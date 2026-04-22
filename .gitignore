@@ -4,3 +4,6 @@ Pods/
 UserInterfaceState.xcuserstate
 xcdebugger
 xcschememanagement.plist
+
+# API Keys
+Secrets.xcconfig
