@@ -1,0 +1,6 @@
+Pods/
+.DS_Store
+*/ios/GoogleService-Info.plist
+UserInterfaceState.xcuserstate
+xcdebugger
+xcschememanagement.plist
