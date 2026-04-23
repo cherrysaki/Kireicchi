@@ -7,6 +7,8 @@ final class OpenAIClient: OpenAIClientProtocol {
     private enum Constants {
         static let baseURL = "https://api.openai.com/v1"
         static let chatCompletionsEndpoint = "/chat/completions"
+        static let imagesEditsEndpoint = "/images/edits"
+        static let imageGenerationTimeout: TimeInterval = 120
     }
     
     init(session: URLSession = .shared) {
@@ -51,6 +53,45 @@ final class OpenAIClient: OpenAIClientProtocol {
             throw error
         } catch let error as RoomAnalysisError {
             throw error
+        } catch {
+            throw OpenAIClientError.networkError(error)
+        }
+    }
+
+    func generatePixelArt(imageData: Data) async throws -> Data {
+        let url = URL(string: Constants.baseURL + Constants.imagesEditsEndpoint)!
+        let boundary = "Boundary-\(UUID().uuidString)"
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = Constants.imageGenerationTimeout
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        let pixelArtRequest = PixelArtRequest(imageData: imageData)
+        request.httpBody = pixelArtRequest.multipartBody(boundary: boundary)
+
+        do {
+            let (data, response) = try await session.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw OpenAIClientError.invalidResponse
+            }
+
+            guard 200...299 ~= httpResponse.statusCode else {
+                let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
+                throw OpenAIClientError.httpError(httpResponse.statusCode, errorMessage)
+            }
+
+            let decoded = try JSONDecoder().decode(PixelArtResponse.self, from: data)
+            return try PixelArtResponseParser.extractImageData(from: decoded)
+
+        } catch let error as OpenAIClientError {
+            throw error
+        } catch let error as PixelArtError {
+            throw error
+        } catch let decodingError as DecodingError {
+            throw OpenAIClientError.encodingFailed(decodingError)
         } catch {
             throw OpenAIClientError.networkError(error)
         }

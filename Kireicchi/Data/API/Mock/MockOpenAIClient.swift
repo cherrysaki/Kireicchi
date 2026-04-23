@@ -12,11 +12,11 @@ final class MockOpenAIClient: OpenAIClientProtocol {
     func analyzeRoom(imageData: Data) async throws -> RoomAnalysisResponse {
         // 実際のAPIコールを模倣するため、少し遅延を入れる
         try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-        
+
         if !shouldSucceed {
             throw MockError.simulatedFailure
         }
-        
+
         // 仕様通りのダミーデータを返す
         return RoomAnalysisResponse(
             score: 65,
@@ -27,6 +27,16 @@ final class MockOpenAIClient: OpenAIClientProtocol {
             ],
             characterComment: "ちょっと散らかってるみたい…"
         )
+    }
+
+    func generatePixelArt(imageData: Data) async throws -> Data {
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+
+        if !shouldSucceed {
+            throw MockError.simulatedFailure
+        }
+
+        return imageData
     }
 }
 

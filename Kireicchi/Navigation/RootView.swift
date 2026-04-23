@@ -12,8 +12,8 @@ struct RootView: View {
                         CaptureView()
                     case .analyzing(let imageData):
                         AnalyzingView(imageData: imageData)
-                    case .analysisResult(let imageData, let analysis):
-                        AnalysisResultView(imageData: imageData, analysis: analysis)
+                    case .analysisResult(let imageData, let pixelArtData, let analysis):
+                        AnalysisResultView(imageData: imageData, pixelArtData: pixelArtData, analysis: analysis)
                     case .settings:
                         SettingsView()
                     }

@@ -9,7 +9,7 @@ final class NavigationRouter: ObservableObject {
     enum Route: Hashable {
         case capture
         case analyzing(imageData: Data)
-        case analysisResult(imageData: Data, analysis: RoomAnalysis)
+        case analysisResult(imageData: Data, pixelArtData: Data, analysis: RoomAnalysis)
         case settings
     }
     

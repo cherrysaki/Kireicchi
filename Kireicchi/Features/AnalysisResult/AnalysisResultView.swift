@@ -2,11 +2,12 @@ import SwiftUI
 
 struct AnalysisResultView: View {
     let imageData: Data
+    let pixelArtData: Data
     let analysis: RoomAnalysis
     @EnvironmentObject var navigationRouter: NavigationRouter
-    
-    private var image: UIImage {
-        UIImage(data: imageData) ?? UIImage(systemName: "photo")!
+
+    private var pixelArtImage: UIImage {
+        UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
     
     var body: some View {
@@ -74,8 +75,9 @@ struct AnalysisResultView: View {
                             .fill(Color.gray.opacity(0.1))
                             .aspectRatio(1, contentMode: .fit)
                             .overlay(
-                                Image(uiImage: image)
+                                Image(uiImage: pixelArtImage)
                                     .resizable()
+                                    .interpolation(.none)
                                     .aspectRatio(contentMode: .fit)
                                     .cornerRadius(12)
                             )
@@ -195,6 +197,7 @@ struct AnalysisResultView: View {
     NavigationStack {
         AnalysisResultView(
             imageData: dummyImageData,
+            pixelArtData: dummyImageData,
             analysis: mockAnalysis
         )
         .environmentObject(NavigationRouter())
