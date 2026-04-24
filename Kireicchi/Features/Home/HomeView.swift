@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var pixelArtStore: PixelArtStore
     
     var body: some View {
         VStack(spacing: 0) {
@@ -67,7 +68,16 @@ struct HomeView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.gray.opacity(0.1))
                     .aspectRatio(1, contentMode: .fit)
-                
+
+                if let data = pixelArtStore.latestPixelArtData,
+                   let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(12)
+                }
+
                 VStack {
                     // キャラクター＋吹き出し
                     HStack {
@@ -94,13 +104,14 @@ struct HomeView: View {
                     }
                     .padding(.top, 20)
                     .padding(.trailing, 20)
-                    
+
                     Spacer()
-                    
-                    // 部屋表示
-                    Text("🏠")
-                        .font(.system(size: 60))
-                    
+
+                    if pixelArtStore.latestPixelArtData == nil {
+                        Text("🏠")
+                            .font(.system(size: 60))
+                    }
+
                     Spacer()
                 }
             }
@@ -155,5 +166,6 @@ struct HomeView: View {
     NavigationStack {
         HomeView()
             .environmentObject(NavigationRouter())
+            .environmentObject(PixelArtStore())
     }
 }

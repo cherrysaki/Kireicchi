@@ -1,14 +1,18 @@
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @Environment(\.modelContext) private var modelContext
+    @Query private var settingsRecords: [NotificationSettings]
     @State private var selectedHour = 19
     @State private var selectedMinute = 0
     @State private var notificationsEnabled = true
     @State private var selectedCharacter = 0
     @State private var showTimePicker = false
-    
+
     private let characters = ["🐱", "🐶"]
+    private let scheduleUseCase: ScheduleNotificationUseCaseProtocol = ScheduleNotificationUseCase()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -175,11 +179,36 @@ struct SettingsView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarHidden(true)
+        .onAppear(perform: loadSettings)
     }
-    
+
+    private func loadSettings() {
+        guard let record = settingsRecords.first else { return }
+        selectedHour = record.hour
+        selectedMinute = record.minute
+        notificationsEnabled = record.isEnabled
+    }
+
     private func saveSettings() {
-        // 設定をUserDefaultsに保存（実装省略）
-        print("設定を保存: 通知=\(notificationsEnabled), 時刻=\(selectedHour):\(selectedMinute), キャラ=\(selectedCharacter)")
+        let record: NotificationSettings
+        if let existing = settingsRecords.first {
+            record = existing
+        } else {
+            record = NotificationSettings()
+            modelContext.insert(record)
+        }
+        record.hour = selectedHour
+        record.minute = selectedMinute
+        record.isEnabled = notificationsEnabled
+        try? modelContext.save()
+
+        let isEnabled = notificationsEnabled
+        let hour = selectedHour
+        let minute = selectedMinute
+        Task {
+            await scheduleUseCase.execute(isEnabled: isEnabled, hour: hour, minute: minute)
+        }
+
         navigationRouter.navigateBack()
     }
 }
@@ -189,4 +218,5 @@ struct SettingsView: View {
         SettingsView()
             .environmentObject(NavigationRouter())
     }
+    .modelContainer(for: NotificationSettings.self, inMemory: true)
 }

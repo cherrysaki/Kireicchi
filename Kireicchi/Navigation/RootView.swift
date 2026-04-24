@@ -2,7 +2,8 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
-    
+    @StateObject private var pixelArtStore = PixelArtStore()
+
     var body: some View {
         NavigationStack(path: $navigationRouter.path) {
             HomeView()
@@ -20,5 +21,6 @@ struct RootView: View {
                 }
         }
         .environmentObject(navigationRouter)
+        .environmentObject(pixelArtStore)
     }
 }

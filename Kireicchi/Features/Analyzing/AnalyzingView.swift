@@ -3,6 +3,7 @@ import SwiftUI
 struct AnalyzingView: View {
     let imageData: Data
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var pixelArtStore: PixelArtStore
 
     @State private var currentStep = 0
     @State private var isAnalyzing = true
@@ -135,6 +136,7 @@ struct AnalyzingView: View {
             let pixelArtData = try await useCase.execute(imageData: imageData)
 
             guard !Task.isCancelled else { return }
+            pixelArtStore.latestPixelArtData = pixelArtData
             currentStep = 2
             try? await Task.sleep(nanoseconds: 200_000_000)
             currentStep = 3
@@ -173,5 +175,6 @@ private final class PreviewMockGeneratePixelArtUseCase: GeneratePixelArtUseCaseP
         AnalyzingView(imageData: dummyImageData,
                       useCase: PreviewMockGeneratePixelArtUseCase())
             .environmentObject(NavigationRouter())
+            .environmentObject(PixelArtStore())
     }
 }
