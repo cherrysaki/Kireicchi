@@ -18,7 +18,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E429E22F2F99E0590093C195 /* Exceptions for "Kireicchi" folder in "Kireicchi" target */ = {
+		E41BCEA02F9B55FC00A01E4D /* Exceptions for "Kireicchi" folder in "Kireicchi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -31,7 +31,7 @@
 		E429E1022F988F140093C195 /* Kireicchi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E429E22F2F99E0590093C195 /* Exceptions for "Kireicchi" folder in "Kireicchi" target */,
+				E41BCEA02F9B55FC00A01E4D /* Exceptions for "Kireicchi" folder in "Kireicchi" target */,
 			);
 			path = Kireicchi;
 			sourceTree = "<group>";
@@ -282,6 +282,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kireicchi/Kireicchi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4AXAW7D47;
@@ -317,6 +318,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kireicchi/Kireicchi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4AXAW7D47;
