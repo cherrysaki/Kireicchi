@@ -26,6 +26,6 @@ struct KireicchiApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: NotificationSettings.self)
+        .modelContainer(for: [NotificationSettings.self, LatestRoomRecord.self])
     }
 }
