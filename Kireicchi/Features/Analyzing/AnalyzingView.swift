@@ -1,9 +1,10 @@
 import SwiftUI
+import SwiftData
 
 struct AnalyzingView: View {
     let imageData: Data
     @EnvironmentObject var navigationRouter: NavigationRouter
-    @EnvironmentObject var pixelArtStore: PixelArtStore
+    @Environment(\.modelContext) private var modelContext
 
     @State private var currentStep = 0
     @State private var isAnalyzing = true
@@ -136,7 +137,6 @@ struct AnalyzingView: View {
             let pixelArtData = try await useCase.execute(imageData: imageData)
 
             guard !Task.isCancelled else { return }
-            pixelArtStore.latestPixelArtData = pixelArtData
             currentStep = 2
             try? await Task.sleep(nanoseconds: 200_000_000)
             currentStep = 3
@@ -150,6 +150,14 @@ struct AnalyzingView: View {
                 messyPoints: ["床の服", "机の上の紙"],
                 characterComment: "もう少し片付けると良いかも！"
             )
+
+            try? LatestRoomRecordStore(context: modelContext).save(
+                pixelArtImageData: pixelArtData,
+                capturedAt: Date(),
+                score: analysis.score,
+                comment: analysis.characterComment
+            )
+
             navigationRouter.navigate(to: .analysisResult(
                 imageData: imageData,
                 pixelArtData: pixelArtData,
@@ -175,6 +183,6 @@ private final class PreviewMockGeneratePixelArtUseCase: GeneratePixelArtUseCaseP
         AnalyzingView(imageData: dummyImageData,
                       useCase: PreviewMockGeneratePixelArtUseCase())
             .environmentObject(NavigationRouter())
-            .environmentObject(PixelArtStore())
+            .modelContainer(for: LatestRoomRecord.self, inMemory: true)
     }
 }

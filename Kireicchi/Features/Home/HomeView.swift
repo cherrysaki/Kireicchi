@@ -1,9 +1,12 @@
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
-    @EnvironmentObject var pixelArtStore: PixelArtStore
-    
+    @Query private var records: [LatestRoomRecord]
+
+    private var latestRecord: LatestRoomRecord? { records.first }
+
     var body: some View {
         VStack(spacing: 0) {
             // 上部バー: 左「設定」ボタン / 中央「次の撮影までの時間」/ 右「コイン表示」
@@ -37,7 +40,7 @@ struct HomeView: View {
                     .font(.subheadline)
                     .bold()
                 Spacer()
-                Text("68/100")
+                Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
                     .font(.title2)
                     .bold()
                     .foregroundColor(.orange)
@@ -69,7 +72,7 @@ struct HomeView: View {
                     .fill(Color.gray.opacity(0.1))
                     .aspectRatio(1, contentMode: .fit)
 
-                if let data = pixelArtStore.latestPixelArtData,
+                if let data = latestRecord?.pixelArtImageData,
                    let uiImage = UIImage(data: data) {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -107,7 +110,7 @@ struct HomeView: View {
 
                     Spacer()
 
-                    if pixelArtStore.latestPixelArtData == nil {
+                    if latestRecord == nil {
                         Text("🏠")
                             .font(.system(size: 60))
                     }
@@ -166,6 +169,6 @@ struct HomeView: View {
     NavigationStack {
         HomeView()
             .environmentObject(NavigationRouter())
-            .environmentObject(PixelArtStore())
+            .modelContainer(for: LatestRoomRecord.self, inMemory: true)
     }
 }
