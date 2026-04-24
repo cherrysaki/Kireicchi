@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 struct PixelArtRequest {
     let imageData: Data
@@ -9,13 +10,13 @@ struct PixelArtRequest {
     let count: Int
 
     init(imageData: Data) {
-        self.imageData = imageData
+        self.imageData = UIImage(data: imageData)?.pngData() ?? imageData
         self.model = "gpt-image-1"
         self.size = "1024x1024"
         self.quality = "medium"
         self.count = 1
         self.prompt = """
-        Convert this room photograph into pixel art at approximately 128x128 pixel resolution, \
+        Convert this room photograph into pixel art at approximately 512x512 pixel resolution, \
         8-bit retro game aesthetic. Preserve the overall scene composition and visible objects. \
         Use flat colors, clearly visible pixel grid, no gradients or anti-aliasing.
         """

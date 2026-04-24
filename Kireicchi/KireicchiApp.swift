@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import FirebaseCore
 
 
@@ -25,5 +26,6 @@ struct KireicchiApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: NotificationSettings.self)
     }
 }
