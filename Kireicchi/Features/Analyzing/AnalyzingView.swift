@@ -5,32 +5,38 @@ struct AnalyzingView: View {
     let imageData: Data
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Environment(\.modelContext) private var modelContext
-
-    @State private var currentStep = 0
-    @State private var isAnalyzing = true
-    @State private var errorMessage: String?
-
-    private let steps = ["準備中", "アップロード中", "AI変換中", "完了"]
-
-    private let useCase: GeneratePixelArtUseCaseProtocol
+    @StateObject private var viewModel: AnalyzingViewModel
 
     init(imageData: Data,
-         useCase: GeneratePixelArtUseCaseProtocol = GeneratePixelArtUseCase(openAIClient: OpenAIClient())) {
+         viewModel: AnalyzingViewModel? = nil) {
         self.imageData = imageData
-        self.useCase = useCase
+        
+        if let viewModel = viewModel {
+            self._viewModel = StateObject(wrappedValue: viewModel)
+        } else {
+            // デフォルトの依存性を設定
+            let openAIClient = OpenAIClient()
+            let analyzeRoomUseCase = AnalyzeRoomUseCase(openAIClient: openAIClient)
+            let generatePixelArtUseCase = GeneratePixelArtUseCase(openAIClient: openAIClient)
+            
+            self._viewModel = StateObject(wrappedValue: AnalyzingViewModel(
+                analyzeRoomUseCase: analyzeRoomUseCase,
+                generatePixelArtUseCase: generatePixelArtUseCase
+            ))
+        }
     }
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            if errorMessage == nil {
+            if viewModel.errorMessage == nil {
                 Text("解析中...")
                     .font(.largeTitle)
                     .bold()
                     .foregroundColor(.primary)
-                    .scaleEffect(isAnalyzing ? 1.1 : 1.0)
-                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnalyzing)
+                    .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
+                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
             } else {
                 Text("エラーが発生しました")
                     .font(.title2)
@@ -42,12 +48,12 @@ struct AnalyzingView: View {
 
             Text("🐱")
                 .font(.system(size: 120))
-                .scaleEffect(isAnalyzing ? 1.05 : 0.95)
-                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isAnalyzing)
+                .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
+                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
             Spacer()
 
-            if let errorMessage {
+            if let errorMessage = viewModel.errorMessage {
                 VStack(spacing: 12) {
                     Text(errorMessage)
                         .font(.footnote)
@@ -65,7 +71,9 @@ struct AnalyzingView: View {
                         .cornerRadius(8)
 
                         Button("再試行") {
-                            retry()
+                            Task {
+                                await viewModel.retry(imageData: imageData)
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
@@ -81,28 +89,32 @@ struct AnalyzingView: View {
             }
         }
         .navigationBarHidden(true)
-        .task(id: runID) {
-            await runAnalysis()
+        .onAppear {
+            // 実際のNavigationRouterとModelContextを設定
+            let roomRecordStore = LatestRoomRecordStore(context: modelContext)
+            viewModel.setup(roomRecordStore: roomRecordStore, navigationRouter: navigationRouter)
+            
+            Task {
+                await viewModel.startAnalysis(imageData: imageData)
+            }
         }
     }
 
-    @State private var runID = UUID()
-
     private var stepList: some View {
         VStack(spacing: 16) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+            ForEach(Array(viewModel.steps.enumerated()), id: \.offset) { index, step in
                 HStack(spacing: 12) {
-                    Image(systemName: index <= currentStep ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(index <= currentStep ? .green : .gray.opacity(0.5))
+                    Image(systemName: index <= viewModel.currentStep ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(index <= viewModel.currentStep ? .green : .gray.opacity(0.5))
                         .font(.title3)
 
                     Text(step)
                         .font(.subheadline)
-                        .foregroundColor(index <= currentStep ? .primary : .secondary)
+                        .foregroundColor(index <= viewModel.currentStep ? .primary : .secondary)
 
                     Spacer()
 
-                    if index == currentStep && isAnalyzing {
+                    if index == viewModel.currentStep && viewModel.isAnalyzing {
                         ProgressView()
                             .scaleEffect(0.8)
                     }
@@ -118,70 +130,19 @@ struct AnalyzingView: View {
         )
         .padding(.horizontal)
     }
-
-    private func retry() {
-        errorMessage = nil
-        currentStep = 0
-        isAnalyzing = true
-        runID = UUID()
-    }
-
-    private func runAnalysis() async {
-        currentStep = 0
-        try? await Task.sleep(nanoseconds: 300_000_000)
-        guard !Task.isCancelled else { return }
-
-        currentStep = 1
-
-        do {
-            let pixelArtData = try await useCase.execute(imageData: imageData)
-
-            guard !Task.isCancelled else { return }
-            currentStep = 2
-            try? await Task.sleep(nanoseconds: 200_000_000)
-            currentStep = 3
-            isAnalyzing = false
-
-            try? await Task.sleep(nanoseconds: 400_000_000)
-
-            let analysis = RoomAnalysis(
-                score: 75,
-                rank: .b,
-                messyPoints: ["床の服", "机の上の紙"],
-                characterComment: "もう少し片付けると良いかも！"
-            )
-
-            try? LatestRoomRecordStore(context: modelContext).save(
-                pixelArtImageData: pixelArtData,
-                capturedAt: Date(),
-                score: analysis.score,
-                comment: analysis.characterComment
-            )
-
-            navigationRouter.navigate(to: .analysisResult(
-                imageData: imageData,
-                pixelArtData: pixelArtData,
-                analysis: analysis
-            ))
-        } catch {
-            isAnalyzing = false
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-        }
-    }
-}
-
-private final class PreviewMockGeneratePixelArtUseCase: GeneratePixelArtUseCaseProtocol {
-    func execute(imageData: Data) async throws -> Data {
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        return imageData
+    
+    private func setupViewModel() {
+        // ViewModelに実際の依存性を注入
+        // 注意: これは理想的な実装ではありませんが、既存のArchitectureに合わせています
     }
 }
 
 #Preview {
     let dummyImageData = (UIImage(systemName: "photo") ?? UIImage()).pngData() ?? Data()
+    let mockViewModel = MockAnalyzingViewModel(shouldSucceed: true, delay: 0.5)
+    
     NavigationStack {
-        AnalyzingView(imageData: dummyImageData,
-                      useCase: PreviewMockGeneratePixelArtUseCase())
+        AnalyzingView(imageData: dummyImageData)
             .environmentObject(NavigationRouter())
             .modelContainer(for: LatestRoomRecord.self, inMemory: true)
     }
