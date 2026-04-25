@@ -281,6 +281,54 @@ class RoomRecord {
 
 ---
 
+## デザインシステム
+
+### カラーパレット
+
+| 用途 | カラー | Hex | 説明 |
+|------|--------|-----|------|
+| primary | ピンク | #FD98B8 | ボタン・アクセント・スコアバナー枠 |
+| secondary | 水色 | #92D9FD | カード背景・ゲージ・ミッションカード枠 |
+| background | クリーム | #FFF9E6 | 画面背景 |
+| surface | 白 | #FFFFFF | カード・シート背景 |
+| textPrimary | ダークブラウン | #5C3D2E | 本文テキスト |
+| textOnPrimary | 白 | #FFFFFF | primaryボタン上のテキスト |
+| starYellow | イエロー | #FFE782 | 星デコレーション |
+| rankText | ピンク | #FD98B8 | ランク文字・スコア数字 |
+
+### タイポグラフィ
+
+| 用途 | サイズ | ウェイト | 説明 |
+|------|--------|----------|------|
+| pixelLarge | 48pt | .bold .rounded | スコア数字・ランク文字 |
+| pixelMedium | 24pt | .bold .rounded | セクションタイトル |
+| pixelSmall | 15pt | .medium .rounded | 本文・リスト |
+
+### 形状・装飾
+
+| 要素 | 値 | 説明 |
+|------|-----|------|
+| cardCornerRadius | 16pt | カードの角丸 |
+| buttonCornerRadius | 999pt | ボタンのpill型角丸 |
+| cardBorderWidth | 2.0pt | カードのボーダー幅 |
+| cardShadow | primary opacity=0.15, radius=8, y=4 | カードの影 |
+| pixelBorder | 破線ボーダー | ピクセルアート風ボーダー |
+
+### ViewModifier
+
+- **PixelCardModifier**: surface背景＋primaryボーダー＋shadow
+- **BluePixelCardModifier**: secondary背景＋secondaryボーダー＋shadow
+
+### 使用例
+
+```swift
+Text("68").font(DesignSystem.Font.pixelLarge)
+Color(DesignSystem.Color.primary)
+.modifier(PixelCardModifier())
+```
+
+---
+
 ## 注意事項
 
 - **指示された機能のみ実装する**。追加機能を勝手に実装しない

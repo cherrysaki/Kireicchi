@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import FirebaseCore
 
 
@@ -21,9 +22,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct KireicchiApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var deps = AppDependencies()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(deps)
+                .task {
+                    await deps.bootstrap()
+                }
         }
+        .modelContainer(for: [LatestRoomRecord.self])
     }
 }
