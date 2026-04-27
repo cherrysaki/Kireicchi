@@ -35,7 +35,7 @@ struct AnalysisResultView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .padding(.top, 8)
-                        Text("いい感じに片付いてます！")
+                        Text(analysis.characterComment)
                             .font(.subheadline)
                             .lineLimit(2)
                     }
@@ -64,56 +64,23 @@ struct AnalysisResultView: View {
                 }
                 .padding(.horizontal)
                 
-                // 中央: ドット絵画像（正方形）＋番号付きハイライト枠をZStackで重ねる
+                // 中央: ドット絵画像（正方形）
                 VStack(alignment: .leading, spacing: 8) {
                     Text("ドット絵化された部屋")
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.1))
-                            .aspectRatio(1, contentMode: .fit)
-                            .overlay(
-                                Image(uiImage: pixelArtImage)
-                                    .resizable()
-                                    .interpolation(.none)
-                                    .aspectRatio(contentMode: .fit)
-                                    .cornerRadius(12)
-                            )
-                        
-                        // 番号付きハイライト枠（① ② ③）
-                        VStack {
-                            HStack {
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 30, height: 30)
-                                    .overlay(
-                                        Text("1")
-                                            .font(.caption)
-                                            .bold()
-                                            .foregroundColor(.white)
-                                    )
-                                    .offset(x: 20, y: 20)
-                                Spacer()
-                            }
-                            Spacer()
-                            HStack {
-                                Spacer()
-                                Circle()
-                                    .fill(Color.orange)
-                                    .frame(width: 30, height: 30)
-                                    .overlay(
-                                        Text("2")
-                                            .font(.caption)
-                                            .bold()
-                                            .foregroundColor(.white)
-                                    )
-                                    .offset(x: -20, y: -30)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.1))
+                        .aspectRatio(1, contentMode: .fit)
+                        .overlay(
+                            Image(uiImage: pixelArtImage)
+                                .resizable()
+                                .interpolation(.none)
+                                .aspectRatio(contentMode: .fit)
+                                .cornerRadius(12)
+                        )
+                        .padding(.horizontal)
                 }
                 
                 // 下部: 片付け優先箇所リスト（番号＋場所名＋★評価）
@@ -123,10 +90,10 @@ struct AnalysisResultView: View {
                         .padding(.horizontal)
                     
                     VStack(spacing: 8) {
-                        ForEach(Array(analysis.messyPoints.enumerated()), id: \.offset) { index, point in
+                        ForEach(Array(analysis.messyPoints.prefix(3).enumerated()), id: \.offset) { index, point in
                             HStack(spacing: 12) {
                                 Circle()
-                                    .fill(index == 0 ? Color.red : Color.orange)
+                                    .fill(priorityColor(for: index))
                                     .frame(width: 24, height: 24)
                                     .overlay(
                                         Text("\(index + 1)")
@@ -140,7 +107,7 @@ struct AnalysisResultView: View {
                                 
                                 Spacer()
                                 
-                                Text(index == 0 ? "⭐⭐⭐" : "⭐⭐")
+                                Text(starRating(for: index))
                                     .font(.caption)
                             }
                             .padding(.horizontal)
@@ -197,6 +164,26 @@ struct AnalysisResultView: View {
         case 50...69: return .orange
         case 30...49: return .red
         default: return .purple
+        }
+    }
+    
+    private func priorityColor(for index: Int) -> Color {
+        switch index {
+        case 0: return .red
+        case 1: return .orange
+        case 2: return .yellow
+        case 3: return .blue
+        case 4: return .purple
+        default: return .gray
+        }
+    }
+    
+    private func starRating(for index: Int) -> String {
+        switch index {
+        case 0: return "⭐⭐⭐"
+        case 1: return "⭐⭐"
+        case 2: return "⭐"
+        default: return "⭐"
         }
     }
 }
