@@ -14,8 +14,8 @@ struct AnalyzingView: View {
         if let viewModel = viewModel {
             self._viewModel = StateObject(wrappedValue: viewModel)
         } else {
-            // デフォルトの依存性を設定
-            let openAIClient = OpenAIClient()
+            // デフォルトの依存性を設定（AppDependenciesのフラグに基づく）
+            let openAIClient = AppDependencies.shared.currentOpenAIClient()
             let analyzeRoomUseCase = AnalyzeRoomUseCase(openAIClient: openAIClient)
             let generatePixelArtUseCase = GeneratePixelArtUseCase(openAIClient: openAIClient)
             

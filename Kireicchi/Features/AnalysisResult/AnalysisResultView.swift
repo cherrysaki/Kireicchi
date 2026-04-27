@@ -152,6 +152,22 @@ struct AnalysisResultView: View {
                     .padding(.horizontal)
                 }
                 
+                // お片付けタイマーボタン
+                Button(action: {
+                    navigationRouter.navigate(to: .cleanupTimer)
+                }) {
+                    HStack {
+                        Image(systemName: "timer")
+                        Text("お片付けタイマーを始める")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal)
+                
                 // 最下部: 「ホーム画面に戻る」ボタン
                 Button(action: {
                     navigationRouter.popToRoot()

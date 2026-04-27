@@ -11,6 +11,7 @@ final class NavigationRouter: ObservableObject {
         case analyzing(imageData: Data)
         case analysisResult(imageData: Data, pixelArtData: Data, analysis: RoomAnalysis)
         case settings
+        case cleanupTimer
     }
     
     // 画面遷移メソッド
