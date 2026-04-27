@@ -15,4 +15,12 @@ enum CharacterState: String, CaseIterable {
             return .sad
         }
     }
+    
+    var gifSuffix: String {
+        switch self {
+        case .happy: return "happy"
+        case .normal: return "sad"
+        case .sad: return "sick"
+        }
+    }
 }
