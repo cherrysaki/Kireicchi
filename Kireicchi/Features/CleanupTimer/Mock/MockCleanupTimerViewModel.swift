@@ -5,6 +5,7 @@ import Combine
 final class MockCleanupTimerViewModel: CleanupTimerViewModelProtocol, ObservableObject {
     @Published var remainingSeconds: Int = 300
     @Published var isRunning: Bool = false
+    @Published var isFinished: Bool = false
     @Published var selectedMinutes: Int = 5
     
     var progress: Double {
@@ -23,6 +24,7 @@ final class MockCleanupTimerViewModel: CleanupTimerViewModelProtocol, Observable
     
     func reset() {
         isRunning = false
+        isFinished = false
         remainingSeconds = selectedMinutes * 60
     }
 }

@@ -94,6 +94,24 @@ struct CleanupTimerView: View {
         }
         .navigationBarHidden(true)
         .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
+        .alert("お片付け完了！", isPresented: $viewModel.isFinished) {
+            Button("再撮影する") {
+                viewModel.isFinished = false
+                navigationRouter.popToRoot()
+                navigationRouter.navigate(to: .capture)
+            }
+            
+            Button("ホームに戻る") {
+                viewModel.isFinished = false
+                navigationRouter.popToRoot()
+            }
+            
+            Button("もう一度タイマー") {
+                viewModel.reset()
+            }
+        } message: {
+            Text("よくがんばりました！")
+        }
     }
     
     private var timePickerSection: some View {

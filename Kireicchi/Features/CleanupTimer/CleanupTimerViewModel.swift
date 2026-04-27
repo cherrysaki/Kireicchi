@@ -5,6 +5,7 @@ import Combine
 final class CleanupTimerViewModel: CleanupTimerViewModelProtocol, ObservableObject {
     @Published var remainingSeconds: Int = 300
     @Published var isRunning: Bool = false
+    @Published var isFinished: Bool = false
     @Published var selectedMinutes: Int = 5 {
         didSet {
             if !isRunning {
@@ -42,6 +43,7 @@ final class CleanupTimerViewModel: CleanupTimerViewModelProtocol, ObservableObje
     
     func reset() {
         isRunning = false
+        isFinished = false
         timer?.invalidate()
         timer = nil
         remainingSeconds = selectedMinutes * 60
@@ -52,6 +54,7 @@ final class CleanupTimerViewModel: CleanupTimerViewModelProtocol, ObservableObje
         if remainingSeconds <= 0 {
             remainingSeconds = 0
             pause()
+            isFinished = true
         }
     }
     
