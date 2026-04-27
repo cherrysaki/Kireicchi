@@ -5,8 +5,19 @@ struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Query private var records: [LatestRoomRecord]
     @StateObject private var appDependencies = AppDependencies.shared
+    
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
     private var latestRecord: LatestRoomRecord? { records.first }
+    
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
+    
+    private var characterState: CharacterState {
+        guard let score = latestRecord?.score else { return .happy }
+        return CharacterState.fromScore(score)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -102,8 +113,11 @@ struct HomeView: View {
                                     .fill(Color.white),
                                     alignment: .bottom
                                 )
-                            Text("🐱")
-                                .font(.system(size: 40))
+                            CharacterView(
+                                characterType: selectedCharacterType,
+                                characterState: characterState
+                            )
+                            .frame(width: 150, height: 150)
                         }
                     }
                     .padding(.top, 20)

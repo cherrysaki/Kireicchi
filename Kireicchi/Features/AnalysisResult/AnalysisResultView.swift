@@ -48,8 +48,12 @@ struct AnalysisResultView: View {
                 
                 // キャラクター＋吹き出しコメント（横並び）
                 HStack(spacing: 12) {
-                    Text("🐱")
-                        .font(.system(size: 50))
+                    CharacterView(
+                        characterType: .character01,
+                        characterState: nil,
+                        forceGif: .cheer
+                    )
+                    .frame(width: 80, height: 80)
                     
                     VStack(alignment: .leading) {
                         Text(analysis.characterComment)

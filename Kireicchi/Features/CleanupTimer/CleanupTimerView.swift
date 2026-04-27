@@ -45,6 +45,13 @@ struct CleanupTimerView: View {
                             .font(DesignSystem.Font.pixelLarge)
                             .foregroundColor(DesignSystem.Color.primary)
                         
+                        CharacterView(
+                            characterType: .character01,
+                            characterState: nil,
+                            forceGif: .cheer
+                        )
+                        .frame(width: 100, height: 100)
+                        
                         timerDisplaySection
                     }
                 } else {
