@@ -45,6 +45,14 @@ final class OpenAIClient: OpenAIClientProtocol {
             }
             
             let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            
+            // デバッグ: 生のレスポンス文字列をログ出力
+            if let rawResponseString = String(data: data, encoding: .utf8) {
+                print("=== OpenAI Raw Response ===")
+                print(rawResponseString)
+                print("===========================")
+            }
+            
             let analysisResponse = try RoomAnalysisResponseParser.parse(from: openAIResponse)
             
             return analysisResponse

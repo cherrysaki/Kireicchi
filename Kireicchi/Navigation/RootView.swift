@@ -16,6 +16,8 @@ struct RootView: View {
                         AnalysisResultView(imageData: imageData, pixelArtData: pixelArtData, analysis: analysis)
                     case .settings:
                         SettingsView()
+                    case .cleanupTimer:
+                        CleanupTimerView()
                     }
                 }
         }

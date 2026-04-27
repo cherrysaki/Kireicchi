@@ -4,6 +4,7 @@ import SwiftData
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Query private var records: [LatestRoomRecord]
+    @StateObject private var appDependencies = AppDependencies.shared
 
     private var latestRecord: LatestRoomRecord? { records.first }
 
@@ -159,7 +160,30 @@ struct HomeView: View {
                     .clipShape(Circle())
                     .shadow(radius: 4)
             }
+            
+            #if DEBUG
+            // デバッグモード切替ボタン（DEBUG版のみ表示）
+            VStack(spacing: 8) {
+                Text(appDependencies.useMockAPI ? "Mock使用中" : "Real API使用中")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Button(action: {
+                    appDependencies.toggleMockAPI()
+                }) {
+                    Text(appDependencies.useMockAPI ? "Real APIに切替" : "Mockに切替")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(4)
+                }
+            }
+            .padding(.top, 16)
             .padding(.bottom, 30)
+            #else
+            Spacer().frame(height: 30)
+            #endif
         }
         .navigationBarHidden(true)
     }
