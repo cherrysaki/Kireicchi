@@ -135,40 +135,30 @@ struct HomeView: View {
             }
 
             VStack {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 4) {
-                        Text("もう すこし\nかたづけよう！")
-                            .font(DesignSystem.Font.caption)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .pixelSquareCard(
-                                fill: DesignSystem.Color.surface,
-                                border: DesignSystem.Color.primaryDark,
-                                borderWidth: 2,
-                                shadowOffset: 2
-                            )
-
-                        CharacterView(
-                            characterType: selectedCharacterType,
-                            characterState: characterState
-                        )
-                        .frame(width: 130, height: 130)
-                    }
-                }
-                .padding(.top, 16)
-                .padding(.trailing, 16)
 
                 Spacer()
 
-                if latestRecord == nil {
-                    Text("🏠")
-                        .font(DesignSystem.Font.custom(size: 56))
-                }
+                VStack(spacing: 4) {
+//                    Text("もう すこし\nかたづけよう！")
+//                        .font(DesignSystem.Font.caption)
+//                        .multilineTextAlignment(.center)
+//                        .foregroundColor(DesignSystem.Color.textPrimary)
+//                        .padding(.horizontal, 10)
+//                        .padding(.vertical, 6)
+//                        .pixelSquareCard(
+//                            fill: DesignSystem.Color.surface,
+//                            border: DesignSystem.Color.primaryDark,
+//                            borderWidth: 2,
+//                            shadowOffset: 2
+//                        )
 
-                Spacer()
+                    CharacterView(
+                        characterType: selectedCharacterType,
+                        characterState: characterState
+                    )
+                    .frame(width: 240, height: 240)
+                }
+                .padding(.bottom, -60)
             }
         }
         .padding(.horizontal)

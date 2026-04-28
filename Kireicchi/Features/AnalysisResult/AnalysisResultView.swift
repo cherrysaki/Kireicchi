@@ -79,7 +79,7 @@ struct AnalysisResultView: View {
                 characterState: nil,
                 forceGif: .cheer
             )
-            .frame(width: 80, height: 80)
+            .frame(width: 120, height: 120)
 
             Text(analysis.characterComment)
                 .font(DesignSystem.Font.subheadline)
@@ -177,9 +177,10 @@ struct AnalysisResultView: View {
                 }
                 .font(DesignSystem.Font.subheadline)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 18)
             }
             .buttonStyle(PixelButtonStyle())
+            .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
 
@@ -192,7 +193,7 @@ struct AnalysisResultView: View {
                 }
                 .font(DesignSystem.Font.subheadline)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 18)
             }
             .buttonStyle(PixelButtonStyle(
                 fill: DesignSystem.Color.surface,
@@ -201,6 +202,7 @@ struct AnalysisResultView: View {
                 borderWidth: 3,
                 shadowOffset: 4
             ))
+            .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
         }

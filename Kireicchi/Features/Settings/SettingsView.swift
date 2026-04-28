@@ -12,7 +12,7 @@ struct SettingsView: View {
     @State private var isSaving = false
 
     private let characters: [(id: String, emoji: String, label: String)] = [
-        ("cat", "🐱", "キャラクター1"),
+        ("cat", "🐱", "キャラクタsー1"),
         ("dog", "🐶", "キャラクター2")
     ]
 
@@ -67,11 +67,14 @@ struct SettingsView: View {
 
                 Button(action: saveSettings) {
                     Text(isSaving ? "ほぞんちゅう..." : "せっていを ほぞんして とじる")
-                        .font(DesignSystem.Font.subheadline)
+                        .font(DesignSystem.Font.caption)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                 }
                 .buttonStyle(PixelButtonStyle())
+                .frame(width: 360, height: 40)
+                .fixedSize()
                 .disabled(isSaving)
                 .padding()
             }

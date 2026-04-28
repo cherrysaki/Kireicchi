@@ -100,7 +100,7 @@ struct FriendVisitView: View {
                     characterType: myCharacterType,
                     characterState: .happy
                 )
-                .frame(width: 110, height: 110)
+                .frame(width: 200, height: 200)
 
                 if let friend = viewModel.friend, isVisitingState {
                     CharacterView(
@@ -108,7 +108,7 @@ struct FriendVisitView: View {
                         characterState: .happy,
                         forceGif: .cheer
                     )
-                    .frame(width: 110, height: 110)
+                    .frame(width: 200, height: 200)
                     .transition(.scale.combined(with: .opacity))
                 }
             }
