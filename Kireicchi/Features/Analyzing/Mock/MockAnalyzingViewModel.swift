@@ -7,7 +7,7 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
     @Published var isAnalyzing = true
     @Published var errorMessage: String?
     
-    let steps = ["準備中", "AI解析中", "ドット絵変換中", "完了"]
+    let steps = ["じゅんびちゅう", "AI かいせきちゅう", "ドットえに へんかんちゅう", "かんりょう"]
     
     private let shouldSucceed: Bool
     private let delay: TimeInterval

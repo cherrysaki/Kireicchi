@@ -21,147 +21,183 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("設定")
-                    .font(.title2)
-                    .bold()
+        ZStack {
+            DesignSystem.Color.background.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                HStack {
+                    Image(systemName: "gearshape.fill")
+                        .font(DesignSystem.Font.title3)
+                        .foregroundColor(DesignSystem.Color.primary)
+                    Text("せってい")
+                        .font(DesignSystem.Font.title2)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                    Spacer()
+                    Button(action: {
+                        navigationRouter.navigateBack()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                            .frame(width: 32, height: 32)
+                            .background(
+                                PixelCircle(pixelSize: 3)
+                                    .fill(DesignSystem.Color.surface)
+                            )
+                            .overlay(
+                                PixelCircleStroke(pixelSize: 3, lineWidth: 2)
+                                    .fill(DesignSystem.Color.primary)
+                            )
+                    }
+                }
+                .padding()
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        captureTimeSection
+                        notificationToggleSection
+                        characterSection
+                        commentSection
+                        AppleLoginSection()
+                    }
+                    .padding(.bottom, 100)
+                }
+
                 Spacer()
-                Button("✕") {
-                    navigationRouter.navigateBack()
+
+                Button(action: saveSettings) {
+                    Text(isSaving ? "ほぞんちゅう..." : "せっていを ほぞんして とじる")
+                        .font(DesignSystem.Font.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
                 }
-                .font(.title2)
-                .foregroundColor(.secondary)
+                .buttonStyle(PixelButtonStyle())
+                .disabled(isSaving)
+                .padding()
             }
-            .padding()
-
-            ScrollView {
-                VStack(spacing: 24) {
-                    captureTimeSection
-                    notificationToggleSection
-                    characterSection
-                    commentSection
-                    AppleLoginSection()
-                }
-                .padding(.bottom, 100)
-            }
-
-            Spacer()
-
-            Button(action: saveSettings) {
-                Text(isSaving ? "保存中..." : "設定を保存して閉じる")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
-            .disabled(isSaving)
-            .padding()
         }
-        .background(Color(.systemGroupedBackground))
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
     }
 
     private var captureTimeSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("撮影時間")
-                .font(.headline)
-                .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("さつえい じかん")
 
             Button(action: { showTimePicker.toggle() }) {
                 HStack {
-                    VStack(alignment: .leading) {
-                        Text("毎日の撮影時刻")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("まいにちの さつえい じこく")
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         Text("\(selectedHour):\(String(format: "%02d", selectedMinute))")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.primary)
+                            .font(DesignSystem.Font.custom(size: 32))
+                            .foregroundColor(DesignSystem.Color.primaryDark)
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(DesignSystem.Color.primary)
                 }
-                .padding()
-                .background(Color.gray.opacity(0.05))
-                .cornerRadius(12)
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
             }
             .buttonStyle(PlainButtonStyle())
             .padding(.horizontal)
+            .padding(.trailing, 3)
 
             if showTimePicker {
-                VStack {
+                VStack(spacing: 12) {
                     HStack {
-                        Picker("時", selection: $selectedHour) {
+                        Picker("じ", selection: $selectedHour) {
                             ForEach(0..<24, id: \.self) { hour in
-                                Text("\(hour)時")
+                                Text("\(hour) じ")
                             }
                         }
                         .pickerStyle(.wheel)
 
-                        Picker("分", selection: $selectedMinute) {
+                        Picker("ふん", selection: $selectedMinute) {
                             ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { minute in
-                                Text("\(minute)分")
+                                Text("\(minute) ふん")
                             }
                         }
                         .pickerStyle(.wheel)
                     }
-                    .frame(height: 150)
+                    .frame(height: 140)
 
-                    Button("決定") {
+                    Button(action: {
                         showTimePicker = false
+                    }) {
+                        Text("けってい")
+                            .font(DesignSystem.Font.subheadline)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 8)
                     }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .buttonStyle(PixelButtonStyle())
                 }
-                .padding()
-                .background(Color.gray.opacity(0.05))
-                .cornerRadius(12)
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.secondary.opacity(0.25),
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
                 .padding(.horizontal)
+                .padding(.trailing, 3)
             }
         }
     }
 
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(DesignSystem.Font.headline)
+            .foregroundColor(DesignSystem.Color.textPrimary)
+            .padding(.horizontal)
+    }
+
     private var notificationToggleSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("通知")
-                .font(.headline)
-                .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("つうち")
 
             HStack {
-                VStack(alignment: .leading) {
-                    Text("撮影リマインダー")
-                        .font(.subheadline)
-                    Text("設定時刻に通知を送信します")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("さつえい リマインダー")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                    Text("せってい じこくに つうちを おくります")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 }
                 Spacer()
                 Toggle("", isOn: $notificationsEnabled)
+                    .tint(DesignSystem.Color.primary)
             }
-            .padding()
-            .background(Color.gray.opacity(0.05))
-            .cornerRadius(12)
+            .padding(14)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.surface,
+                border: DesignSystem.Color.primary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
             .padding(.horizontal)
+            .padding(.trailing, 3)
         }
     }
 
     private var characterSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("キャラクター")
-                .font(.headline)
-                .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("キャラクター")
 
-            Picker("キャラクターを選択", selection: $selectedCharacterId) {
+            Picker("キャラクターを えらぶ", selection: $selectedCharacterId) {
                 ForEach(characters, id: \.id) { character in
                     HStack {
                         Text(character.emoji)
-                            .font(.title)
+                            .font(DesignSystem.Font.title)
                         Text(character.label)
                     }
                     .tag(character.id)
@@ -175,22 +211,28 @@ struct SettingsView: View {
     private var commentSection: some View {
         HStack(spacing: 12) {
             Text(selectedEmoji)
-                .font(.system(size: 60))
+                .font(DesignSystem.Font.custom(size: 56))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("設定ありがとう！")
-                    .font(.subheadline)
-                    .bold()
-                Text("一緒にお部屋をきれいにしようね🌟")
-                    .font(.subheadline)
+                Text("せってい ありがとう！")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Text("いっしょに おへやを きれいに しようね🌟")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
             }
-            .padding()
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(12)
+            .padding(12)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.secondary.opacity(0.4),
+                border: DesignSystem.Color.primary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
 
             Spacer()
         }
         .padding(.horizontal)
+        .padding(.trailing, 3)
         .padding(.top, 8)
     }
 

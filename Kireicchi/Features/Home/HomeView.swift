@@ -5,201 +5,266 @@ struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Query private var records: [LatestRoomRecord]
     @StateObject private var appDependencies = AppDependencies.shared
-    
+
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
     private var latestRecord: LatestRoomRecord? { records.first }
-    
+
     private var selectedCharacterType: CharacterType {
         CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
     }
-    
+
     private var characterState: CharacterState {
         guard let score = latestRecord?.score else { return .happy }
         return CharacterState.fromScore(score)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 上部バー: 左「設定」ボタン / 中央「次の撮影までの時間」/ 右「コイン表示」
-            HStack {
-                Button("設定") {
-                    navigationRouter.navigate(to: .settings)
-                }
-                .font(.subheadline)
-                
-                Spacer()
-                
-                Text("次の撮影まで: 8時間30分")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                HStack(spacing: 4) {
-                    Text("💰")
-                    Text("120")
-                        .font(.caption)
-                        .bold()
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            
-            // 「お部屋の散らかり指数 68/100」バナー
-            HStack {
-                Text("お部屋の散らかり指数")
-                    .font(.subheadline)
-                    .bold()
-                Spacer()
-                Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.orange)
-            }
-            .padding()
-            .background(Color.orange.opacity(0.1))
-            .cornerRadius(8)
-            .padding(.horizontal)
-            
-            // ハートゲージ（横棒）
-            VStack(alignment: .leading, spacing: 4) {
-                Text("ハッピー度")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                HStack {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.red)
-                        .frame(width: 120, height: 8)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 80, height: 8)
-                }
-            }
-            .padding()
-            
-            // ドット絵部屋（正方形）＋キャラクター＋吹き出しコメント
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.1))
-                    .aspectRatio(1, contentMode: .fit)
+        ZStack {
+            DesignSystem.Color.background.ignoresSafeArea()
 
-                if let data = latestRecord?.pixelArtImageData,
-                   let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .interpolation(.none)
-                        .aspectRatio(contentMode: .fit)
-                        .cornerRadius(12)
-                }
-
-                VStack {
-                    // キャラクター＋吹き出し
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Text("もう少し片付けよう！")
-                                .font(.caption)
-                                .padding(8)
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .overlay(
-                                    // 吹き出しの尻尾
-                                    Path { path in
-                                        path.move(to: CGPoint(x: 20, y: 25))
-                                        path.addLine(to: CGPoint(x: 30, y: 35))
-                                        path.addLine(to: CGPoint(x: 10, y: 35))
-                                    }
-                                    .fill(Color.white),
-                                    alignment: .bottom
-                                )
-                            CharacterView(
-                                characterType: selectedCharacterType,
-                                characterState: characterState
-                            )
-                            .frame(width: 150, height: 150)
-                        }
-                    }
-                    .padding(.top, 20)
-                    .padding(.trailing, 20)
-
-                    Spacer()
-
-                    if latestRecord == nil {
-                        Text("🏠")
-                            .font(.system(size: 60))
-                    }
-
-                    Spacer()
-                }
+            VStack(spacing: 16) {
+                topBar
+                scoreBanner
+                happinessGauge
+                roomFrame
+                missionList
+                Spacer(minLength: 8)
+                cameraButton
+                debugFooter
             }
-            .padding(.horizontal)
-            
-            // お片付けミッションセクション＋タスクリスト（チェックボックス付き）
-            VStack(alignment: .leading, spacing: 12) {
-                Text("お片付けミッション")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                VStack(spacing: 8) {
-                    ForEach(["床の服を片付ける", "机を整理する", "本棚の整理"], id: \.self) { task in
-                        HStack(spacing: 12) {
-                            Button(action: {}) {
-                                Image(systemName: "circle")
-                                    .foregroundColor(.blue)
-                            }
-                            Text(task)
-                                .font(.subheadline)
-                            Spacer()
-                            Text("⭐⭐⭐")
-                                .font(.caption)
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-            }
-            .padding(.vertical)
-            
-            Spacer()
-            
-            // 最下部中央: カメラアイコンボタン（固定）
-            Button(action: {
-                navigationRouter.navigate(to: .capture)
-            }) {
-                Image(systemName: "camera.fill")
-                    .font(.title)
-                    .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
-                    .background(Color.blue)
-                    .clipShape(Circle())
-                    .shadow(radius: 4)
-            }
-            
-            #if DEBUG
-            // デバッグモード切替ボタン（DEBUG版のみ表示）
-            VStack(spacing: 8) {
-                Text(appDependencies.useMockAPI ? "Mock使用中" : "Real API使用中")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Button(action: {
-                    appDependencies.toggleMockAPI()
-                }) {
-                    Text(appDependencies.useMockAPI ? "Real APIに切替" : "Mockに切替")
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(4)
-                }
-            }
-            .padding(.top, 16)
-            .padding(.bottom, 30)
-            #else
-            Spacer().frame(height: 30)
-            #endif
+            .padding(.top, 8)
         }
         .navigationBarHidden(true)
+    }
+
+    // MARK: - Top Bar
+    private var topBar: some View {
+        HStack {
+            Button(action: {
+                navigationRouter.navigate(to: .settings)
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        PixelCircle(pixelSize: 3)
+                            .fill(DesignSystem.Color.surface)
+                    )
+                    .overlay(
+                        PixelCircleStroke(pixelSize: 3, lineWidth: 3)
+                            .fill(DesignSystem.Color.primary)
+                    )
+            }
+
+            Spacer()
+
+            Text("つぎのさつえいまで: 8じかん30ぷん")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Score Banner
+    private var scoreBanner: some View {
+        HStack {
+            Text("おへやの ちらかりしすう")
+                .font(DesignSystem.Font.subheadline)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+            Spacer()
+            Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
+                .font(DesignSystem.Font.title2)
+                .foregroundColor(DesignSystem.Color.primaryDark)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .pixelSquareCard(
+            fill: DesignSystem.Color.secondary.opacity(0.45),
+            border: DesignSystem.Color.primary,
+            borderWidth: 3,
+            shadowOffset: 4
+        )
+        .padding(.horizontal)
+        .padding(.trailing, 4)
+    }
+
+    // MARK: - Happiness Gauge
+    private var happinessGauge: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("ハッピーど")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+
+            HStack(spacing: 4) {
+                ForEach(0..<8) { index in
+                    Rectangle()
+                        .fill(index < 5 ? DesignSystem.Color.primary : DesignSystem.Color.secondary.opacity(0.3))
+                        .frame(height: 12)
+                }
+            }
+            .padding(.horizontal, 4)
+            .overlay(
+                Rectangle()
+                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            )
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Room Frame
+    private var roomFrame: some View {
+        ZStack {
+            Rectangle()
+                .fill(DesignSystem.Color.secondary.opacity(0.25))
+                .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    Rectangle()
+                        .stroke(DesignSystem.Color.primary, lineWidth: 3)
+                )
+
+            if let data = latestRecord?.pixelArtImageData,
+               let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .interpolation(.none)
+                    .aspectRatio(contentMode: .fit)
+            }
+
+            VStack {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 4) {
+                        Text("もう すこし\nかたづけよう！")
+                            .font(DesignSystem.Font.caption)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .pixelSquareCard(
+                                fill: DesignSystem.Color.surface,
+                                border: DesignSystem.Color.primaryDark,
+                                borderWidth: 2,
+                                shadowOffset: 2
+                            )
+
+                        CharacterView(
+                            characterType: selectedCharacterType,
+                            characterState: characterState
+                        )
+                        .frame(width: 130, height: 130)
+                    }
+                }
+                .padding(.top, 16)
+                .padding(.trailing, 16)
+
+                Spacer()
+
+                if latestRecord == nil {
+                    Text("🏠")
+                        .font(DesignSystem.Font.custom(size: 56))
+                }
+
+                Spacer()
+            }
+        }
+        .padding(.horizontal)
+        .padding(.trailing, 4)
+    }
+
+    // MARK: - Mission List
+    private var missionList: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("⭐")
+                    .font(DesignSystem.Font.subheadline)
+                Text("おかたづけミッション")
+                    .font(DesignSystem.Font.headline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+            }
+            .padding(.horizontal)
+
+            VStack(spacing: 6) {
+                ForEach(["ゆかの ふくをかたづける", "つくえを せいりする", "ほんだなの せいり"], id: \.self) { task in
+                    HStack(spacing: 12) {
+                        Button(action: {}) {
+                            Image(systemName: "square")
+                                .font(DesignSystem.Font.subheadline)
+                                .foregroundColor(DesignSystem.Color.primary)
+                        }
+                        Text(task)
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                        Spacer()
+                        Text("⭐⭐⭐")
+                            .font(DesignSystem.Font.caption)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .pixelSquareCard(
+                        fill: DesignSystem.Color.surface,
+                        border: DesignSystem.Color.secondary,
+                        borderWidth: 2,
+                        shadowOffset: 3
+                    )
+                    .padding(.horizontal)
+                    .padding(.trailing, 3)
+                }
+            }
+        }
+    }
+
+    // MARK: - Camera Button
+    private var cameraButton: some View {
+        Button(action: {
+            navigationRouter.navigate(to: .capture)
+        }) {
+            Image(systemName: "camera.fill")
+                .font(DesignSystem.Font.title)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .frame(width: 72, height: 72)
+                .background(
+                    PixelCircle(pixelSize: 5)
+                        .fill(DesignSystem.Color.primary)
+                )
+                .overlay(
+                    PixelCircleStroke(pixelSize: 5, lineWidth: 4)
+                        .fill(DesignSystem.Color.primaryDark)
+                )
+        }
+    }
+
+    // MARK: - Debug Footer
+    @ViewBuilder
+    private var debugFooter: some View {
+        #if DEBUG
+        VStack(spacing: 6) {
+            Text(appDependencies.useMockAPI ? "Mock しようちゅう" : "Real API しようちゅう")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
+
+            Button(action: {
+                appDependencies.toggleMockAPI()
+            }) {
+                Text(appDependencies.useMockAPI ? "Real API に きりかえ" : "Mock に きりかえ")
+                    .font(DesignSystem.Font.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .pixelSquareCard(
+                        fill: DesignSystem.Color.surface,
+                        border: DesignSystem.Color.textPrimary.opacity(0.3),
+                        borderWidth: 2,
+                        shadowOffset: 2
+                    )
+            }
+        }
+        .padding(.bottom, 24)
+        #else
+        Spacer().frame(height: 24)
+        #endif
     }
 }
 

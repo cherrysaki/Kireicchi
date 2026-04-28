@@ -10,36 +10,41 @@ struct AppleLoginSection: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("アカウント")
-                .font(.headline)
+                .font(DesignSystem.Font.headline)
+                .foregroundColor(DesignSystem.Color.textPrimary)
                 .padding(.horizontal)
 
             Group {
                 if isLinkedWithApple {
                     HStack {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
-                        VStack(alignment: .leading) {
-                            Text("Apple ID でログイン中")
-                                .font(.subheadline)
-                                .bold()
+                            .foregroundColor(DesignSystem.Color.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Apple ID で ログインちゅう")
+                                .font(DesignSystem.Font.subheadline)
+                                .foregroundColor(DesignSystem.Color.textPrimary)
                             if let name = deps.currentUser?.displayName, !name.isEmpty {
                                 Text(name)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .font(DesignSystem.Font.caption)
+                                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                             }
                         }
                         Spacer()
                     }
-                    .padding()
-                    .background(Color.gray.opacity(0.05))
-                    .cornerRadius(12)
+                    .padding(14)
+                    .pixelSquareCard(
+                        fill: DesignSystem.Color.surface,
+                        border: DesignSystem.Color.primary,
+                        borderWidth: 2,
+                        shadowOffset: 3
+                    )
                 } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("データを機種変更時に引き継ぐには Apple ID でログインしてください。")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("きしゅへんこうの ときに データを ひきつぐには Apple ID で ログインしてください。")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         SignInWithAppleButton(
                             onRequest: { request in
                                 let raw = deps.signInWithAppleUseCase.makeRawNonce()
@@ -52,14 +57,19 @@ struct AppleLoginSection: View {
                             }
                         )
                         .signInWithAppleButtonStyle(.black)
-                        .frame(height: 48)
+                        .frame(height: 44)
                     }
-                    .padding()
-                    .background(Color.gray.opacity(0.05))
-                    .cornerRadius(12)
+                    .padding(14)
+                    .pixelSquareCard(
+                        fill: DesignSystem.Color.surface,
+                        border: DesignSystem.Color.primary,
+                        borderWidth: 2,
+                        shadowOffset: 3
+                    )
                 }
             }
             .padding(.horizontal)
+            .padding(.trailing, 3)
         }
     }
 

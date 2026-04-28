@@ -25,7 +25,7 @@ struct CleanupTimerView: View {
             VStack(spacing: viewModel.isRunning ? 40 : 24) {
                 // タイトル（タイマー実行中は目立たなくする）
                 if !viewModel.isRunning {
-                    Text("お片付けタイマー")
+                    Text("おかたづけ タイマー")
                         .font(DesignSystem.Font.pixelMedium)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                         .padding(.top, 20)
@@ -41,7 +41,7 @@ struct CleanupTimerView: View {
                 // タイマー表示（実行中は大きく表示）
                 if viewModel.isRunning {
                     VStack(spacing: 30) {
-                        Text("お片付け中...")
+                        Text("おかたづけ ちゅう...")
                             .font(DesignSystem.Font.pixelLarge)
                             .foregroundColor(DesignSystem.Color.primary)
                         
@@ -71,26 +71,34 @@ struct CleanupTimerView: View {
                         Button(action: {
                             viewModel.pause()
                         }) {
-                            Text("一時停止")
-                                .font(.caption)
-                                .foregroundColor(DesignSystem.Color.textPrimary)
+                            Text("いちじていし")
+                                .font(DesignSystem.Font.caption)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(DesignSystem.Color.surface.opacity(0.8))
-                                .cornerRadius(8)
                         }
-                        
+                        .buttonStyle(PixelButtonStyle(
+                            fill: DesignSystem.Color.surface,
+                            foreground: DesignSystem.Color.primaryDark,
+                            border: DesignSystem.Color.primaryDark,
+                            borderWidth: 2,
+                            shadowOffset: 2
+                        ))
+
                         Button(action: {
                             navigationRouter.navigateBack()
                         }) {
-                            Text("戻る")
-                                .font(.caption)
-                                .foregroundColor(DesignSystem.Color.textPrimary)
+                            Text("もどる")
+                                .font(DesignSystem.Font.caption)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(DesignSystem.Color.surface.opacity(0.8))
-                                .cornerRadius(8)
                         }
+                        .buttonStyle(PixelButtonStyle(
+                            fill: DesignSystem.Color.surface,
+                            foreground: DesignSystem.Color.primaryDark,
+                            border: DesignSystem.Color.primaryDark,
+                            borderWidth: 2,
+                            shadowOffset: 2
+                        ))
                     }
                     .padding(.bottom, 40)
                 } else {
@@ -101,35 +109,35 @@ struct CleanupTimerView: View {
         }
         .navigationBarHidden(true)
         .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
-        .alert("お片付け完了！", isPresented: $viewModel.isFinished) {
-            Button("再撮影する") {
+        .alert("おかたづけ かんりょう！", isPresented: $viewModel.isFinished) {
+            Button("もういちど さつえい") {
                 viewModel.isFinished = false
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
             }
-            
-            Button("ホームに戻る") {
+
+            Button("ホームに もどる") {
                 viewModel.isFinished = false
                 navigationRouter.popToRoot()
             }
-            
-            Button("もう一度タイマー") {
+
+            Button("もう いちど タイマー") {
                 viewModel.reset()
             }
         } message: {
-            Text("よくがんばりました！")
+            Text("よく がんばりました！")
         }
     }
     
     private var timePickerSection: some View {
         VStack(spacing: 12) {
-            Text("タイマー時間")
+            Text("タイマー じかん")
                 .font(DesignSystem.Font.pixelSmall)
                 .foregroundColor(DesignSystem.Color.textPrimary)
-            
-            Picker("分", selection: $viewModel.selectedMinutes) {
+
+            Picker("ふん", selection: $viewModel.selectedMinutes) {
                 ForEach(1...30, id: \.self) { minute in
-                    Text("\(minute)分")
+                    Text("\(minute) ふん")
                         .tag(minute)
                 }
             }
@@ -180,7 +188,6 @@ struct CleanupTimerView: View {
     
     private var timerControlSection: some View {
         HStack(spacing: 16) {
-            // 開始/一時停止ボタン
             Button(action: {
                 if viewModel.isRunning {
                     viewModel.pause()
@@ -188,66 +195,59 @@ struct CleanupTimerView: View {
                     viewModel.start()
                 }
             }) {
-                Text(viewModel.isRunning ? "一時停止" : "開始")
+                Text(viewModel.isRunning ? "いちじていし" : "はじめる")
                     .font(DesignSystem.Font.pixelSmall)
-                    .foregroundColor(DesignSystem.Color.textOnPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(DesignSystem.Color.primary)
-                    .cornerRadius(DesignSystem.Layout.buttonCornerRadius)
             }
-            
-            // リセットボタン
+            .buttonStyle(PixelButtonStyle())
+
             Button(action: {
                 viewModel.reset()
             }) {
                 Text("リセット")
                     .font(DesignSystem.Font.pixelSmall)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(DesignSystem.Color.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignSystem.Layout.buttonCornerRadius)
-                            .stroke(DesignSystem.Color.textPrimary, lineWidth: 2)
-                    )
-                    .cornerRadius(DesignSystem.Layout.buttonCornerRadius)
             }
+            .buttonStyle(PixelButtonStyle(
+                fill: DesignSystem.Color.surface,
+                foreground: DesignSystem.Color.primaryDark,
+                border: DesignSystem.Color.primaryDark
+            ))
         }
     }
-    
+
     private var bottomButtonSection: some View {
         HStack(spacing: 16) {
-            // 戻るボタン
             Button(action: {
                 navigationRouter.navigateBack()
             }) {
-                Text("戻る")
+                Text("もどる")
                     .font(DesignSystem.Font.pixelSmall)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(DesignSystem.Color.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignSystem.Layout.buttonCornerRadius)
-                            .stroke(DesignSystem.Color.textPrimary, lineWidth: 2)
-                    )
-                    .cornerRadius(DesignSystem.Layout.buttonCornerRadius)
             }
-            
-            // 再撮影ボタン
+            .buttonStyle(PixelButtonStyle(
+                fill: DesignSystem.Color.surface,
+                foreground: DesignSystem.Color.primaryDark,
+                border: DesignSystem.Color.primaryDark
+            ))
+
             Button(action: {
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
             }) {
-                Text("再撮影")
+                Text("もういちど さつえい")
                     .font(DesignSystem.Font.pixelSmall)
-                    .foregroundColor(DesignSystem.Color.textOnPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(DesignSystem.Color.secondary)
-                    .cornerRadius(DesignSystem.Layout.buttonCornerRadius)
             }
+            .buttonStyle(PixelButtonStyle(
+                fill: DesignSystem.Color.secondary,
+                foreground: DesignSystem.Color.textPrimary,
+                border: DesignSystem.Color.primaryDark
+            ))
         }
         .padding(.bottom, 20)
     }
