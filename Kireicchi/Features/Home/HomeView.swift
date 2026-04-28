@@ -187,32 +187,27 @@ struct HomeView: View {
             }
             .padding(.horizontal)
 
-            VStack(spacing: 6) {
-                ForEach(["ゆかの ふくをかたづける", "つくえを せいりする", "ほんだなの せいり"], id: \.self) { task in
-                    HStack(spacing: 12) {
-                        Button(action: {}) {
-                            Image(systemName: "square")
-                                .font(DesignSystem.Font.subheadline)
-                                .foregroundColor(DesignSystem.Color.primary)
-                        }
-                        Text(task)
-                            .font(DesignSystem.Font.subheadline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                        Spacer()
-                        Text("⭐⭐⭐")
-                            .font(DesignSystem.Font.caption)
+            if let record = latestRecord, !record.messyPointLabels.isEmpty {
+                VStack(spacing: 6) {
+                    ForEach(Array(record.messyPointLabels.prefix(3).enumerated()), id: \.offset) { index, label in
+                        CleanupTaskRow(label: label, index: index)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .pixelSquareCard(
+                                fill: DesignSystem.Color.surface,
+                                border: DesignSystem.Color.secondary,
+                                borderWidth: 2,
+                                shadowOffset: 3
+                            )
+                            .padding(.horizontal)
+                            .padding(.trailing, 3)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .pixelSquareCard(
-                        fill: DesignSystem.Color.surface,
-                        border: DesignSystem.Color.secondary,
-                        borderWidth: 2,
-                        shadowOffset: 3
-                    )
-                    .padding(.horizontal)
-                    .padding(.trailing, 3)
                 }
+            } else {
+                Text("さつえいして おへやを ぶんせきしよう！")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                    .padding(.horizontal)
             }
         }
     }

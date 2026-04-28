@@ -72,11 +72,13 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
             
             // データ保存
             if let roomRecordStore = roomRecordStore {
+                let messyPointLabels = analysis.messyPoints.map { "\($0.label):\($0.priority)" }
                 try roomRecordStore.save(
                     pixelArtImageData: pixelData,
                     capturedAt: Date(),
                     score: analysis.score,
-                    comment: analysis.characterComment
+                    comment: analysis.characterComment,
+                    messyPointLabels: messyPointLabels
                 )
             }
             

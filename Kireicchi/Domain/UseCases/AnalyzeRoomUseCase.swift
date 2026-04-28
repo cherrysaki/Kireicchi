@@ -19,10 +19,9 @@ final class AnalyzeRoomUseCase: AnalyzeRoomUseCaseProtocol {
         // CLAUDE.mdのスコアリングルールに従ってランクを算出
         let rank = CleanlinessRank.fromScore(response.score)
         
-        // MessyPointをStringの配列に変換（優先度順でソート）
+        // MessyPointを優先度順でソート
         let messyPoints = response.messyPoints
             .sorted { $0.priority > $1.priority }  // 優先度が高い順
-            .map { $0.label }
         
         return RoomAnalysis(
             score: response.score,

@@ -141,13 +141,13 @@ struct AnalysisResultView: View {
                                 .foregroundColor(DesignSystem.Color.textOnPrimary)
                         }
 
-                        Text(point)
+                        Text(point.label)
                             .font(DesignSystem.Font.subheadline)
                             .foregroundColor(DesignSystem.Color.textPrimary)
 
                         Spacer()
 
-                        Text(starRating(for: index))
+                        Text(starRating(for: point.priority))
                             .font(DesignSystem.Font.caption)
                     }
                     .padding(.horizontal, 12)
@@ -225,11 +225,12 @@ struct AnalysisResultView: View {
         }
     }
 
-    private func starRating(for index: Int) -> String {
-        switch index {
-        case 0: return "⭐⭐⭐"
-        case 1: return "⭐⭐"
-        case 2: return "⭐"
+    private func starRating(for priority: Int) -> String {
+        switch priority {
+        case 5: return "⭐⭐⭐⭐⭐"
+        case 4: return "⭐⭐⭐⭐"
+        case 3: return "⭐⭐⭐"
+        case 2: return "⭐⭐"
         default: return "⭐"
         }
     }
@@ -239,7 +240,11 @@ struct AnalysisResultView: View {
     let mockAnalysis = RoomAnalysis(
         score: 75,
         rank: .b,
-        messyPoints: ["ゆかの ふく", "つくえの うえの かみ", "ほんだなの せいり"],
+        messyPoints: [
+            MessyPoint(label: "ゆかの ふく", priority: 3),
+            MessyPoint(label: "つくえの うえの かみ", priority: 2),
+            MessyPoint(label: "ほんだなの せいり", priority: 1)
+        ],
         characterComment: "もう すこし かたづけると いいかも！"
     )
     let dummyImageData = (UIImage(systemName: "photo") ?? UIImage()).pngData() ?? Data()
