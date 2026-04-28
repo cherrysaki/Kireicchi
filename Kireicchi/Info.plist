@@ -37,7 +37,7 @@
 	<string>$(OPENAI_API_KEY)</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>yurumoji.ttf</string>
+		<string>cp_period.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

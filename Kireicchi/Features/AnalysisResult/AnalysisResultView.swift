@@ -147,8 +147,11 @@ struct AnalysisResultView: View {
 
                         Spacer()
 
-                        Text(starRating(for: point.priority))
-                            .font(DesignSystem.Font.caption)
+                        HStack(spacing: 2) {
+                            ForEach(0..<min(max(point.priority, 1), 5), id: \.self) { _ in
+                                PixelStar(size: 12)
+                            }
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -227,15 +230,6 @@ struct AnalysisResultView: View {
         }
     }
 
-    private func starRating(for priority: Int) -> String {
-        switch priority {
-        case 5: return "⭐⭐⭐⭐⭐"
-        case 4: return "⭐⭐⭐⭐"
-        case 3: return "⭐⭐⭐"
-        case 2: return "⭐⭐"
-        default: return "⭐"
-        }
-    }
 }
 
 #Preview {

@@ -29,7 +29,7 @@ struct SettingsView: View {
                     Image(systemName: "gearshape.fill")
                         .font(DesignSystem.Font.title3)
                         .foregroundColor(DesignSystem.Color.primary)
-                    Text("せってい")
+                    Text("設定")
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                     Spacer()
@@ -117,16 +117,16 @@ struct SettingsView: View {
             if showTimePicker {
                 VStack(spacing: 12) {
                     HStack {
-                        Picker("じ", selection: $selectedHour) {
+                        Picker("時", selection: $selectedHour) {
                             ForEach(0..<24, id: \.self) { hour in
-                                Text("\(hour) じ")
+                                Text("\(hour) 時")
                             }
                         }
                         .pickerStyle(.wheel)
 
-                        Picker("ふん", selection: $selectedMinute) {
+                        Picker("分", selection: $selectedMinute) {
                             ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { minute in
-                                Text("\(minute) ふん")
+                                Text("\(minute) 分")
                             }
                         }
                         .pickerStyle(.wheel)
@@ -136,7 +136,7 @@ struct SettingsView: View {
                     Button(action: {
                         showTimePicker = false
                     }) {
-                        Text("けってい")
+                        Text("決定")
                             .font(DesignSystem.Font.subheadline)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
@@ -165,14 +165,14 @@ struct SettingsView: View {
 
     private var notificationToggleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("つうち")
+            sectionLabel("通知")
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("撮影リマインダー")
                         .font(DesignSystem.Font.subheadline)
                         .foregroundColor(DesignSystem.Color.textPrimary)
-                    Text("せってい じこくに つうちを おくります")
+                    Text("設定時刻に通知を送ります")
                         .font(DesignSystem.Font.caption)
                         .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 }
@@ -196,7 +196,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("キャラクター")
 
-            Picker("キャラクターを えらぶ", selection: $selectedCharacterId) {
+            Picker("キャラクターを 選ぶ", selection: $selectedCharacterId) {
                 ForEach(characters, id: \.id) { character in
                     HStack {
                         Text(character.emoji)
@@ -217,7 +217,7 @@ struct SettingsView: View {
                 .font(DesignSystem.Font.custom(size: 56))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("せってい ありがとう！")
+                Text("設定ありがとう！")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
                 Text("一緒にお部屋をきれいにしようね🌟")

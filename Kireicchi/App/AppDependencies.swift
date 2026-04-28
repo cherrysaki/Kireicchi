@@ -12,7 +12,6 @@ class MockSignInWithAppleUseCase: SignInWithAppleUseCaseProtocol {
 
 @MainActor
 final class AppDependencies: ObservableObject {
-    @Published var useMockAPI: Bool = true
     @Published var useMockConnectivity: Bool = true
     @Published var currentUser: AppUser? = nil
     @Published var authProvider: String = ""
@@ -39,13 +38,8 @@ final class AppDependencies: ObservableObject {
     // 設定更新処理
     func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String) async {}
 
-    // Mock/Real APIを切り替えるメソッド
     func currentOpenAIClient() -> OpenAIClientProtocol {
-        if useMockAPI {
-            return MockOpenAIClient()
-        } else {
-            return OpenAIClient()
-        }
+        OpenAIClient()
     }
 
     // Mock/Real Connectivityを切り替えるメソッド
@@ -70,11 +64,6 @@ final class AppDependencies: ObservableObject {
             peerSession: currentPeerSession(),
             distanceTracker: currentDistanceTracker()
         )
-    }
-
-    // デバッグ用のトグルメソッド
-    func toggleMockAPI() {
-        useMockAPI.toggle()
     }
 
     func toggleMockConnectivity() {

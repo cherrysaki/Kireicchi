@@ -4,7 +4,6 @@ import SwiftData
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Query private var records: [LatestRoomRecord]
-    @StateObject private var appDependencies = AppDependencies.shared
 
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
@@ -31,7 +30,7 @@ struct HomeView: View {
                 missionList
                 Spacer(minLength: 8)
                 cameraButton
-                debugFooter
+                Spacer().frame(height: 24)
             }
             .padding(.top, 8)
         }
@@ -94,25 +93,17 @@ struct HomeView: View {
 
     // MARK: - Happiness Gauge
     private var happinessGauge: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("ハッピー度")
-                .font(DesignSystem.Font.caption)
-                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-
-            HStack(spacing: 4) {
-                ForEach(0..<8) { index in
-                    Rectangle()
-                        .fill(index < 5 ? DesignSystem.Color.primary : DesignSystem.Color.secondary.opacity(0.3))
-                        .frame(height: 12)
-                }
-            }
-            .padding(.horizontal, 4)
-            .overlay(
-                Rectangle()
-                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
-            )
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let value = latestRecord.map {
+                Happiness.calculate(
+                    score: $0.score,
+                    capturedAt: $0.capturedAt,
+                    now: context.date
+                )
+            } ?? Happiness.defaultWhenNoRecord
+            PixelHeartGauge(value: value)
+                .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
 
     // MARK: - Room Frame
@@ -169,9 +160,8 @@ struct HomeView: View {
     private var missionList: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
-                Text("⭐")
-                    .font(DesignSystem.Font.subheadline)
-                Text("おかた付けミッション")
+                PixelStar(size: 22)
+                Text("お片付けミッション")
                     .font(DesignSystem.Font.headline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
             }
@@ -243,35 +233,6 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Debug Footer
-    @ViewBuilder
-    private var debugFooter: some View {
-        #if DEBUG
-        VStack(spacing: 6) {
-            Text(appDependencies.useMockAPI ? "Mock 使用中" : "Real API 使用中")
-                .font(DesignSystem.Font.caption)
-                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
-
-            Button(action: {
-                appDependencies.toggleMockAPI()
-            }) {
-                Text(appDependencies.useMockAPI ? "Real API に切替" : "Mock に切替")
-                    .font(DesignSystem.Font.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .pixelSquareCard(
-                        fill: DesignSystem.Color.surface,
-                        border: DesignSystem.Color.textPrimary.opacity(0.3),
-                        borderWidth: 2,
-                        shadowOffset: 2
-                    )
-            }
-        }
-        .padding(.bottom, 24)
-        #else
-        Spacer().frame(height: 24)
-        #endif
-    }
 }
 
 #Preview {

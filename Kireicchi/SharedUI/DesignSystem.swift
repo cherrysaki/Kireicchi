@@ -19,7 +19,7 @@ struct DesignSystem {
     
     // MARK: - Fonts
     struct Font {
-        private static let name = "Yurumoji"
+        private static let name = "CP-period"
 
         static let pixelLarge = SwiftUI.Font.custom(name, size: 52)
         static let pixelMedium = SwiftUI.Font.custom(name, size: 28)

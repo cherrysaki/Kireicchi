@@ -42,7 +42,7 @@ struct AppleLoginSection: View {
                     )
                 } else {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("きしゅへんこうの ときに データを ひきつぐには Apple ID で ログインしてください。")
+                        Text("機種変更の ときに データを 引き継ぐには Apple ID で ログインしてください。")
                             .font(DesignSystem.Font.caption)
                             .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         SignInWithAppleButton(

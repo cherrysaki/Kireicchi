@@ -16,16 +16,10 @@ struct CleanupTaskRow: View {
         return Int(parts.last ?? "1") ?? 1
     }
     
-    private func starRating(for priority: Int) -> String {
-        switch priority {
-        case 5: return "⭐⭐⭐⭐⭐"
-        case 4: return "⭐⭐⭐⭐"
-        case 3: return "⭐⭐⭐"
-        case 2: return "⭐⭐"
-        default: return "⭐"
-        }
+    private var starCount: Int {
+        min(max(priority, 1), 5)
     }
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Button(action: {
@@ -34,16 +28,19 @@ struct CleanupTaskRow: View {
                 Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(.blue)
             }
-            
+
             Text(parsedLabel)
                 .font(.subheadline)
                 .strikethrough(isCompleted)
                 .foregroundColor(isCompleted ? .secondary : .primary)
-            
+
             Spacer()
-            
-            Text(starRating(for: priority))
-                .font(.caption)
+
+            HStack(spacing: 2) {
+                ForEach(0..<starCount, id: \.self) { _ in
+                    PixelStar(size: 12)
+                }
+            }
         }
     }
 }
