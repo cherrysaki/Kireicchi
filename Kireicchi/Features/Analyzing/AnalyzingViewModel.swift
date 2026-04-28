@@ -7,6 +7,7 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     @Published var currentStep = 0
     @Published var isAnalyzing = true
     @Published var errorMessage: String?
+    @Published var errorDetails: (rawResponse: String?, apiKeyPrefix: String?)?
     
     let steps = ["準備中", "AI解析中", "ドット絵変換中", "完了"]
     
@@ -35,6 +36,7 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     func startAnalysis(imageData: Data) async {
         currentStep = 0
         errorMessage = nil
+        errorDetails = nil
         isAnalyzing = true
         
         await performAnalysis(imageData: imageData)
@@ -43,6 +45,7 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     func retry(imageData: Data) async {
         currentStep = 0
         errorMessage = nil
+        errorDetails = nil
         isAnalyzing = true
         roomAnalysis = nil
         pixelArtData = nil
@@ -94,6 +97,16 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
         } catch {
             isAnalyzing = false
             errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            
+            // OpenAIClientErrorの詳細情報を抽出
+            if let openAIError = error as? OpenAIClientError {
+                errorDetails = (
+                    rawResponse: openAIError.rawResponse,
+                    apiKeyPrefix: openAIError.apiKeyPrefix
+                )
+            } else {
+                errorDetails = nil
+            }
         }
     }
 }

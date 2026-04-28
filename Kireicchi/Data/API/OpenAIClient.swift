@@ -39,23 +39,29 @@ final class OpenAIClient: OpenAIClientProtocol {
                 throw OpenAIClientError.invalidResponse
             }
             
-            guard 200...299 ~= httpResponse.statusCode else {
-                let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-                throw OpenAIClientError.httpError(httpResponse.statusCode, errorMessage)
-            }
+            let rawResponseString = String(data: data, encoding: .utf8) ?? "読み取り不可"
             
-            let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            guard 200...299 ~= httpResponse.statusCode else {
+                // 認証エラーの特別処理
+                if httpResponse.statusCode == 401 {
+                    let apiKeyPrefix = String(apiKey.prefix(8))
+                    throw OpenAIClientError.authenticationError(apiKeyPrefix: apiKeyPrefix)
+                }
+                throw OpenAIClientError.httpError(httpResponse.statusCode, rawResponseString)
+            }
             
             // デバッグ: 生のレスポンス文字列をログ出力
-            if let rawResponseString = String(data: data, encoding: .utf8) {
-                print("=== OpenAI Raw Response ===")
-                print(rawResponseString)
-                print("===========================")
+            print("=== OpenAI Raw Response ===")
+            print(rawResponseString)
+            print("===========================")
+            
+            do {
+                let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+                let analysisResponse = try RoomAnalysisResponseParser.parse(from: openAIResponse)
+                return analysisResponse
+            } catch let decodingError {
+                throw OpenAIClientError.jsonDecodingFailed(error: decodingError, rawResponse: rawResponseString)
             }
-            
-            let analysisResponse = try RoomAnalysisResponseParser.parse(from: openAIResponse)
-            
-            return analysisResponse
             
         } catch let error as OpenAIClientError {
             throw error
@@ -86,20 +92,28 @@ final class OpenAIClient: OpenAIClientProtocol {
                 throw OpenAIClientError.invalidResponse
             }
 
+            let rawResponseString = String(data: data, encoding: .utf8) ?? "読み取り不可"
+            
             guard 200...299 ~= httpResponse.statusCode else {
-                let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-                throw OpenAIClientError.httpError(httpResponse.statusCode, errorMessage)
+                // 認証エラーの特別処理
+                if httpResponse.statusCode == 401 {
+                    let apiKeyPrefix = String(apiKey.prefix(8))
+                    throw OpenAIClientError.authenticationError(apiKeyPrefix: apiKeyPrefix)
+                }
+                throw OpenAIClientError.httpError(httpResponse.statusCode, rawResponseString)
             }
 
-            let decoded = try JSONDecoder().decode(PixelArtResponse.self, from: data)
-            return try PixelArtResponseParser.extractImageData(from: decoded)
+            do {
+                let decoded = try JSONDecoder().decode(PixelArtResponse.self, from: data)
+                return try PixelArtResponseParser.extractImageData(from: decoded)
+            } catch let decodingError {
+                throw OpenAIClientError.jsonDecodingFailed(error: decodingError, rawResponse: rawResponseString)
+            }
 
         } catch let error as OpenAIClientError {
             throw error
         } catch let error as PixelArtError {
             throw error
-        } catch let decodingError as DecodingError {
-            throw OpenAIClientError.encodingFailed(decodingError)
         } catch {
             throw OpenAIClientError.networkError(error)
         }
@@ -111,6 +125,8 @@ enum OpenAIClientError: LocalizedError {
     case invalidResponse
     case httpError(Int, String)
     case networkError(Error)
+    case jsonDecodingFailed(error: Error, rawResponse: String)
+    case authenticationError(apiKeyPrefix: String)
     
     var errorDescription: String? {
         switch self {
@@ -122,6 +138,30 @@ enum OpenAIClientError: LocalizedError {
             return "HTTP エラー \(statusCode): \(message)"
         case .networkError(let error):
             return "ネットワークエラー: \(error.localizedDescription)"
+        case .jsonDecodingFailed(let error, let rawResponse):
+            return "JSONデコードエラー: \(error.localizedDescription)"
+        case .authenticationError(let apiKeyPrefix):
+            return "認証エラー (APIキー: \(apiKeyPrefix)...)"
+        }
+    }
+    
+    var rawResponse: String? {
+        switch self {
+        case .jsonDecodingFailed(_, let rawResponse):
+            return rawResponse
+        case .httpError(_, let message):
+            return message
+        default:
+            return nil
+        }
+    }
+    
+    var apiKeyPrefix: String? {
+        switch self {
+        case .authenticationError(let prefix):
+            return prefix
+        default:
+            return nil
         }
     }
 }

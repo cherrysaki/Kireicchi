@@ -46,42 +46,36 @@ struct AnalyzingView: View {
 
             Spacer().frame(height: 40)
 
-            Text("🐱")
-                .font(.system(size: 120))
-                .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
-                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
+            CharacterView(
+                characterType: .character01,
+                characterState: nil,
+                forceGif: .run
+            )
+            .frame(width: 120, height: 120)
+            .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
+            .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
             Spacer()
 
             if let errorMessage = viewModel.errorMessage {
-                VStack(spacing: 12) {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-
-                    HStack(spacing: 12) {
-                        Button("戻る") {
-                            navigationRouter.navigateBack()
+                ErrorDetailView(
+                    errorMessage: errorMessage,
+                    rawResponse: viewModel.errorDetails?.rawResponse,
+                    apiKeyPrefix: viewModel.errorDetails?.apiKeyPrefix,
+                    onCopy: {
+                        if let rawResponse = viewModel.errorDetails?.rawResponse {
+                            UIPasteboard.general.string = rawResponse
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(8)
-
-                        Button("再試行") {
-                            Task {
-                                await viewModel.retry(imageData: imageData)
-                            }
+                    },
+                    onBack: {
+                        navigationRouter.navigateBack()
+                    },
+                    onRetry: {
+                        Task {
+                            await viewModel.retry(imageData: imageData)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
                     }
-                }
+                )
                 .padding(.bottom, 60)
             } else {
                 stepList

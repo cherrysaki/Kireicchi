@@ -6,7 +6,7 @@ struct LatestRoomRecordStore {
     let context: ModelContext
 
     func save(pixelArtImageData: Data, capturedAt: Date, score: Int, 
-              comment: String, messyPointLabels: [String]) throws {
+              comment: String, messyPointLabels: [String]?) throws {
         let existing = try context.fetch(FetchDescriptor<LatestRoomRecord>())
         if let first = existing.first {
             first.pixelArtImageData = pixelArtImageData

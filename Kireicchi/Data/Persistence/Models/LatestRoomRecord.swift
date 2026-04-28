@@ -7,10 +7,10 @@ final class LatestRoomRecord {
     var capturedAt: Date
     var score: Int
     var comment: String
-    var messyPointLabels: [String]  // "label:priority"形式で保存
+    var messyPointLabels: [String]? // オプショナルに変更してマイグレーション対応
 
     init(pixelArtImageData: Data, capturedAt: Date, score: Int, 
-         comment: String, messyPointLabels: [String] = []) {
+         comment: String, messyPointLabels: [String]? = nil) {
         self.pixelArtImageData = pixelArtImageData
         self.capturedAt = capturedAt
         self.score = score
