@@ -60,7 +60,7 @@ struct HomeView: View {
 
             Spacer()
 
-            Text("つぎのさつえいまで: 8じかん30ぷん")
+            Text("次の撮影まで: 8時間30分")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
 
@@ -72,7 +72,7 @@ struct HomeView: View {
     // MARK: - Score Banner
     private var scoreBanner: some View {
         HStack {
-            Text("おへやの ちらかりしすう")
+            Text("お部屋の散らかり指数")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
             Spacer()
@@ -95,7 +95,7 @@ struct HomeView: View {
     // MARK: - Happiness Gauge
     private var happinessGauge: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("ハッピーど")
+            Text("ハッピー度")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
 
@@ -171,7 +171,7 @@ struct HomeView: View {
             HStack(spacing: 6) {
                 Text("⭐")
                     .font(DesignSystem.Font.subheadline)
-                Text("おかたづけミッション")
+                Text("おかた付けミッション")
                     .font(DesignSystem.Font.headline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
             }
@@ -196,7 +196,7 @@ struct HomeView: View {
                     }
                 }
             } else {
-                Text("さつえいして おへやを ぶんせきしよう！")
+                Text("撮影してお部屋を分析しよう！")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                     .padding(.horizontal)
@@ -248,14 +248,14 @@ struct HomeView: View {
     private var debugFooter: some View {
         #if DEBUG
         VStack(spacing: 6) {
-            Text(appDependencies.useMockAPI ? "Mock しようちゅう" : "Real API しようちゅう")
+            Text(appDependencies.useMockAPI ? "Mock 使用中" : "Real API 使用中")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
 
             Button(action: {
                 appDependencies.toggleMockAPI()
             }) {
-                Text(appDependencies.useMockAPI ? "Real API に きりかえ" : "Mock に きりかえ")
+                Text(appDependencies.useMockAPI ? "Real API に切替" : "Mock に切替")
                     .font(DesignSystem.Font.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)

@@ -21,19 +21,19 @@ struct DesignSystem {
     struct Font {
         private static let name = "Yurumoji"
 
-        static let pixelLarge = SwiftUI.Font.custom(name, size: 48)
-        static let pixelMedium = SwiftUI.Font.custom(name, size: 24)
-        static let pixelSmall = SwiftUI.Font.custom(name, size: 15)
+        static let pixelLarge = SwiftUI.Font.custom(name, size: 52)
+        static let pixelMedium = SwiftUI.Font.custom(name, size: 28)
+        static let pixelSmall = SwiftUI.Font.custom(name, size: 17)
 
-        static let largeTitle = SwiftUI.Font.custom(name, size: 34)
-        static let title = SwiftUI.Font.custom(name, size: 28)
-        static let title2 = SwiftUI.Font.custom(name, size: 22)
-        static let title3 = SwiftUI.Font.custom(name, size: 20)
-        static let headline = SwiftUI.Font.custom(name, size: 17)
-        static let body = SwiftUI.Font.custom(name, size: 17)
-        static let subheadline = SwiftUI.Font.custom(name, size: 15)
-        static let footnote = SwiftUI.Font.custom(name, size: 13)
-        static let caption = SwiftUI.Font.custom(name, size: 12)
+        static let largeTitle = SwiftUI.Font.custom(name, size: 38)
+        static let title = SwiftUI.Font.custom(name, size: 32)
+        static let title2 = SwiftUI.Font.custom(name, size: 26)
+        static let title3 = SwiftUI.Font.custom(name, size: 24)
+        static let headline = SwiftUI.Font.custom(name, size: 19)
+        static let body = SwiftUI.Font.custom(name, size: 19)
+        static let subheadline = SwiftUI.Font.custom(name, size: 17)
+        static let footnote = SwiftUI.Font.custom(name, size: 15)
+        static let caption = SwiftUI.Font.custom(name, size: 14)
 
         static func custom(size: CGFloat) -> SwiftUI.Font {
             SwiftUI.Font.custom(name, size: size)

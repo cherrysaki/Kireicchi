@@ -22,7 +22,7 @@ struct AppleLoginSection: View {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(DesignSystem.Color.primary)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Apple ID で ログインちゅう")
+                            Text("Apple ID でログイン中")
                                 .font(DesignSystem.Font.subheadline)
                                 .foregroundColor(DesignSystem.Color.textPrimary)
                             if let name = deps.currentUser?.displayName, !name.isEmpty {

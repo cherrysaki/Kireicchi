@@ -102,7 +102,7 @@ struct AnalysisResultView: View {
     // MARK: - Pixel Art Section
     private var pixelArtSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("ドットえに なった おへや")
+            Text("ドット絵になったお部屋")
                 .font(DesignSystem.Font.headline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .padding(.horizontal)
@@ -124,7 +124,7 @@ struct AnalysisResultView: View {
     // MARK: - Priority List
     private var priorityListSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("かたづけ ゆうせん かしょ")
+            Text("片付け優先箇所")
                 .font(DesignSystem.Font.headline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .padding(.horizontal)
@@ -173,7 +173,7 @@ struct AnalysisResultView: View {
             }) {
                 HStack {
                     Image(systemName: "timer")
-                    Text("おかたづけタイマーを はじめる")
+                    Text("お片付けタイマーを始める")
                 }
                 .font(DesignSystem.Font.subheadline)
                 .frame(maxWidth: .infinity)
@@ -247,7 +247,7 @@ struct AnalysisResultView: View {
             MessyPoint(label: "つくえの うえの かみ", priority: 2),
             MessyPoint(label: "ほんだなの せいり", priority: 1)
         ],
-        characterComment: "もう すこし かたづけると いいかも！"
+        characterComment: "もう少し片付けるといいかも！"
     )
     let dummyImageData = (UIImage(systemName: "photo") ?? UIImage()).pngData() ?? Data()
 

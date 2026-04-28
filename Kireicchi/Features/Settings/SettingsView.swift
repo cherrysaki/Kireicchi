@@ -66,7 +66,7 @@ struct SettingsView: View {
                 Spacer()
 
                 Button(action: saveSettings) {
-                    Text(isSaving ? "ほぞんちゅう..." : "せっていを ほぞんして とじる")
+                    Text(isSaving ? "保存中..." : "設定を保存して閉じる")
                         .font(DesignSystem.Font.caption)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 16)
@@ -86,12 +86,12 @@ struct SettingsView: View {
 
     private var captureTimeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("さつえい じかん")
+            sectionLabel("撮影時間")
 
             Button(action: { showTimePicker.toggle() }) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("まいにちの さつえい じこく")
+                        Text("毎日の撮影時刻")
                             .font(DesignSystem.Font.subheadline)
                             .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         Text("\(selectedHour):\(String(format: "%02d", selectedMinute))")
@@ -169,7 +169,7 @@ struct SettingsView: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("さつえい リマインダー")
+                    Text("撮影リマインダー")
                         .font(DesignSystem.Font.subheadline)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                     Text("せってい じこくに つうちを おくります")
@@ -220,7 +220,7 @@ struct SettingsView: View {
                 Text("せってい ありがとう！")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
-                Text("いっしょに おへやを きれいに しようね🌟")
+                Text("一緒にお部屋をきれいにしようね🌟")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
             }

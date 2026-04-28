@@ -25,7 +25,7 @@ struct CleanupTimerView: View {
             VStack(spacing: viewModel.isRunning ? 40 : 24) {
                 // タイトル（タイマー実行中は目立たなくする）
                 if !viewModel.isRunning {
-                    Text("おかたづけ タイマー")
+                    Text("お片付けタイマー")
                         .font(DesignSystem.Font.pixelMedium)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                         .padding(.top, 20)
@@ -41,7 +41,7 @@ struct CleanupTimerView: View {
                 // タイマー表示（実行中は大きく表示）
                 if viewModel.isRunning {
                     VStack(spacing: 30) {
-                        Text("おかたづけ ちゅう...")
+                        Text("お片付け中...")
                             .font(DesignSystem.Font.pixelLarge)
                             .foregroundColor(DesignSystem.Color.primary)
                         
@@ -109,33 +109,33 @@ struct CleanupTimerView: View {
         }
         .navigationBarHidden(true)
         .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
-        .alert("おかたづけ かんりょう！", isPresented: $viewModel.isFinished) {
-            Button("もういちど さつえい") {
+        .alert("お片付け完了！", isPresented: $viewModel.isFinished) {
+            Button("もう一度撮影") {
                 viewModel.isFinished = false
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
             }
 
-            Button("ホームに もどる") {
+            Button("ホームに戻る") {
                 viewModel.isFinished = false
                 navigationRouter.popToRoot()
             }
 
-            Button("もう いちど タイマー") {
+            Button("もう一度タイマー") {
                 viewModel.reset()
             }
         } message: {
-            Text("よく がんばりました！")
+            Text("よく頑張りました！")
         }
     }
     
     private var timePickerSection: some View {
         VStack(spacing: 12) {
-            Text("タイマー じかん")
+            Text("タイマー時間")
                 .font(DesignSystem.Font.pixelSmall)
                 .foregroundColor(DesignSystem.Color.textPrimary)
 
-            Picker("ふん", selection: $viewModel.selectedMinutes) {
+            Picker("分", selection: $viewModel.selectedMinutes) {
                 ForEach(1...30, id: \.self) { minute in
                     Text("\(minute) ふん")
                         .tag(minute)
@@ -238,7 +238,7 @@ struct CleanupTimerView: View {
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
             }) {
-                Text("もういちど さつえい")
+                Text("もう一度撮影")
                     .font(DesignSystem.Font.pixelSmall)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)

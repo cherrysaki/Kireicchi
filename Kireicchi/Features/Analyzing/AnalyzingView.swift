@@ -34,13 +34,13 @@ struct AnalyzingView: View {
                 Spacer()
 
                 if viewModel.errorMessage == nil {
-                    Text("かいせきちゅう...")
+                    Text("解析中...")
                         .font(DesignSystem.Font.largeTitle)
                         .foregroundColor(DesignSystem.Color.primaryDark)
                         .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
                         .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
                 } else {
-                    Text("エラーが おきました")
+                    Text("エラーが発生しました")
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(DesignSystem.Color.accentWarm)
                 }
