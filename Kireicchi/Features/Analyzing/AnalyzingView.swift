@@ -27,65 +27,61 @@ struct AnalyzingView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            DesignSystem.Color.background.ignoresSafeArea()
 
-            if viewModel.errorMessage == nil {
-                Text("解析中...")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.primary)
-                    .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
-                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
-            } else {
-                Text("エラーが発生しました")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.red)
-            }
+            VStack(spacing: 0) {
+                Spacer()
 
-            Spacer().frame(height: 40)
+                if viewModel.errorMessage == nil {
+                    Text("解析中...")
+                        .font(DesignSystem.Font.largeTitle)
+                        .foregroundColor(DesignSystem.Color.primaryDark)
+                        .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
+                        .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
+                } else {
+                    Text("エラーが発生しました")
+                        .font(DesignSystem.Font.title2)
+                        .foregroundColor(DesignSystem.Color.accentWarm)
+                }
 
-            Text("🐱")
-                .font(.system(size: 120))
+                Spacer().frame(height: 40)
+
+                CharacterView(
+                    characterType: .character01,
+                    characterState: nil,
+                    forceGif: .run
+                )
+                .frame(width: 120, height: 120)
                 .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
                 .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
-            Spacer()
+                Spacer()
 
-            if let errorMessage = viewModel.errorMessage {
-                VStack(spacing: 12) {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-
-                    HStack(spacing: 12) {
-                        Button("戻る") {
+                if let errorMessage = viewModel.errorMessage {
+                    ErrorDetailView(
+                        errorMessage: errorMessage,
+                        rawResponse: viewModel.errorDetails?.rawResponse,
+                        apiKeyPrefix: viewModel.errorDetails?.apiKeyPrefix,
+                        onCopy: {
+                            if let rawResponse = viewModel.errorDetails?.rawResponse {
+                                UIPasteboard.general.string = rawResponse
+                            }
+                        },
+                        onBack: {
                             navigationRouter.navigateBack()
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(8)
-
-                        Button("再試行") {
+                        },
+                        onRetry: {
                             Task {
                                 await viewModel.retry(imageData: imageData)
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
+                    )
+                    .padding(.bottom, 60)
+                } else {
+                    stepList
+                    Spacer().frame(height: 60)
                 }
-                .padding(.bottom, 60)
-            } else {
-                stepList
-                Spacer().frame(height: 60)
             }
         }
         .navigationBarHidden(true)
@@ -101,34 +97,37 @@ struct AnalyzingView: View {
     }
 
     private var stepList: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             ForEach(Array(viewModel.steps.enumerated()), id: \.offset) { index, step in
                 HStack(spacing: 12) {
-                    Image(systemName: index <= viewModel.currentStep ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(index <= viewModel.currentStep ? .green : .gray.opacity(0.5))
-                        .font(.title3)
+                    Image(systemName: index <= viewModel.currentStep ? "checkmark.square.fill" : "square")
+                        .foregroundColor(index <= viewModel.currentStep ? DesignSystem.Color.primary : DesignSystem.Color.textPrimary.opacity(0.3))
+                        .font(DesignSystem.Font.title3)
 
                     Text(step)
-                        .font(.subheadline)
-                        .foregroundColor(index <= viewModel.currentStep ? .primary : .secondary)
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(index <= viewModel.currentStep ? DesignSystem.Color.textPrimary : DesignSystem.Color.textPrimary.opacity(0.5))
 
                     Spacer()
 
                     if index == viewModel.currentStep && viewModel.isAnalyzing {
                         ProgressView()
+                            .tint(DesignSystem.Color.primary)
                             .scaleEffect(0.8)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
             }
         }
-        .padding(.vertical, 24)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.gray.opacity(0.05))
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+        .padding(.vertical, 18)
+        .pixelSquareCard(
+            fill: DesignSystem.Color.surface,
+            border: DesignSystem.Color.primary,
+            borderWidth: 2,
+            shadowOffset: 3
         )
         .padding(.horizontal)
+        .padding(.trailing, 3)
     }
     
     private func setupViewModel() {

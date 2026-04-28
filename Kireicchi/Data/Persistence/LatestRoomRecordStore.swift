@@ -5,13 +5,15 @@ import SwiftData
 struct LatestRoomRecordStore {
     let context: ModelContext
 
-    func save(pixelArtImageData: Data, capturedAt: Date, score: Int, comment: String) throws {
+    func save(pixelArtImageData: Data, capturedAt: Date, score: Int, 
+              comment: String, messyPointLabels: [String]?) throws {
         let existing = try context.fetch(FetchDescriptor<LatestRoomRecord>())
         if let first = existing.first {
             first.pixelArtImageData = pixelArtImageData
             first.capturedAt = capturedAt
             first.score = score
             first.comment = comment
+            first.messyPointLabels = messyPointLabels
             for extra in existing.dropFirst() {
                 context.delete(extra)
             }
@@ -20,7 +22,8 @@ struct LatestRoomRecordStore {
                 pixelArtImageData: pixelArtImageData,
                 capturedAt: capturedAt,
                 score: score,
-                comment: comment
+                comment: comment,
+                messyPointLabels: messyPointLabels
             ))
         }
         try context.save()

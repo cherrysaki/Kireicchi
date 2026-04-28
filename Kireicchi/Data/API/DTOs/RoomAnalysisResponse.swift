@@ -26,10 +26,6 @@ struct RoomAnalysisResponse: Codable {
     }
 }
 
-struct MessyPoint: Codable {
-    let label: String
-    let priority: Int
-}
 
 // OpenAI APIレスポンスから部屋解析結果を抽出するためのパーサー
 struct RoomAnalysisResponseParser {

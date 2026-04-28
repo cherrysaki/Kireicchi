@@ -21,11 +21,13 @@ struct CaptureView: View {
                         navigationRouter.navigateBack()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.title2)
+                            .font(DesignSystem.Font.title2)
                             .foregroundColor(.white)
                             .frame(width: 44, height: 44)
-                            .background(Color.black.opacity(0.3))
-                            .clipShape(Circle())
+                            .background(
+                                PixelCircle(pixelSize: 4)
+                                    .fill(Color.black.opacity(0.4))
+                            )
                     }
                     Spacer()
                 }
@@ -34,23 +36,20 @@ struct CaptureView: View {
                 Spacer()
 
                 Text("1×")
-                    .font(.subheadline)
+                    .font(DesignSystem.Font.subheadline)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(16)
+                    .pixelFrame(pixelSize: 3, background: Color.black.opacity(0.4))
 
                 Spacer().frame(height: 40)
 
                 Button(action: shutterTapped) {
                     ZStack {
-                        Circle()
-                            .stroke(Color.white, lineWidth: 4)
+                        PixelCircleStroke(pixelSize: 5, lineWidth: 6)
+                            .fill(Color.white)
                             .frame(width: 80, height: 80)
-                        Circle()
+                        PixelCircle(pixelSize: 5)
                             .fill(isCapturing ? Color.gray : Color.white)
-                            .frame(width: 64, height: 64)
+                            .frame(width: 60, height: 60)
                     }
                 }
                 .disabled(isCapturing || cameraController.permissionDenied || !cameraController.isConfigured)
@@ -69,22 +68,28 @@ struct CaptureView: View {
     private var permissionDeniedView: some View {
         VStack(spacing: 16) {
             Image(systemName: "camera.slash")
-                .font(.system(size: 60))
+                .font(DesignSystem.Font.custom(size: 60))
                 .foregroundColor(.white.opacity(0.7))
-            Text("カメラへのアクセスが許可されていません")
+            Text("カメラへの アクセスが きょかされて いません")
+                .font(DesignSystem.Font.subheadline)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
-            Text("設定アプリでカメラのアクセスを許可してください")
-                .font(.caption)
+            Text("せってい アプリで カメラの アクセスを きょかして ください")
+                .font(DesignSystem.Font.caption)
                 .foregroundColor(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
-            Button("設定を開く") {
+            Button(action: {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
+            }) {
+                Text("せっていを ひらく")
+                    .font(DesignSystem.Font.subheadline)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
             }
+            .buttonStyle(PixelButtonStyle())
             .padding(.top, 8)
-            .foregroundColor(.white)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)

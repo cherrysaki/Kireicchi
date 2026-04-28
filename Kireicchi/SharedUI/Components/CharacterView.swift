@@ -1,23 +1,62 @@
 import SwiftUI
 import UIKit
 
+enum CharacterGifType: String {
+    case happy = "happy"
+    case normal = "normal"
+    case sad = "sad" 
+    case sick = "sick"
+    case cheer = "cheer"
+    case walk = "walk"
+    case run = "run"
+}
+
 struct CharacterView: View {
     let characterType: CharacterType
-    let state: CharacterState
+    let characterState: CharacterState?
+    let forceGif: CharacterGifType?
     
     @State private var showingWalk = false
     @State private var timer: Timer?
     
+    init(characterType: CharacterType, characterState: CharacterState) {
+        self.characterType = characterType
+        self.characterState = characterState
+        self.forceGif = nil
+    }
+    
+    init(characterType: CharacterType, characterState: CharacterState?, forceGif: CharacterGifType) {
+        self.characterType = characterType
+        self.characterState = characterState
+        self.forceGif = forceGif
+    }
+    
     var body: some View {
-        AnimatedGIFView(
-            gifName: showingWalk ? characterType.walkGifName : characterType.gifName(for: state)
-        )
-        .onAppear {
-            startTimer()
+        AnimatedGIFView(gifName: currentGifName)
+            .onAppear {
+                if forceGif == nil {
+                    startTimer()
+                }
+            }
+            .onDisappear {
+                timer?.invalidate()
+                timer = nil
+            }
+    }
+    
+    private var currentGifName: String {
+        if let forceGif = forceGif {
+            return "\(characterType.rawValue)_\(forceGif.rawValue)"
         }
-        .onDisappear {
-            timer?.invalidate()
-            timer = nil
+        
+        guard let characterState = characterState else {
+            return "\(characterType.rawValue)_happy"
+        }
+        
+        if showingWalk {
+            return characterType.walkGifName
+        } else {
+            return characterType.gifName(for: characterState)
         }
     }
     
@@ -36,7 +75,16 @@ struct AnimatedGIFView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIImageView {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        imageView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        imageView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        imageView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         return imageView
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIImageView, context: Context) -> CGSize? {
+        proposal.replacingUnspecifiedDimensions()
     }
     
     func updateUIView(_ uiView: UIImageView, context: Context) {
@@ -79,13 +127,16 @@ struct AnimatedGIFView: UIViewRepresentable {
 
 #Preview {
     VStack(spacing: 20) {
-        CharacterView(characterType: .character01, state: .happy)
+        CharacterView(characterType: .character01, characterState: .happy)
             .frame(width: 100, height: 100)
         
-        CharacterView(characterType: .character01, state: .normal)
+        CharacterView(characterType: .character01, characterState: .normal)
             .frame(width: 100, height: 100)
         
-        CharacterView(characterType: .character01, state: .sad)
+        CharacterView(characterType: .character01, characterState: .sad)
+            .frame(width: 100, height: 100)
+        
+        CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
             .frame(width: 100, height: 100)
     }
     .padding()
