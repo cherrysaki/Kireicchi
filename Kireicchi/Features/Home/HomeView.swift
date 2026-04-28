@@ -141,21 +141,21 @@ struct HomeView: View {
                     .font(.headline)
                     .padding(.horizontal)
                 
-                VStack(spacing: 8) {
-                    ForEach(["床の服を片付ける", "机を整理する", "本棚の整理"], id: \.self) { task in
-                        HStack(spacing: 12) {
-                            Button(action: {}) {
-                                Image(systemName: "circle")
-                                    .foregroundColor(.blue)
-                            }
-                            Text(task)
-                                .font(.subheadline)
-                            Spacer()
-                            Text("⭐⭐⭐")
-                                .font(.caption)
+                if let record = latestRecord, !record.messyPointLabels.isEmpty {
+                    VStack(spacing: 8) {
+                        ForEach(Array(record.messyPointLabels.prefix(3).enumerated()), id: \.offset) { index, label in
+                            CleanupTaskRow(
+                                label: label,
+                                index: index
+                            )
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
+                } else {
+                    Text("撮影して部屋を分析しましょう！")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
                 }
             }
             .padding(.vertical)
