@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @EnvironmentObject var deps: AppDependencies
+    @Environment(\.modelContext) private var modelContext
+    @Query private var records: [LatestRoomRecord]
 
     @State private var selectedHour = 19
     @State private var selectedMinute = 0
@@ -59,6 +62,10 @@ struct SettingsView: View {
                         characterSection
                         commentSection
                         AppleLoginSection()
+                        
+                        #if DEBUG
+                        debugSection
+                        #endif
                     }
                     .padding(.bottom, 100)
                 }
@@ -238,6 +245,174 @@ struct SettingsView: View {
         .padding(.trailing, 3)
         .padding(.top, 8)
     }
+
+    #if DEBUG
+    private var debugSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("🎬 スクショ用デバッグ")
+            
+            // 現在の状態表示
+            VStack(alignment: .leading, spacing: 4) {
+                Text("現在の状態")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+                
+                Text("レコード数: \(records.count)")
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                    .padding(.horizontal)
+                
+                if let record = records.first {
+                    Text("スコア: \(record.score)")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .padding(.horizontal)
+                    
+                    Text("キャラクター状態: \(CharacterState.fromScore(record.score).rawValue)")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.primary)
+                        .padding(.horizontal)
+                    
+                    Text("撮影日: \(DateFormatter.localizedString(from: record.capturedAt, dateStyle: .short, timeStyle: .none))")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .padding(.horizontal)
+                    
+                    let daysSince = Calendar.current.dateComponents([.day], from: record.capturedAt, to: Date()).day ?? 0
+                    Text("経過日数: \(daysSince)日 \(daysSince >= 5 ? "(家出状態)" : "")")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(daysSince >= 5 ? DesignSystem.Color.primary : DesignSystem.Color.textPrimary.opacity(0.7))
+                        .padding(.horizontal)
+                } else {
+                    Text("レコードなし")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .padding(.horizontal)
+                }
+            }
+            
+            // キャラクター状態の切替ボタン（4つ横並び）
+            VStack(alignment: .leading, spacing: 8) {
+                Text("キャラクター状態")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+                
+                HStack(spacing: 8) {
+                    debugStateButton(title: "元気", score: 90)
+                    debugStateButton(title: "普通", score: 70)
+                    debugStateButton(title: "不調", score: 50)
+                    debugStateButton(title: "病気", score: 20)
+                }
+                .padding(.horizontal)
+            }
+            
+            // 家出状態の切替ボタン
+            VStack(alignment: .leading, spacing: 8) {
+                Text("家出状態")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+                
+                HStack(spacing: 12) {
+                    debugRunawayButton(title: "家出させる", isRunaway: true)
+                    debugRunawayButton(title: "家出解除", isRunaway: false)
+                    Spacer()
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+    
+    private func debugStateButton(title: String, score: Int) -> some View {
+        Button(action: {
+            updateLatestRecordScore(score)
+        }) {
+            Text(title)
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+        }
+        .buttonStyle(PixelButtonStyle())
+    }
+    
+    private func debugRunawayButton(title: String, isRunaway: Bool) -> some View {
+        Button(action: {
+            updateLatestRecordCapturedAt(isRunaway: isRunaway)
+        }) {
+            Text(title)
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+        .buttonStyle(PixelButtonStyle())
+    }
+    
+    private func updateLatestRecordScore(_ score: Int) {
+        let newState = CharacterState.fromScore(score)
+        print("🔧 Debug: スコア更新ボタンが押されました。スコア: \(score) → キャラクター状態: \(newState.rawValue)")
+        
+        if records.isEmpty {
+            print("🔧 Debug: レコードが存在しません。ダミーレコードを作成します。")
+            let dummyImageData = Data()
+            let dummyRecord = LatestRoomRecord(
+                pixelArtImageData: dummyImageData,
+                capturedAt: Date(),
+                score: score,
+                comment: "デバッグ用レコード",
+                messyPointLabels: ["床の服:3", "机の本:2", "ゴミ箱:1"]
+            )
+            modelContext.insert(dummyRecord)
+        } else if let record = records.first {
+            let oldState = CharacterState.fromScore(record.score)
+            print("🔧 Debug: 既存レコードのスコアを \(record.score)(\(oldState.rawValue)) から \(score)(\(newState.rawValue)) に更新します。")
+            record.score = score
+        }
+        
+        do {
+            try modelContext.save()
+            print("🔧 Debug: データ保存成功 - 新しい状態: \(newState.rawValue)")
+        } catch {
+            print("🔧 Debug: データ保存失敗: \(error)")
+        }
+    }
+    
+    private func updateLatestRecordCapturedAt(isRunaway: Bool) {
+        print("🔧 Debug: 家出状態変更ボタンが押されました。家出状態: \(isRunaway)")
+        
+        if records.isEmpty {
+            print("🔧 Debug: レコードが存在しません。ダミーレコードを作成します。")
+            let dummyImageData = Data()
+            let capturedAt = isRunaway 
+                ? Calendar.current.date(byAdding: .day, value: -6, to: Date()) ?? Date()
+                : Date()
+            let dummyRecord = LatestRoomRecord(
+                pixelArtImageData: dummyImageData,
+                capturedAt: capturedAt,
+                score: 50,
+                comment: "デバッグ用レコード",
+                messyPointLabels: ["床の服:3", "机の本:2", "ゴミ箱:1"]
+            )
+            modelContext.insert(dummyRecord)
+        } else if let record = records.first {
+            let newDate = isRunaway 
+                ? Calendar.current.date(byAdding: .day, value: -6, to: Date()) ?? Date()
+                : Date()
+            print("🔧 Debug: 既存レコードのcapturedAtを \(record.capturedAt) から \(newDate) に更新します。")
+            record.capturedAt = newDate
+        }
+        
+        do {
+            try modelContext.save()
+            print("🔧 Debug: データ保存成功")
+        } catch {
+            print("🔧 Debug: データ保存失敗: \(error)")
+        }
+    }
+    #endif
 
     private func loadSettings() {
         guard let user = deps.currentUser else { return }

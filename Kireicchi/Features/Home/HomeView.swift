@@ -17,6 +17,12 @@ struct HomeView: View {
         guard let score = latestRecord?.score else { return .happy }
         return CharacterState.fromScore(score)
     }
+    
+    private var isRunaway: Bool {
+        guard let capturedAt = latestRecord?.capturedAt else { return false }
+        let daysSince = Calendar.current.dateComponents([.day], from: capturedAt, to: Date()).day ?? 0
+        return daysSince >= 5
+    }
 
     var body: some View {
         ZStack {
@@ -27,7 +33,11 @@ struct HomeView: View {
                 scoreBanner
                 happinessGauge
                 roomFrame
-                missionList
+                if isRunaway {
+                    runawayMessage
+                } else {
+                    missionList
+                }
                 Spacer(minLength: 8)
                 cameraButton
                 Spacer().frame(height: 24)
@@ -125,31 +135,24 @@ struct HomeView: View {
                     .aspectRatio(contentMode: .fit)
             }
 
-            VStack {
+            if isRunaway {
+                Image("okitegami")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 360, height: 360)
+            } else {
+                VStack {
+                    Spacer()
 
-                Spacer()
-
-                VStack(spacing: 4) {
-//                    Text("もう すこし\nかたづけよう！")
-//                        .font(DesignSystem.Font.caption)
-//                        .multilineTextAlignment(.center)
-//                        .foregroundColor(DesignSystem.Color.textPrimary)
-//                        .padding(.horizontal, 10)
-//                        .padding(.vertical, 6)
-//                        .pixelSquareCard(
-//                            fill: DesignSystem.Color.surface,
-//                            border: DesignSystem.Color.primaryDark,
-//                            borderWidth: 2,
-//                            shadowOffset: 2
-//                        )
-
-                    CharacterView(
-                        characterType: selectedCharacterType,
-                        characterState: characterState
-                    )
-                    .frame(width: 240, height: 240)
+                    VStack(spacing: 4) {
+                        CharacterView(
+                            characterType: selectedCharacterType,
+                            characterState: characterState
+                        )
+                        .frame(width: 240, height: 240)
+                    }
+                    .padding(.bottom, -60)
                 }
-                .padding(.bottom, -60)
             }
         }
         .padding(.horizontal)
@@ -192,6 +195,16 @@ struct HomeView: View {
                     .padding(.horizontal)
             }
         }
+    }
+
+    // MARK: - Runaway Message
+    private var runawayMessage: some View {
+        VStack(spacing: 4) {
+            Text("きれいっちは家出しました")
+                .font(DesignSystem.Font.headline)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+        }
+        .padding(.horizontal)
     }
 
     // MARK: - Camera Button
