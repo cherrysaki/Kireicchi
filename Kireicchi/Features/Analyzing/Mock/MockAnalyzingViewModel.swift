@@ -6,6 +6,7 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
     @Published var currentStep = 0
     @Published var isAnalyzing = true
     @Published var errorMessage: String?
+    @Published var errorDetails: (rawResponse: String?, apiKeyPrefix: String?)?
     
     let steps = ["じゅんびちゅう", "AI かいせきちゅう", "ドットえに へんかんちゅう", "かんりょう"]
     
@@ -24,6 +25,7 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
     func retry(imageData: Data) async {
         currentStep = 0
         errorMessage = nil
+        errorDetails = nil
         isAnalyzing = true
         await performMockAnalysis()
     }
@@ -37,7 +39,19 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
             
             if step == 2 && !shouldSucceed {
                 isAnalyzing = false
-                errorMessage = "Mock: シミュレートされたエラー"
+                errorMessage = "JSONデコードエラー: Mock simulated error"
+                errorDetails = (
+                    rawResponse: """
+                    {
+                      "error": {
+                        "message": "Mock API error for testing",
+                        "type": "mock_error",
+                        "code": "test_failure"
+                      }
+                    }
+                    """,
+                    apiKeyPrefix: "sk-mock-12"
+                )
                 return
             }
         }

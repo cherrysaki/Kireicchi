@@ -47,49 +47,36 @@ struct AnalyzingView: View {
 
                 Spacer().frame(height: 40)
 
-                Text("🐱")
-                    .font(DesignSystem.Font.custom(size: 120))
-                    .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
-                    .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
+                CharacterView(
+                    characterType: .character01,
+                    characterState: nil,
+                    forceGif: .run
+                )
+                .frame(width: 120, height: 120)
+                .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
+                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
                 Spacer()
 
                 if let errorMessage = viewModel.errorMessage {
-                    VStack(spacing: 12) {
-                        Text(errorMessage)
-                            .font(DesignSystem.Font.footnote)
-                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-
-                        HStack(spacing: 12) {
-                            Button(action: {
-                                navigationRouter.navigateBack()
-                            }) {
-                                Text("もどる")
-                                    .font(DesignSystem.Font.subheadline)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
+                    ErrorDetailView(
+                        errorMessage: errorMessage,
+                        rawResponse: viewModel.errorDetails?.rawResponse,
+                        apiKeyPrefix: viewModel.errorDetails?.apiKeyPrefix,
+                        onCopy: {
+                            if let rawResponse = viewModel.errorDetails?.rawResponse {
+                                UIPasteboard.general.string = rawResponse
                             }
-                            .buttonStyle(PixelButtonStyle(
-                                fill: DesignSystem.Color.surface,
-                                foreground: DesignSystem.Color.primaryDark,
-                                border: DesignSystem.Color.primaryDark
-                            ))
-
-                            Button(action: {
-                                Task {
-                                    await viewModel.retry(imageData: imageData)
-                                }
-                            }) {
-                                Text("もういちど")
-                                    .font(DesignSystem.Font.subheadline)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
+                        },
+                        onBack: {
+                            navigationRouter.navigateBack()
+                        },
+                        onRetry: {
+                            Task {
+                                await viewModel.retry(imageData: imageData)
                             }
-                            .buttonStyle(PixelButtonStyle())
                         }
-                    }
+                    )
                     .padding(.bottom, 60)
                 } else {
                     stepList

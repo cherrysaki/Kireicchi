@@ -3,10 +3,12 @@ import UIKit
 
 enum CharacterGifType: String {
     case happy = "happy"
+    case normal = "normal"
     case sad = "sad" 
     case sick = "sick"
     case cheer = "cheer"
     case walk = "walk"
+    case run = "run"
 }
 
 struct CharacterView: View {

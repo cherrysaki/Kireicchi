@@ -187,9 +187,11 @@ struct HomeView: View {
             }
             .padding(.horizontal)
 
-            if let record = latestRecord, !record.messyPointLabels.isEmpty {
+            if let record = latestRecord,
+               let messyPointLabels = record.messyPointLabels,
+               !messyPointLabels.isEmpty {
                 VStack(spacing: 6) {
-                    ForEach(Array(record.messyPointLabels.prefix(3).enumerated()), id: \.offset) { index, label in
+                    ForEach(Array(messyPointLabels.prefix(3).enumerated()), id: \.offset) { index, label in
                         CleanupTaskRow(label: label, index: index)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
