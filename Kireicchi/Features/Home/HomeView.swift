@@ -209,41 +209,23 @@ struct HomeView: View {
 
     // MARK: - Camera Button
     private var cameraButton: some View {
-        HStack(spacing: 16) {
-            Button(action: {
-                navigationRouter.navigate(to: .friendVisit)
-            }) {
-                Image(systemName: "person.2.fill")
-                    .font(DesignSystem.Font.title3)
-                    .foregroundColor(DesignSystem.Color.textOnPrimary)
-                    .frame(width: 56, height: 56)
-                    .background(
-                        PixelCircle(pixelSize: 4)
-                            .fill(DesignSystem.Color.secondary)
-                    )
-                    .overlay(
-                        PixelCircleStroke(pixelSize: 4, lineWidth: 3)
-                            .fill(DesignSystem.Color.primaryDark)
-                    )
-            }
-
-            Button(action: {
-                navigationRouter.navigate(to: .capture)
-            }) {
-                Image(systemName: "camera.fill")
-                    .font(DesignSystem.Font.title)
-                    .foregroundColor(DesignSystem.Color.textOnPrimary)
-                    .frame(width: 72, height: 72)
-                    .background(
-                        PixelCircle(pixelSize: 5)
-                            .fill(DesignSystem.Color.primary)
-                    )
-                    .overlay(
-                        PixelCircleStroke(pixelSize: 5, lineWidth: 4)
-                            .fill(DesignSystem.Color.primaryDark)
-                    )
-            }
+        Button(action: {
+            navigationRouter.navigate(to: .capture)
+        }) {
+            Image(systemName: "camera.fill")
+                .font(DesignSystem.Font.title)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .frame(width: 72, height: 72)
+                .background(
+                    PixelCircle(pixelSize: 5)
+                        .fill(DesignSystem.Color.primary)
+                )
+                .overlay(
+                    PixelCircleStroke(pixelSize: 5, lineWidth: 4)
+                        .fill(DesignSystem.Color.primaryDark)
+                )
         }
+        .frame(maxWidth: .infinity)
     }
 
 }

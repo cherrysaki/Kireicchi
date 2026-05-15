@@ -18,11 +18,6 @@ struct RootView: View {
                         SettingsView()
                     case .cleanupTimer:
                         CleanupTimerView()
-                    case .friendVisit:
-                        FriendVisitView(
-                            myDisplayName: AppDependencies.shared.currentUser?.displayName ?? "わたし",
-                            myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
-                        )
                     }
                 }
         }
