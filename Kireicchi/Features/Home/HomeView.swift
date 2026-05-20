@@ -40,10 +40,13 @@ struct HomeView: View {
                 }
                 Spacer(minLength: 8)
                 cameraButton
+                    .padding(.bottom, 16)
                 Spacer().frame(height: 24)
             }
             .padding(.top, 8)
+            .background(DesignSystem.Color.background.ignoresSafeArea())
         }
+        .background(DesignSystem.Color.background.ignoresSafeArea())
         .navigationBarHidden(true)
     }
 
@@ -84,6 +87,8 @@ struct HomeView: View {
             Text("お部屋の散らかり指数")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
             Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
                 .font(DesignSystem.Font.title2)
