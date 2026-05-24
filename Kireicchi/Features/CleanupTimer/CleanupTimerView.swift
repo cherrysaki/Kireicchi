@@ -14,13 +14,8 @@ struct CleanupTimerView: View {
     
     var body: some View {
         ZStack {
-            // 背景（タイマー実行中は画面全体に広げる）
-            if viewModel.isRunning {
-                DesignSystem.Color.background
-                    .ignoresSafeArea(.all)
-            } else {
-                DesignSystem.Color.background
-            }
+            DesignSystem.Color.background
+                .ignoresSafeArea(.all)
             
             VStack(spacing: viewModel.isRunning ? 40 : 24) {
                 // タイトル（タイマー実行中は目立たなくする）
