@@ -250,7 +250,29 @@ struct SettingsView: View {
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("🎬 スクショ用デバッグ")
-            
+
+            // Mock 通信トグル
+            HStack {
+                Text("Mock 通信 (シミュレータ用)")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { deps.useMockConnectivity },
+                    set: { deps.useMockConnectivity = $0 }
+                ))
+                .labelsHidden()
+            }
+            .padding(.horizontal)
+
+            // サインイン状態
+            Text("uid: \(deps.currentUser?.uid ?? "未サインイン")")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                .padding(.horizontal)
+                .lineLimit(1)
+                .truncationMode(.middle)
+
             // 現在の状態表示
             VStack(alignment: .leading, spacing: 4) {
                 Text("現在の状態")
@@ -445,9 +467,6 @@ struct SettingsView: View {
     NavigationStack {
         SettingsView()
             .environmentObject(NavigationRouter())
-            .environmentObject(AppDependencies(
-                authService: MockAuthService(preAuthenticatedUid: "mock-uid"),
-                userRepository: MockUserRepository()
-            ))
+            .environmentObject(AppDependencies())
     }
 }

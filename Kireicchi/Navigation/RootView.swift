@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
+    @EnvironmentObject private var deps: AppDependencies
 
     var body: some View {
         NavigationStack(path: $navigationRouter.path) {
@@ -20,12 +21,21 @@ struct RootView: View {
                         CleanupTimerView()
                     case .friendVisit:
                         FriendVisitView(
-                            myDisplayName: AppDependencies.shared.currentUser?.displayName ?? "わたし",
+                            myDisplayName: deps.currentUser?.displayName ?? "わたし",
                             myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
                         )
                     }
                 }
         }
         .environmentObject(navigationRouter)
+        .safeAreaInset(edge: .top) {
+            if let message = deps.bootstrapError {
+                RetryBanner(message: message) {
+                    Task { await deps.bootstrap() }
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: deps.bootstrapError)
     }
 }

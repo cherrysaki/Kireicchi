@@ -4,17 +4,18 @@ struct DesignSystem {
     
     // MARK: - Colors
     struct Color {
-        static let primary = SwiftUI.Color(hex: "4DA8FF")        // ビビッドな空色 - ボタン・主要アクセント
-        static let primaryDark = SwiftUI.Color(hex: "2D6BC4")    // 深い青 - shadow / 強調
-        static let secondary = SwiftUI.Color(hex: "92D9FD")      // ライトブルー - カード背景・ゲージ
-        static let accent = SwiftUI.Color(hex: "FFE782")         // イエロー - ハイライト・コイン的アクセント
+        static let primary = SwiftUI.Color(hex: "A9DFF9")        // スカイ - メインアクセント・ボタン・カード枠
+        static let primaryDark = SwiftUI.Color(hex: "4C3E3C")    // ダークブラウン - 枠線・影・テキスト
+        static let secondary = SwiftUI.Color(hex: "FFC6D9")      // ピンク - ミッション帯・ハートフィル
+        static let secondaryDark = SwiftUI.Color(hex: "C2627E")  // 深いピンク - ピンク要素の影/枠
+        static let accent = SwiftUI.Color(hex: "FFE497")         // イエロー - 星・ハイライト
         static let accentWarm = SwiftUI.Color(hex: "FF9F5E")     // オレンジ - スコア悪化警告
-        static let background = SwiftUI.Color(hex: "FFF9E6")     // クリーム - 画面背景
+        static let background = SwiftUI.Color(hex: "FFF9EF")     // クリーム - 画面背景
         static let surface = SwiftUI.Color(hex: "FFFFFF")        // 白 - カード・シート背景
-        static let textPrimary = SwiftUI.Color(hex: "2C3E50")    // ダークネイビー - 本文
-        static let textOnPrimary = SwiftUI.Color(hex: "FFFFFF")  // 白 - primaryボタン上のテキスト
-        static let starYellow = SwiftUI.Color(hex: "FFE782")     // イエロー - 星デコレーション(=accentエイリアス)
-        static let rankText = SwiftUI.Color(hex: "2D6BC4")       // 深い青 - ランク文字・スコア数字
+        static let textPrimary = SwiftUI.Color(hex: "4C3E3C")    // ダークブラウン - 本文
+        static let textOnPrimary = SwiftUI.Color(hex: "4C3E3C")  // ダークブラウン - primary背景上のテキスト
+        static let starYellow = SwiftUI.Color(hex: "FFE497")     // イエロー - 星デコレーション(=accentエイリアス)
+        static let rankText = SwiftUI.Color(hex: "4C3E3C")       // ダークブラウン - ランク文字・スコア数字
     }
     
     // MARK: - Fonts

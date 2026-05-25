@@ -12,37 +12,75 @@ class MockSignInWithAppleUseCase: SignInWithAppleUseCaseProtocol {
 
 @MainActor
 final class AppDependencies: ObservableObject {
-    @Published var useMockConnectivity: Bool = true
+    @Published var useMockConnectivity: Bool = false
     @Published var currentUser: AppUser? = nil
     @Published var authProvider: String = ""
+    @Published var bootstrapError: String? = nil
 
-    var signInWithAppleUseCase: SignInWithAppleUseCaseProtocol
+    let signInWithAppleUseCase: SignInWithAppleUseCaseProtocol
+    private let authService: AuthServiceProtocol
+    private let userRepository: UserRepositoryProtocol
 
-    // Singleton
     static let shared = AppDependencies()
 
     init() {
-        self.signInWithAppleUseCase = MockSignInWithAppleUseCase()
+        let authService = AuthService()
+        let userRepository = UserRepository()
+        self.authService = authService
+        self.userRepository = userRepository
+        self.signInWithAppleUseCase = SignInWithAppleUseCase(
+            authService: authService,
+            userRepository: userRepository
+        )
     }
 
-    init(authService: Any, userRepository: Any) {
-        self.signInWithAppleUseCase = MockSignInWithAppleUseCase()
+    func bootstrap() async {
+        bootstrapError = nil
+        do {
+            let session = try await authService.ensureSignedIn()
+            let user = try await userRepository.createIfMissing(
+                uid: session.uid,
+                authProvider: session.provider
+            )
+            self.currentUser = user
+            self.authProvider = session.provider
+        } catch {
+            self.bootstrapError = "サーバーと つながれないみたい (\(error.localizedDescription))"
+            print("[bootstrap] failed: \(error)")
+        }
     }
 
-    // 起動時の初期化処理
-    func bootstrap() async {}
+    func completeAppleSignIn(credential: ASAuthorizationAppleIDCredential, rawNonce: String) async {
+        do {
+            let user = try await signInWithAppleUseCase.completeSignIn(
+                authorizationCredential: credential,
+                rawNonce: rawNonce
+            )
+            self.currentUser = user
+            self.authProvider = user.authProvider
+        } catch {
+            self.bootstrapError = "Apple サインインに しっぱい (\(error.localizedDescription))"
+            print("[completeAppleSignIn] failed: \(error)")
+        }
+    }
 
-    // Apple Sign In完了処理
-    func completeAppleSignIn(credential: Any, rawNonce: String) async {}
-
-    // 設定更新処理
-    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String) async {}
+    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String) async {
+        guard let uid = currentUser?.uid else { return }
+        do {
+            let updated = try await userRepository.update(uid: uid) { user in
+                user.notificationSettings = NotificationSettingsData(hour: hour, minute: minute, isEnabled: isEnabled)
+                user.selectedCharacterId = characterId
+            }
+            self.currentUser = updated
+        } catch {
+            print("[updateSettings] failed: \(error)")
+        }
+    }
 
     func currentOpenAIClient() -> OpenAIClientProtocol {
         OpenAIClient()
     }
 
-    // Mock/Real Connectivityを切り替えるメソッド
     func currentPeerSession() -> PeerSessionProtocol {
         if useMockConnectivity {
             return MockPeerSession()
