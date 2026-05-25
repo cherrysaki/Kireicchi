@@ -1,13 +1,24 @@
 import SwiftUI
+import SwiftData
 
 struct AnalysisResultView: View {
     let imageData: Data
     let pixelArtData: Data
     let analysis: RoomAnalysis
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @Environment(\.modelContext) private var modelContext
+    @Query private var records: [LatestRoomRecord]
 
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
+    }
+
+    private var originalImage: UIImage? {
+        UIImage(data: imageData)
+    }
+
+    private var pendingMissions: [MissionPersisted] {
+        (records.first?.missions ?? []).filter { !$0.isDone }
     }
 
     var body: some View {
@@ -121,49 +132,42 @@ struct AnalysisResultView: View {
         }
     }
 
-    // MARK: - Priority List
+    // MARK: - Mission Swipe Section
     private var priorityListSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("片付け優先箇所")
-                .font(DesignSystem.Font.headline)
-                .foregroundColor(DesignSystem.Color.textPrimary)
-                .padding(.horizontal)
-
-            VStack(spacing: 6) {
-                ForEach(Array(analysis.messyPoints.prefix(3).enumerated()), id: \.offset) { index, point in
-                    HStack(spacing: 12) {
-                        ZStack {
-                            PixelCircle(pixelSize: 3)
-                                .fill(priorityColor(for: index))
-                                .frame(width: 28, height: 28)
-                            Text("\(index + 1)")
-                                .font(DesignSystem.Font.caption)
-                                .foregroundColor(DesignSystem.Color.textOnPrimary)
-                        }
-
-                        Text(point.label)
-                            .font(DesignSystem.Font.subheadline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-
-                        Spacer()
-
-                        HStack(spacing: 2) {
-                            ForEach(0..<min(max(point.priority, 1), 5), id: \.self) { _ in
-                                PixelStar(size: 12)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .pixelSquareCard(
-                        fill: DesignSystem.Color.surface,
-                        border: DesignSystem.Color.secondary,
-                        borderWidth: 2,
-                        shadowOffset: 3
-                    )
-                    .padding(.horizontal)
-                    .padding(.trailing, 3)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Text("片付けミッション")
+                    .font(DesignSystem.Font.headline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Spacer()
+                if !pendingMissions.isEmpty {
+                    Text("\(pendingMissions.count)件のこってる")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                 }
+            }
+            .padding(.horizontal)
+
+            SwipeMissionStack(
+                missions: pendingMissions,
+                originalImage: originalImage,
+                onSwipe: { mission, direction in
+                    if direction == .right {
+                        let store = LatestRoomRecordStore(context: modelContext)
+                        try? store.updateMission(id: mission.id, isDone: true)
+                    }
+                    // 左スワイプ(未読)は永続化しない
+                }
+            )
+            .frame(height: 420)
+            .padding(.horizontal)
+            .padding(.trailing, 6)
+
+            if !pendingMissions.isEmpty {
+                Text("← スキップ        DONE →")
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }
@@ -221,15 +225,6 @@ struct AnalysisResultView: View {
         }
     }
 
-    private func priorityColor(for index: Int) -> Color {
-        switch index {
-        case 0: return DesignSystem.Color.accentWarm
-        case 1: return DesignSystem.Color.accent
-        case 2: return DesignSystem.Color.primary
-        default: return DesignSystem.Color.secondary
-        }
-    }
-
 }
 
 #Preview {
@@ -237,20 +232,45 @@ struct AnalysisResultView: View {
         score: 75,
         rank: .b,
         messyPoints: [
-            MessyPoint(label: "ゆかの ふく", priority: 3),
-            MessyPoint(label: "つくえの うえの かみ", priority: 2),
-            MessyPoint(label: "ほんだなの せいり", priority: 1)
+            MessyPoint(label: "ゆかの ふく", priority: 3,
+                       bbox: NormalizedRect(x: 0.1, y: 0.55, w: 0.45, h: 0.35)),
+            MessyPoint(label: "つくえの うえの かみ", priority: 2,
+                       bbox: NormalizedRect(x: 0.2, y: 0.15, w: 0.4, h: 0.25)),
+            MessyPoint(label: "ほんだなの せいり", priority: 1, bbox: nil)
         ],
         characterComment: "もう少し片付けるといいかも！"
     )
-    let dummyImageData = (UIImage(systemName: "photo") ?? UIImage()).pngData() ?? Data()
+    let dummyImage = UIGraphicsImageRenderer(size: CGSize(width: 600, height: 600)).image { ctx in
+        UIColor.systemTeal.setFill()
+        ctx.fill(CGRect(x: 0, y: 0, width: 600, height: 600))
+        UIColor.systemOrange.setFill()
+        ctx.fill(CGRect(x: 60, y: 330, width: 270, height: 210))
+    }
+    let dummyImageData = dummyImage.pngData() ?? Data()
 
-    NavigationStack {
+    let container = try! ModelContainer(
+        for: LatestRoomRecord.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    let missions = mockAnalysis.messyPoints.map { MissionPersisted(from: $0) }
+    let missionsData = try? JSONEncoder().encode(missions)
+    container.mainContext.insert(LatestRoomRecord(
+        pixelArtImageData: dummyImageData,
+        capturedAt: Date(),
+        score: mockAnalysis.score,
+        comment: mockAnalysis.characterComment,
+        messyPointLabels: missions.map { "\($0.label):\($0.priority)" },
+        originalImageData: dummyImageData,
+        missionsData: missionsData
+    ))
+
+    return NavigationStack {
         AnalysisResultView(
             imageData: dummyImageData,
             pixelArtData: dummyImageData,
             analysis: mockAnalysis
         )
         .environmentObject(NavigationRouter())
+        .modelContainer(container)
     }
 }

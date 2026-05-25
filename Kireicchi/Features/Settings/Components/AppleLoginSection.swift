@@ -90,8 +90,5 @@ struct AppleLoginSection: View {
 
 #Preview {
     AppleLoginSection()
-        .environmentObject(AppDependencies(
-            authService: MockAuthService(preAuthenticatedUid: "mock-uid"),
-            userRepository: MockUserRepository()
-        ))
+        .environmentObject(AppDependencies())
 }

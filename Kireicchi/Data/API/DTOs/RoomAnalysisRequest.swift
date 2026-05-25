@@ -13,10 +13,10 @@ struct RoomAnalysisRequest: Codable {
     
     init(imageData: Data) {
         self.model = "gpt-4o"
-        self.maxTokens = 500
-        
+        self.maxTokens = 700
+
         let base64Image = imageData.base64EncodedString()
-        
+
         let systemMessage = ChatMessage(
             role: "system",
             content: [
@@ -28,10 +28,19 @@ struct RoomAnalysisRequest: Codable {
 {
   "score": 0から100の整数（100が完璧に綺麗）,
   "messy_points": [
-    { "label": "片付けが必要な場所の名前", "priority": 1から5の整数 }
+    {
+      "label": "片付けが必要な場所の名前",
+      "priority": 1から5の整数,
+      "bbox": [x, y, w, h]
+    }
   ],
   "character_comment": "キャラクターのひとこと（日本語・20文字以内・かわいい口調）"
 }
+
+bbox の仕様:
+- 画像の左上=(0,0), 右下=(1,1) の正規化座標。x,y は領域の左上、w,h は幅と高さ。
+- 値は必ず 0 以上 1 以下。x+w および y+h は 1 を超えないこと。
+- 対象がどこにあるか特定できない場合は bbox フィールドを省略してよい。
 """)
             ]
         )

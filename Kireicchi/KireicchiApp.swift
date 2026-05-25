@@ -22,7 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct KireicchiApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject private var deps = AppDependencies()
+    @StateObject private var deps = AppDependencies.shared
 
     var body: some Scene {
         WindowGroup {
