@@ -67,13 +67,13 @@ struct HomeView: View {
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $isMissionSheetPresented) {
-            MissionListSheet(
+        .fullScreenCover(isPresented: $isMissionSheetPresented) {
+            HomeMissionSwipeView(
                 missions: pendingMissions,
-                legacyLabels: pendingMissions.isEmpty && latestRecord?.missions.isEmpty != false ? legacyMissionLabels : [],
-                onToggleDone: { mission in
+                originalImage: latestRecord?.originalImageData.flatMap { UIImage(data: $0) },
+                onComplete: { mission in
                     let store = LatestRoomRecordStore(context: modelContext)
-                    try? store.updateMission(id: mission.id, isDone: !mission.isDone)
+                    try? store.updateMission(id: mission.id, isDone: true)
                 }
             )
         }
@@ -212,6 +212,7 @@ struct HomeView: View {
     // MARK: - Mission Banner
     private var missionBanner: some View {
         Button(action: {
+            guard !pendingMissions.isEmpty else { return }
             isMissionSheetPresented = true
         }) {
             HStack(spacing: 12) {
@@ -256,113 +257,6 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
-    }
-}
-
-// MARK: - Mission List Sheet
-private struct MissionListSheet: View {
-    let missions: [MissionPersisted]
-    let legacyLabels: [String]
-    let onToggleDone: (MissionPersisted) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ZStack {
-            DesignSystem.Color.background.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 8) {
-                    PixelStar(size: 24)
-                    Text("お片付けミッション")
-                        .font(DesignSystem.Font.title3)
-                        .foregroundColor(DesignSystem.Color.textPrimary)
-                    Spacer()
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(DesignSystem.Font.headline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                    }
-                }
-
-                if missions.isEmpty && legacyLabels.isEmpty {
-                    Text("まだミッションがありません。\nお部屋を撮影してみよう！")
-                        .font(DesignSystem.Font.subheadline)
-                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                } else if !missions.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(missions) { mission in
-                                MissionTaskRow(mission: mission) {
-                                    onToggleDone(mission)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 12)
-                                .pixelSquareCard(
-                                    fill: DesignSystem.Color.surface,
-                                    border: DesignSystem.Color.primaryDark,
-                                    borderWidth: 2,
-                                    shadowOffset: 3
-                                )
-                                .padding(.trailing, 3)
-                            }
-                        }
-                    }
-                } else {
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(Array(legacyLabels.enumerated()), id: \.offset) { index, label in
-                                CleanupTaskRow(label: label, index: index)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 12)
-                                    .pixelSquareCard(
-                                        fill: DesignSystem.Color.surface,
-                                        border: DesignSystem.Color.primaryDark,
-                                        borderWidth: 2,
-                                        shadowOffset: 3
-                                    )
-                                    .padding(.trailing, 3)
-                            }
-                        }
-                    }
-                }
-
-                Spacer()
-            }
-            .padding(20)
-        }
-        .presentationDetents([.medium, .large])
-    }
-}
-
-// MARK: - Mission Task Row
-private struct MissionTaskRow: View {
-    let mission: MissionPersisted
-    let onToggle: () -> Void
-
-    private var starCount: Int { min(max(mission.priority, 1), 5) }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onToggle) {
-                Image(systemName: mission.isDone ? "checkmark.circle.fill" : "circle")
-                    .font(DesignSystem.Font.title3)
-                    .foregroundColor(mission.isDone ? DesignSystem.Color.primaryDark : DesignSystem.Color.textPrimary.opacity(0.6))
-            }
-            .buttonStyle(.plain)
-
-            Text(mission.label)
-                .font(DesignSystem.Font.subheadline)
-                .strikethrough(mission.isDone)
-                .foregroundColor(mission.isDone ? DesignSystem.Color.textPrimary.opacity(0.5) : DesignSystem.Color.textPrimary)
-
-            Spacer()
-
-            HStack(spacing: 2) {
-                ForEach(0..<starCount, id: \.self) { _ in
-                    PixelStar(size: 12)
-                }
-            }
-        }
     }
 }
 
