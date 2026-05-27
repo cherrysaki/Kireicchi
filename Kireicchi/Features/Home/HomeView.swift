@@ -32,39 +32,54 @@ struct HomeView: View {
     }
 
     private var characterState: CharacterState {
-        guard let score = latestRecord?.score else { return .happy }
-        return CharacterState.fromScore(score)
+        guard let record = latestRecord else { return .happy }
+        let happiness = Happiness.calculate(
+            score: record.score,
+            capturedAt: record.capturedAt
+        )
+        return CharacterState.fromHappiness(happiness)
     }
-    
+
+    private func characterState(at now: Date) -> CharacterState {
+        guard let record = latestRecord else { return .happy }
+        let happiness = Happiness.calculate(
+            score: record.score,
+            capturedAt: record.capturedAt,
+            now: now
+        )
+        return CharacterState.fromHappiness(happiness)
+    }
+
     private var isRunaway: Bool {
         guard let capturedAt = latestRecord?.capturedAt else { return false }
         let daysSince = Calendar.current.dateComponents([.day], from: capturedAt, to: Date()).day ?? 0
-        return daysSince >= 5
+        return daysSince >= 7
     }
 
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
 
-            VStack(spacing: 16) {
-                topBar
-                scoreBanner
-                happinessGauge
-                roomFrame
-                if isRunaway {
-                    runawayMessage
-                } else {
-                    missionBanner
+            VStack(spacing: 14) {
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    VStack(spacing: 14) {
+                        topBar(now: context.date)
+                        statusRow(now: context.date)
+                        roomFrame(now: context.date)
+                    }
                 }
-                Spacer(minLength: 8)
-                cameraButton
-                    .padding(.bottom, 16)
-                Spacer().frame(height: 24)
+                missionBanner
+                Spacer(minLength: 0)
             }
             .padding(.top, 8)
-            .background(DesignSystem.Color.background.ignoresSafeArea())
+            .padding(.bottom, 88)
+
+            VStack {
+                Spacer()
+                cameraButton
+                    .padding(.bottom, 12)
+            }
         }
-        .background(DesignSystem.Color.background.ignoresSafeArea())
         .navigationBarHidden(true)
         .sheet(isPresented: $isMissionSheetPresented) {
             MissionListSheet(
@@ -79,6 +94,29 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Top Bar
+    private func topBar(now: Date) -> some View {
+        HStack(spacing: 12) {
+            Button(action: {
+                navigationRouter.navigate(to: .settings)
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+            }
+
+            Spacer()
+
+            Text(nextCaptureText(capturedAt: latestRecord?.capturedAt, now: now))
+                .font(DesignSystem.Font.footnote)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+
+            Spacer()
+                .frame(width: 28)
+        }
+        .padding(.horizontal, 20)
+    }
+
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
         guard let capturedAt else { return "今すぐ撮影しよう！" }
         let next = capturedAt.addingTimeInterval(24 * 3600)
@@ -89,89 +127,77 @@ struct HomeView: View {
         return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
-    // MARK: - Top Bar
-    private var topBar: some View {
-        HStack {
-            Button(action: {
-                navigationRouter.navigate(to: .settings)
-            }) {
-                Image(systemName: "gearshape.fill")
-                    .font(DesignSystem.Font.title3)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        PixelCircle(pixelSize: 3)
-                            .fill(DesignSystem.Color.surface)
-                    )
-                    .overlay(
-                        PixelCircleStroke(pixelSize: 3, lineWidth: 3)
-                            .fill(DesignSystem.Color.primary)
-                    )
-            }
-
-            Spacer()
-
-            TimelineView(.periodic(from: .now, by: 60)) { context in
-                Text(nextCaptureText(capturedAt: latestRecord?.capturedAt, now: context.date))
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-            }
-
-            Spacer()
+    // MARK: - Status Row (score pill + heart gauge)
+    private func statusRow(now: Date) -> some View {
+        HStack(spacing: 12) {
+            scorePill
+            heartGaugePill(now: now)
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 
-    // MARK: - Score Banner
-    private var scoreBanner: some View {
-        HStack {
-            Text("お部屋の散らかり指数")
-                .font(DesignSystem.Font.subheadline)
+    private var scorePill: some View {
+        HStack(spacing: 8) {
+            Text("散らかり指数")
+                .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-            Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                .font(DesignSystem.Font.title2)
-                .foregroundColor(DesignSystem.Color.primaryDark)
+                .font(DesignSystem.Font.footnote)
+                .foregroundColor(DesignSystem.Color.textPrimary)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .pixelSquareCard(
-            fill: DesignSystem.Color.secondary.opacity(0.45),
-            border: DesignSystem.Color.primary,
-            borderWidth: 3,
-            shadowOffset: 4
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            Capsule().fill(DesignSystem.Color.primary)
         )
-        .padding(.horizontal)
-        .padding(.trailing, 4)
+        .overlay(
+            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+        )
     }
 
-    // MARK: - Happiness Gauge
-    private var happinessGauge: some View {
-        TimelineView(.periodic(from: .now, by: 60)) { context in
-            let value = latestRecord.map {
-                Happiness.calculate(
-                    score: $0.score,
-                    capturedAt: $0.capturedAt,
-                    now: context.date
-                )
-            } ?? Happiness.defaultWhenNoRecord
-            PixelHeartGauge(value: value)
-                .padding(.horizontal)
+    private func heartGaugePill(now: Date) -> some View {
+        let value = latestRecord.map {
+            Happiness.calculate(
+                score: $0.score,
+                capturedAt: $0.capturedAt,
+                now: now
+            )
+        } ?? Happiness.defaultWhenNoRecord
+
+        return HStack(spacing: 8) {
+            ZStack {
+                PixelHeartShape().fill(DesignSystem.Color.secondary)
+                PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
+            }
+            .frame(width: 22, height: 18)
+
+            GeometryReader { geo in
+                let clamped = min(max(Double(value) / 100.0, 0), 1)
+                ZStack(alignment: .leading) {
+                    Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
+                    Capsule()
+                        .fill(DesignSystem.Color.secondary)
+                        .frame(width: geo.size.width * clamped)
+                }
+            }
+            .frame(height: 14)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            Capsule().fill(DesignSystem.Color.surface)
+        )
+        .overlay(
+            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+        )
     }
 
     // MARK: - Room Frame
-    private var roomFrame: some View {
+    private func roomFrame(now: Date) -> some View {
         ZStack {
-            Rectangle()
-                .fill(DesignSystem.Color.secondary.opacity(0.25))
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.secondary.opacity(0.15))
                 .aspectRatio(1, contentMode: .fit)
-                .overlay(
-                    Rectangle()
-                        .stroke(DesignSystem.Color.primary, lineWidth: 3)
-                )
 
             if let data = latestRecord?.pixelArtImageData,
                let uiImage = UIImage(data: data) {
@@ -179,30 +205,31 @@ struct HomeView: View {
                     .resizable()
                     .interpolation(.none)
                     .aspectRatio(contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
 
             if isRunaway {
                 Image("okitegami")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 360, height: 360)
+                    .frame(width: 320, height: 320)
             } else {
                 VStack {
                     Spacer()
-
-                    VStack(spacing: 4) {
-                        CharacterView(
-                            characterType: selectedCharacterType,
-                            characterState: characterState
-                        )
-                        .frame(width: 240, height: 240)
-                    }
-                    .padding(.bottom, -60)
+                    CharacterView(
+                        characterType: selectedCharacterType,
+                        characterState: characterState(at: now)
+                    )
+                    .frame(width: 200, height: 200)
+                    .padding(.bottom, -30)
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.trailing, 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DesignSystem.Color.primary, lineWidth: 5)
+        )
+        .padding(.horizontal, 20)
     }
 
     // MARK: - Mission Banner
@@ -242,16 +269,6 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
-    }
-
-    // MARK: - Runaway Message
-    private var runawayMessage: some View {
-        VStack(spacing: 4) {
-            Text("きれいっちは家出しました")
-                .font(DesignSystem.Font.headline)
-                .foregroundColor(DesignSystem.Color.textPrimary)
-        }
-        .padding(.horizontal)
     }
 
     // MARK: - Camera Button
