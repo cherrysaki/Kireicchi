@@ -216,11 +216,12 @@ struct TutorialView: View {
             Button(buttonTitle, action: action)
                 .font(DesignSystem.Font.pixelSmall)
                 .foregroundColor(DesignSystem.Color.textOnPrimary)
-                .padding(.horizontal, 32)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 48)
+                .padding(.vertical, 14)
                 .background(DesignSystem.Color.primary)
                 .cornerRadius(8)
                 .padding(.bottom, 32)
+                .padding(.bottom, 24)
         }
     }
 }
