@@ -182,8 +182,12 @@ struct SettingsView: View {
 
     private var commentSection: some View {
         HStack(spacing: 12) {
-            Text("🐱")
-                .font(DesignSystem.Font.custom(size: 56))
+            CharacterView(
+                characterType: .character01,
+                characterState: nil,
+                forceGif: .cheer
+            )
+            .frame(width: 80, height: 80)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("設定ありがとう！")
