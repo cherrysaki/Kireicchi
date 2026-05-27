@@ -4,6 +4,7 @@ struct HomeTabBar: View {
     let onHome: () -> Void
     let onCapture: () -> Void
     let onFriends: () -> Void
+    var canCapture: Bool = true
 
     var body: some View {
         ZStack {
@@ -38,16 +39,16 @@ struct HomeTabBar: View {
             Button(action: onCapture) {
                 ZStack {
                     Circle()
-                        .fill(DesignSystem.Color.primary)
+                        .fill(canCapture ? DesignSystem.Color.primary : Color.gray)
                         .overlay(
                             Circle()
-                                .stroke(DesignSystem.Color.primaryDark, lineWidth: 3)
+                                .stroke(canCapture ? DesignSystem.Color.primaryDark : Color.gray.opacity(0.7), lineWidth: 3)
                         )
                         .frame(width: 64, height: 64)
 
                     Image(systemName: "camera.fill")
                         .font(DesignSystem.Font.title2)
-                        .foregroundColor(DesignSystem.Color.primaryDark)
+                        .foregroundColor(canCapture ? DesignSystem.Color.primaryDark : Color.white.opacity(0.8))
                 }
             }
             .offset(y: -18)
