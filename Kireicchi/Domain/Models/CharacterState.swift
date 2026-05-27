@@ -14,7 +14,16 @@ enum CharacterState: String, CaseIterable {
         default:       return .sick
         }
     }
-    
+
+    static func fromHappiness(_ happiness: Int) -> CharacterState {
+        switch happiness {
+        case 75...100: return .happy
+        case 50...74:  return .normal
+        case 25...49:  return .sad
+        default:       return .sick  // 0...24
+        }
+    }
+
     var gifSuffix: String {
         switch self {
         case .happy:  return "happy"
