@@ -60,9 +60,10 @@ struct SettingsView: View {
                         captureTimeSection
                         notificationToggleSection
                         characterSection
+                        historySection
                         commentSection
                         AppleLoginSection()
-                        
+
                         #if DEBUG
                         debugSection
                         #endif
@@ -215,6 +216,40 @@ struct SettingsView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
+        }
+    }
+
+    private var historySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("きろく")
+
+            Button(action: {
+                navigationRouter.navigate(to: .history)
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("きろくを見る")
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                        Text("これまでの撮影とスコアの推移")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignSystem.Color.primary)
+                }
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.horizontal)
+            .padding(.trailing, 3)
         }
     }
 

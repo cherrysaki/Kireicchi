@@ -3,6 +3,7 @@ import SwiftUI
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
     @EnvironmentObject private var deps: AppDependencies
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationStack(path: $navigationRouter.path) {
@@ -24,6 +25,10 @@ struct RootView: View {
                             myDisplayName: deps.currentUser?.displayName ?? "わたし",
                             myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
                         )
+                    case .history:
+                        HistoryView(viewModel: HistoryViewModel(
+                            historyStore: RoomHistoryStore(context: modelContext)
+                        ))
                     }
                 }
         }

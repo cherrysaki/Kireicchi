@@ -88,7 +88,12 @@ struct AnalyzingView: View {
         .onAppear {
             // 実際のNavigationRouterとModelContextを設定
             let roomRecordStore = LatestRoomRecordStore(context: modelContext)
-            viewModel.setup(roomRecordStore: roomRecordStore, navigationRouter: navigationRouter)
+            let historyStore = RoomHistoryStore(context: modelContext)
+            viewModel.setup(
+                roomRecordStore: roomRecordStore,
+                historyStore: historyStore,
+                navigationRouter: navigationRouter
+            )
             
             Task {
                 await viewModel.startAnalysis(imageData: imageData)
