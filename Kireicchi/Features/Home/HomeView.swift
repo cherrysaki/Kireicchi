@@ -64,7 +64,7 @@ struct HomeView: View {
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     VStack(spacing: 14) {
                         topBar(now: context.date)
-                        statusRow(now: context.date)
+                        scorePill
                         roomFrame(now: context.date)
                     }
                 }
@@ -130,32 +130,28 @@ struct HomeView: View {
         return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
-    // MARK: - Status Row (score pill + heart gauge)
-    private func statusRow(now: Date) -> some View {
-        HStack(spacing: 12) {
-            scorePill
-            heartGaugePill(now: now)
+    private var scorePill: some View {
+        HStack {
+            Text("散らかり指数")
+                .font(DesignSystem.Font.subheadline)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+            Spacer()
+            Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
+                .font(DesignSystem.Font.title2)
+                .bold()
+                .foregroundColor(DesignSystem.Color.textPrimary)
         }
         .padding(.horizontal, 20)
-    }
-
-    private var scorePill: some View {
-        HStack(spacing: 8) {
-            Text("散らかり指数")
-                .font(DesignSystem.Font.caption)
-                .foregroundColor(DesignSystem.Color.textPrimary)
-            Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                .font(DesignSystem.Font.footnote)
-                .foregroundColor(DesignSystem.Color.textPrimary)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .background(
-            Capsule().fill(DesignSystem.Color.primary)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
+        .padding(.horizontal, 20)
     }
 
     private func heartGaugePill(now: Date) -> some View {
@@ -167,37 +163,39 @@ struct HomeView: View {
             )
         } ?? Happiness.defaultWhenNoRecord
 
-        return HStack(spacing: 8) {
+        return HStack(spacing: 6) {
             ZStack {
                 PixelHeartShape().fill(DesignSystem.Color.secondary)
                 PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
             }
-            .frame(width: 22, height: 18)
+            .frame(width: 18, height: 14)
 
             GeometryReader { geo in
                 let clamped = min(max(Double(value) / 100.0, 0), 1)
                 ZStack(alignment: .leading) {
-                    Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
+                    Capsule().fill(DesignSystem.Color.primary.opacity(0.3))
                     Capsule()
                         .fill(DesignSystem.Color.secondary)
                         .frame(width: geo.size.width * clamped)
                 }
             }
-            .frame(height: 14)
+            .frame(width: 80, height: 10)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
         .background(
-            Capsule().fill(DesignSystem.Color.surface)
+            Capsule()
+                .fill(DesignSystem.Color.surface.opacity(0.85))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            Capsule()
+                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
         )
     }
 
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.secondary.opacity(0.15))
                 .aspectRatio(1, contentMode: .fit)
@@ -227,6 +225,9 @@ struct HomeView: View {
                     .padding(.bottom, -30)
                 }
             }
+
+            heartGaugePill(now: now)
+                .padding(10)
         }
         .overlay(
             RoundedRectangle(cornerRadius: 12)
