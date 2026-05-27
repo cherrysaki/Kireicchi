@@ -10,7 +10,7 @@ struct TutorialView: View {
 
     var body: some View {
         ZStack {
-            DesignSystem.Color.background.ignoresSafeArea()
+            Color(hex: "FFFBEF").ignoresSafeArea()
 
             Group {
                 switch currentPage {
@@ -127,7 +127,7 @@ struct TutorialView: View {
                     .resizable()
                     .interpolation(.none)
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 280)
+                    .frame(maxWidth: 180)
             ),
             buttonTitle: "次へ",
             action: goNext
