@@ -98,7 +98,8 @@ struct HomeView: View {
                             showCaptureAlert = true
                         }
                     },
-                    onFriends: { navigationRouter.navigate(to: .friendVisit) }
+                    onFriends: { navigationRouter.navigate(to: .friendVisit) },
+                    canCapture: canCapture
                 )
                 .padding(.bottom, 12)
             }
