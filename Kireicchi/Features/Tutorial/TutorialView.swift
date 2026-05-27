@@ -1,4 +1,6 @@
 import SwiftUI
+import AVFoundation
+import UserNotifications
 
 struct TutorialView: View {
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
@@ -171,7 +173,14 @@ struct TutorialView: View {
                     .frame(width: 200, height: 200)
             ),
             buttonTitle: "はじめる",
-            action: complete
+            action: {
+                Task {
+                    await AVCaptureDevice.requestAccess(for: .video)
+                    try? await UNUserNotificationCenter.current()
+                        .requestAuthorization(options: [.alert, .sound, .badge])
+                    hasShownTutorial = true
+                }
+            }
         )
     }
 
@@ -205,13 +214,11 @@ struct TutorialView: View {
             Button(action: action) {
                 Text(buttonTitle)
                     .font(DesignSystem.Font.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
+                    .frame(width: 160)
+                    .padding(.vertical, 8)
             }
             .buttonStyle(PixelButtonStyle())
-            .padding(.horizontal, 40)
-            .padding(.bottom, 64)
+            .padding(.bottom, 48)
         }
     }
 }
