@@ -213,14 +213,14 @@ struct TutorialView: View {
 
             Spacer()
 
-            Button(action: action) {
-                Text(buttonTitle)
-                    .font(DesignSystem.Font.headline)
-                    .frame(width: 120)
-                    .padding(.vertical, 6)
-            }
-            .buttonStyle(PixelButtonStyle())
-            .padding(.bottom, 32)
+            Button(buttonTitle, action: action)
+                .font(DesignSystem.Font.pixelSmall)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 10)
+                .background(DesignSystem.Color.primary)
+                .cornerRadius(8)
+                .padding(.bottom, 32)
         }
     }
 }
