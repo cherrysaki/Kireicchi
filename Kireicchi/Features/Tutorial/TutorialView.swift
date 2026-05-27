@@ -99,7 +99,7 @@ struct TutorialView: View {
         Image("logo_Kireicchi")
             .resizable()
             .scaledToFit()
-            .frame(maxWidth: 240)
+            .frame(maxWidth: 320)
             .transition(.opacity)
     }
 
@@ -110,7 +110,7 @@ struct TutorialView: View {
             subtitle: "激落くんの妖精\nきれいっちと一緒に\nお部屋をきれいにしよう！",
             media: AnyView(
                 CharacterView(characterType: .character01, characterState: .happy)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -124,9 +124,9 @@ struct TutorialView: View {
             subtitle: "カメラボタンを押して\nお部屋の写真を撮るだけ！\nAIがお部屋の状態を分析するよ",
             media: AnyView(
                 Image(systemName: "camera.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 120))
                     .foregroundColor(DesignSystem.Color.primary)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -140,9 +140,9 @@ struct TutorialView: View {
             subtitle: "お部屋の散らかり具合を\n100点満点でスコア化！\n片付けるべき場所も教えてくれるよ",
             media: AnyView(
                 Image(systemName: "star.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 120))
                     .foregroundColor(DesignSystem.Color.primary)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -156,7 +156,7 @@ struct TutorialView: View {
             subtitle: "部屋がきれいだと\nきれいっちが元気になるよ！\n7日間撮影しないと家出しちゃう…",
             media: AnyView(
                 CharacterView(characterType: .character01, characterState: .sad)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -170,7 +170,7 @@ struct TutorialView: View {
             subtitle: "毎日撮影して\nきれいっちを元気にしてあげてね！",
             media: AnyView(
                 CharacterView(characterType: .character01, characterState: .happy)
-                    .frame(width: 200, height: 200)
+                    .frame(width: 280, height: 280)
             ),
             buttonTitle: "はじめる",
             action: {
@@ -214,11 +214,11 @@ struct TutorialView: View {
             Button(action: action) {
                 Text(buttonTitle)
                     .font(DesignSystem.Font.headline)
-                    .frame(width: 160)
-                    .padding(.vertical, 8)
+                    .frame(width: 120)
+                    .padding(.vertical, 6)
             }
             .buttonStyle(PixelButtonStyle())
-            .padding(.bottom, 48)
+            .padding(.bottom, 32)
         }
     }
 }
