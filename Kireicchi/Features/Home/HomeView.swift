@@ -213,7 +213,7 @@ struct HomeView: View {
                 Image("okitegami")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 320, height: 320)
+                    .padding(16)
             } else {
                 VStack {
                     Spacer()
@@ -221,8 +221,8 @@ struct HomeView: View {
                         characterType: selectedCharacterType,
                         characterState: characterState(at: now)
                     )
-                    .frame(width: 200, height: 200)
-                    .padding(.bottom, -30)
+                    .frame(width: 160, height: 160)
+                    .padding(.bottom, 8)
                 }
             }
 
