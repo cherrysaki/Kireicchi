@@ -58,7 +58,9 @@ struct CleanupTimerView: View {
                 } else {
                     timerDisplaySection
                 }
-
+                
+                Spacer().frame(height: 16)
+                
                 timerControlSection
 
                 Spacer()
@@ -102,16 +104,16 @@ struct CleanupTimerView: View {
                 }
             }
             .pickerStyle(.wheel)
-            .frame(height: 120)
+            .frame(height:  150)
             .modifier(PixelCardModifier())
         }
     }
 
     private var timerDisplaySection: some View {
         VStack(spacing: 12) {
-            let circleSize: CGFloat = viewModel.isRunning ? 300 : 200
-            let lineWidth: CGFloat = viewModel.isRunning ? 16 : 12
-            let fontSize: CGFloat = viewModel.isRunning ? 48 : 36
+            let circleSize: CGFloat = viewModel.isRunning ? 330 : 220
+            let lineWidth: CGFloat = viewModel.isRunning ? 20 : 15
+            let fontSize: CGFloat = viewModel.isRunning ? 52 : 39
 
             if viewModel.isRunning {
                 Text(timeString(from: viewModel.remainingSeconds))
@@ -140,7 +142,7 @@ struct CleanupTimerView: View {
                         characterState: nil,
                         forceGif: .cheer
                     )
-                    .frame(width: circleSize * 0.6, height: circleSize * 0.6)
+                    .frame(width: circleSize * 0.85, height: circleSize * 0.85)
                 } else {
                     VStack {
                         Text(timeString(from: viewModel.remainingSeconds))
@@ -165,18 +167,17 @@ struct CleanupTimerView: View {
             }
         }) {
             Text(viewModel.isRunning ? "いちじていし" : "はじめる")
-                .font(DesignSystem.Font.pixelSmall)
+                .font(DesignSystem.Font.pixelMedium)
                 .foregroundColor(DesignSystem.Color.textOnPrimary)
                 .padding(.horizontal, 40)
-                .padding(.vertical, 14)
+                .padding(.vertical, 20)
                 .background(DesignSystem.Color.primary)
-                .clipShape(Capsule())
+                .clipShape(RoundedRectangle(cornerRadius: 18))
         }
     }
 
     private var bottomButtonSection: some View {
         VStack(spacing: 16) {
-            Spacer()
             Button(action: {
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
@@ -185,7 +186,7 @@ struct CleanupTimerView: View {
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 40)
         }
     }
 
