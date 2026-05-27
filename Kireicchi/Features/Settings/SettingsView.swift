@@ -238,9 +238,6 @@ struct SettingsView: View {
     NavigationStack {
         SettingsView()
             .environmentObject(NavigationRouter())
-            .environmentObject(AppDependencies(
-                authService: MockAuthService(preAuthenticatedUid: "mock-uid"),
-                userRepository: MockUserRepository()
-            ))
+            .environmentObject(AppDependencies())
     }
 }
