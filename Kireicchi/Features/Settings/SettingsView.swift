@@ -6,6 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
+    @Query private var historyRecords: [RoomHistoryRecord]
 
     @State private var selectedHour = 19
     @State private var selectedMinute = 0
@@ -330,7 +331,7 @@ struct SettingsView: View {
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
                     .padding(.horizontal)
-                
+
                 HStack(spacing: 12) {
                     debugRunawayButton(title: "家出させる", isRunaway: true)
                     debugRunawayButton(title: "家出解除", isRunaway: false)
@@ -338,7 +339,71 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal)
             }
+
+            // 撮影制限テスト
+            VStack(alignment: .leading, spacing: 8) {
+                Text("撮影制限テスト (今日: \(todayCaptureCount)回)")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+
+                HStack(spacing: 12) {
+                    debugCaptureLimitButton(title: "0回にする") {
+                        resetTodayHistoryRecords()
+                    }
+                    debugCaptureLimitButton(title: "2回にする") {
+                        markCapturedTwiceToday()
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal)
+            }
         }
+    }
+
+    private var todayCaptureCount: Int {
+        let calendar = Calendar.current
+        return historyRecords.filter { calendar.isDateInToday($0.capturedAt) }.count
+    }
+
+    private func debugCaptureLimitButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+        .buttonStyle(PixelButtonStyle())
+    }
+
+    private func resetTodayHistoryRecords() {
+        let calendar = Calendar.current
+        let todayRecords = historyRecords.filter { calendar.isDateInToday($0.capturedAt) }
+        print("🔧 Debug: 今日のRoomHistoryRecord \(todayRecords.count) 件を削除します")
+        for record in todayRecords {
+            modelContext.delete(record)
+        }
+        try? modelContext.save()
+    }
+
+    private func markCapturedTwiceToday() {
+        let needed = 2 - todayCaptureCount
+        guard needed > 0 else {
+            print("🔧 Debug: すでに今日 \(todayCaptureCount) 回撮影済み")
+            return
+        }
+        print("🔧 Debug: ダミーRoomHistoryRecord を \(needed) 件追加して今日2回扱いにします")
+        let now = Date()
+        for offset in 0..<needed {
+            let dummy = RoomHistoryRecord(
+                capturedAt: now.addingTimeInterval(TimeInterval(-offset * 60)),
+                score: 70,
+                rank: "B"
+            )
+            modelContext.insert(dummy)
+        }
+        try? modelContext.save()
     }
     
     private func debugStateButton(title: String, score: Int) -> some View {
