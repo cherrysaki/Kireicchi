@@ -5,10 +5,23 @@ struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
+    @Query private var historyRecords: [RoomHistoryRecord]
 
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
     @State private var isMissionSheetPresented = false
+    @State private var showCaptureAlert: Bool = false
+
+    private var todayCaptureCount: Int {
+        let calendar = Calendar.current
+        return historyRecords.filter {
+            calendar.isDateInToday($0.capturedAt)
+        }.count
+    }
+
+    private var canCapture: Bool {
+        todayCaptureCount < 2
+    }
 
     private var latestRecord: LatestRoomRecord? { records.first }
 
@@ -78,13 +91,24 @@ struct HomeView: View {
                 Spacer()
                 HomeTabBar(
                     onHome: { navigationRouter.popToRoot() },
-                    onCapture: { navigationRouter.navigate(to: .capture) },
+                    onCapture: {
+                        if canCapture {
+                            navigationRouter.navigate(to: .capture)
+                        } else {
+                            showCaptureAlert = true
+                        }
+                    },
                     onFriends: { navigationRouter.navigate(to: .friendVisit) }
                 )
                 .padding(.bottom, 12)
             }
         }
         .navigationBarHidden(true)
+        .alert("本日の撮影は終了しました", isPresented: $showCaptureAlert) {
+            Button("OK") {}
+        } message: {
+            Text("1日2回まで撮影できます。\nまた明日撮影してね！")
+        }
         .sheet(isPresented: $isMissionSheetPresented) {
             MissionListSheet(
                 missions: pendingMissions,
