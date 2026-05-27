@@ -14,15 +14,6 @@ struct SettingsView: View {
     @State private var showTimePicker = false
     @State private var isSaving = false
 
-    private let characters: [(id: String, emoji: String, label: String)] = [
-        ("cat", "🐱", "キャラクタsー1"),
-        ("dog", "🐶", "キャラクター2")
-    ]
-
-    private var selectedEmoji: String {
-        characters.first { $0.id == selectedCharacterId }?.emoji ?? "🐱"
-    }
-
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
@@ -59,10 +50,9 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         captureTimeSection
                         notificationToggleSection
-                        characterSection
                         commentSection
                         AppleLoginSection()
-                        
+
                         #if DEBUG
                         debugSection
                         #endif
@@ -196,25 +186,6 @@ struct SettingsView: View {
             )
             .padding(.horizontal)
             .padding(.trailing, 3)
-        }
-    }
-
-    private var characterSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("キャラクター")
-
-            Picker("キャラクターを 選ぶ", selection: $selectedCharacterId) {
-                ForEach(characters, id: \.id) { character in
-                    HStack {
-                        Text(character.emoji)
-                            .font(DesignSystem.Font.title)
-                        Text(character.label)
-                    }
-                    .tag(character.id)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
         }
     }
 
