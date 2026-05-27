@@ -31,6 +31,7 @@ struct AnalyzingView: View {
             DesignSystem.Color.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                Spacer()
                 ZStack {
                     if viewModel.errorMessage == nil {
                         Text("解析中...")
@@ -44,7 +45,7 @@ struct AnalyzingView: View {
                             .foregroundColor(DesignSystem.Color.accentWarm)
                     }
                 }
-                .frame(height: 160)
+                .frame(height: 240)
 
                 Spacer()
 
