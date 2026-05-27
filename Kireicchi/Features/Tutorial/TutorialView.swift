@@ -123,10 +123,11 @@ struct TutorialView: View {
             title: "お部屋を撮影しよう",
             subtitle: "カメラボタンを押して\nお部屋の写真を撮るだけ！\nAIがお部屋の状態を分析するよ",
             media: AnyView(
-                Image(systemName: "camera.fill")
-                    .font(.system(size: 120))
-                    .foregroundColor(DesignSystem.Color.primary)
-                    .frame(width: 280, height: 280)
+                Image("tutorial_camera")
+                    .resizable()
+                    .interpolation(.none)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 280)
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -139,10 +140,11 @@ struct TutorialView: View {
             title: "スコアが出るよ",
             subtitle: "お部屋の散らかり具合を\n100点満点でスコア化！\n片付けるべき場所も教えてくれるよ",
             media: AnyView(
-                Image(systemName: "star.fill")
-                    .font(.system(size: 120))
-                    .foregroundColor(DesignSystem.Color.primary)
-                    .frame(width: 280, height: 280)
+                Image("tutorial_score_preview")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 320)
+                    .cornerRadius(16)
             ),
             buttonTitle: "次へ",
             action: goNext
