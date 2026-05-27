@@ -154,7 +154,7 @@ struct TutorialView: View {
     // MARK: - Page 4: Health
     private var healthPage: some View {
         contentPage(
-            title: "きれいっちを元気にしよう",
+            title: "きれいっちを元気にしよう！",
             subtitle: "部屋がきれいだと\nきれいっちが元気になるよ！\n7日間撮影しないと家出しちゃう…",
             media: AnyView(
                 CharacterView(characterType: .character01, characterState: .sad)
