@@ -77,7 +77,7 @@ struct HomeView: View {
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     VStack(spacing: 14) {
                         topBar(now: context.date)
-                        statusRow(now: context.date)
+                        scorePill
                         roomFrame(now: context.date)
                     }
                 }
@@ -154,31 +154,28 @@ struct HomeView: View {
         return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
-    // MARK: - Status Row (score pill のみ、ハートゲージは roomFrame にオーバーレイ)
-    private func statusRow(now: Date) -> some View {
-        scorePill
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-    }
-
     private var scorePill: some View {
-        HStack(spacing: 8) {
+        HStack {
             Text("散らかり指数")
-                .font(DesignSystem.Font.caption)
+                .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
             Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                .font(DesignSystem.Font.footnote)
+                .font(DesignSystem.Font.title2)
+                .bold()
                 .foregroundColor(DesignSystem.Color.textPrimary)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
         .background(
-            Capsule().fill(DesignSystem.Color.primary)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
+        .padding(.horizontal, 20)
     }
 
     private func heartGaugePill(now: Date) -> some View {
@@ -192,35 +189,42 @@ struct HomeView: View {
         let clamped = min(max(Double(value) / 100.0, 0), 1)
         let barWidth: CGFloat = 110
 
-        return HStack(spacing: 8) {
+        return HStack(spacing: 6) {
             ZStack {
                 PixelHeartShape().fill(DesignSystem.Color.secondary)
                 PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
             }
-            .frame(width: 22, height: 18)
+            .frame(width: 18, height: 14)
 
-            ZStack(alignment: .leading) {
-                Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
-                Capsule()
-                    .fill(DesignSystem.Color.secondary)
-                    .frame(width: barWidth * clamped)
+            GeometryReader { geo in
+                let clamped = min(max(Double(value) / 100.0, 0), 1)
+                ZStack(alignment: .leading) {
+                    Capsule().fill(DesignSystem.Color.primary.opacity(0.3))
+                    Capsule()
+                        .fill(DesignSystem.Color.secondary)
+                        .frame(width: geo.size.width * clamped)
+                }
             }
-            .frame(width: barWidth, height: 14)
+            .frame(width: 80, height: 10)
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(
-            Capsule().fill(DesignSystem.Color.surface)
+            Capsule()
+                .fill(DesignSystem.Color.surface.opacity(0.85))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            Capsule()
+                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
         )
     }
 
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
-        ZStack {
-            DesignSystem.Color.secondary.opacity(0.15)
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.secondary.opacity(0.15))
+                .aspectRatio(1, contentMode: .fit)
 
             if let data = latestRecord?.pixelArtImageData,
                let uiImage = UIImage(data: data) {
@@ -246,6 +250,9 @@ struct HomeView: View {
                     .padding(.bottom, -30)
                 }
             }
+
+            heartGaugePill(now: now)
+                .padding(10)
         }
         .aspectRatio(1, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 12))
