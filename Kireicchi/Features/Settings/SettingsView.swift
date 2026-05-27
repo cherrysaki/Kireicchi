@@ -23,22 +23,6 @@ struct SettingsView: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                     Spacer()
-                    Button(action: {
-                        navigationRouter.navigateBack()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(DesignSystem.Font.subheadline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                PixelCircle(pixelSize: 3)
-                                    .fill(DesignSystem.Color.surface)
-                            )
-                            .overlay(
-                                PixelCircleStroke(pixelSize: 3, lineWidth: 2)
-                                    .fill(DesignSystem.Color.primary)
-                            )
-                    }
                 }
                 .padding()
 
