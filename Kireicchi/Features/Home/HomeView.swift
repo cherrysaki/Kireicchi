@@ -3,11 +3,29 @@ import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
 
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
+    @State private var isMissionSheetPresented = false
+
     private var latestRecord: LatestRoomRecord? { records.first }
+
+    private var pendingMissions: [MissionPersisted] {
+        (latestRecord?.missions ?? []).filter { !$0.isDone }
+    }
+
+    private var legacyMissionLabels: [String] {
+        latestRecord?.messyPointLabels ?? []
+    }
+
+    private var pendingMissionCount: Int {
+        if !pendingMissions.isEmpty || (latestRecord?.missions.isEmpty == false) {
+            return pendingMissions.count
+        }
+        return legacyMissionLabels.count
+    }
 
     private var selectedCharacterType: CharacterType {
         CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
@@ -36,7 +54,7 @@ struct HomeView: View {
                 if isRunaway {
                     runawayMessage
                 } else {
-                    missionList
+                    missionBanner
                 }
                 Spacer(minLength: 8)
                 cameraButton
@@ -48,6 +66,17 @@ struct HomeView: View {
         }
         .background(DesignSystem.Color.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .sheet(isPresented: $isMissionSheetPresented) {
+            MissionListSheet(
+                missions: pendingMissions,
+                legacyLabels: pendingMissions.isEmpty && latestRecord?.missions.isEmpty != false
+                    ? legacyMissionLabels : [],
+                onToggleDone: { mission in
+                    let store = LatestRoomRecordStore(context: modelContext)
+                    try? store.updateMission(id: mission.id, isDone: !mission.isDone)
+                }
+            )
+        }
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
@@ -176,42 +205,43 @@ struct HomeView: View {
         .padding(.trailing, 4)
     }
 
-    // MARK: - Mission List
-    private var missionList: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                PixelStar(size: 22)
-                Text("お片付けミッション")
-                    .font(DesignSystem.Font.headline)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-            }
-            .padding(.horizontal)
-
-            if let record = latestRecord,
-               let messyPointLabels = record.messyPointLabels,
-               !messyPointLabels.isEmpty {
-                VStack(spacing: 6) {
-                    ForEach(Array(messyPointLabels.prefix(3).enumerated()), id: \.offset) { index, label in
-                        CleanupTaskRow(label: label, index: index)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .pixelSquareCard(
-                                fill: DesignSystem.Color.surface,
-                                border: DesignSystem.Color.secondary,
-                                borderWidth: 2,
-                                shadowOffset: 3
-                            )
-                            .padding(.horizontal)
-                            .padding(.trailing, 3)
-                    }
+    // MARK: - Mission Banner
+    private var missionBanner: some View {
+        Button(action: {
+            isMissionSheetPresented = true
+        }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignSystem.Color.primary.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                    PixelStar(size: 22)
                 }
-            } else {
-                Text("撮影してお部屋を分析しよう！")
+                Text(missionBannerText)
                     .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                    .padding(.horizontal)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.surface,
+                border: DesignSystem.Color.primary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
+            .padding(.horizontal)
         }
+    }
+
+    private var missionBannerText: String {
+        let count = pendingMissionCount
+        if count > 0 {
+            return "ミッションが\(count)件残っています"
+        }
+        return "撮影してお部屋を分析しよう！"
     }
 
     // MARK: - Runaway Message
@@ -244,6 +274,113 @@ struct HomeView: View {
         }
     }
 
+}
+
+// MARK: - Mission List Sheet
+private struct MissionListSheet: View {
+    let missions: [MissionPersisted]
+    let legacyLabels: [String]
+    let onToggleDone: (MissionPersisted) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            DesignSystem.Color.background.ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 8) {
+                    PixelStar(size: 24)
+                    Text("お片付けミッション")
+                        .font(DesignSystem.Font.title3)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                    Spacer()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(DesignSystem.Font.headline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                    }
+                }
+
+                if missions.isEmpty && legacyLabels.isEmpty {
+                    Text("まだミッションがありません。\nお部屋を撮影してみよう！")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                } else if !missions.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(missions) { mission in
+                                MissionTaskRow(mission: mission) {
+                                    onToggleDone(mission)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .pixelSquareCard(
+                                    fill: DesignSystem.Color.surface,
+                                    border: DesignSystem.Color.primaryDark,
+                                    borderWidth: 2,
+                                    shadowOffset: 3
+                                )
+                                .padding(.trailing, 3)
+                            }
+                        }
+                    }
+                } else {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(Array(legacyLabels.enumerated()), id: \.offset) { index, label in
+                                CleanupTaskRow(label: label, index: index)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .pixelSquareCard(
+                                        fill: DesignSystem.Color.surface,
+                                        border: DesignSystem.Color.primaryDark,
+                                        borderWidth: 2,
+                                        shadowOffset: 3
+                                    )
+                                    .padding(.trailing, 3)
+                            }
+                        }
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(20)
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
+// MARK: - Mission Task Row
+private struct MissionTaskRow: View {
+    let mission: MissionPersisted
+    let onToggle: () -> Void
+
+    private var starCount: Int { min(max(mission.priority, 1), 5) }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: onToggle) {
+                Image(systemName: mission.isDone ? "checkmark.circle.fill" : "circle")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(mission.isDone ? DesignSystem.Color.primaryDark : DesignSystem.Color.textPrimary.opacity(0.6))
+            }
+            .buttonStyle(.plain)
+
+            Text(mission.label)
+                .font(DesignSystem.Font.subheadline)
+                .strikethrough(mission.isDone)
+                .foregroundColor(mission.isDone ? DesignSystem.Color.textPrimary.opacity(0.5) : DesignSystem.Color.textPrimary)
+
+            Spacer()
+
+            HStack(spacing: 2) {
+                ForEach(0..<starCount, id: \.self) { _ in
+                    PixelStar(size: 12)
+                }
+            }
+        }
+    }
 }
 
 #Preview {
