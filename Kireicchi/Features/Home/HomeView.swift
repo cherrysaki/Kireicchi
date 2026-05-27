@@ -17,14 +17,28 @@ struct HomeView: View {
     }
 
     private var characterState: CharacterState {
-        guard let score = latestRecord?.score else { return .happy }
-        return CharacterState.fromScore(score)
+        guard let record = latestRecord else { return .happy }
+        let happiness = Happiness.calculate(
+            score: record.score,
+            capturedAt: record.capturedAt
+        )
+        return CharacterState.fromHappiness(happiness)
+    }
+
+    private func characterState(at now: Date) -> CharacterState {
+        guard let record = latestRecord else { return .happy }
+        let happiness = Happiness.calculate(
+            score: record.score,
+            capturedAt: record.capturedAt,
+            now: now
+        )
+        return CharacterState.fromHappiness(happiness)
     }
 
     private var isRunaway: Bool {
         guard let capturedAt = latestRecord?.capturedAt else { return false }
         let daysSince = Calendar.current.dateComponents([.day], from: capturedAt, to: Date()).day ?? 0
-        return daysSince >= 5
+        return daysSince >= 7
     }
 
     private var pendingMissions: [MissionPersisted] {
@@ -48,8 +62,12 @@ struct HomeView: View {
 
             VStack(spacing: 14) {
                 topBar
-                statusRow
-                roomFrame
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    VStack(spacing: 14) {
+                        statusRow(now: context.date)
+                        roomFrame(now: context.date)
+                    }
+                }
                 missionBanner
                 Spacer(minLength: 0)
             }
@@ -103,10 +121,10 @@ struct HomeView: View {
     }
 
     // MARK: - Status Row (score pill + heart gauge)
-    private var statusRow: some View {
+    private func statusRow(now: Date) -> some View {
         HStack(spacing: 12) {
             scorePill
-            heartGaugePill
+            heartGaugePill(now: now)
         }
         .padding(.horizontal, 20)
     }
@@ -130,47 +148,45 @@ struct HomeView: View {
         )
     }
 
-    private var heartGaugePill: some View {
-        TimelineView(.periodic(from: .now, by: 60)) { context in
-            let value = latestRecord.map {
-                Happiness.calculate(
-                    score: $0.score,
-                    capturedAt: $0.capturedAt,
-                    now: context.date
-                )
-            } ?? Happiness.defaultWhenNoRecord
+    private func heartGaugePill(now: Date) -> some View {
+        let value = latestRecord.map {
+            Happiness.calculate(
+                score: $0.score,
+                capturedAt: $0.capturedAt,
+                now: now
+            )
+        } ?? Happiness.defaultWhenNoRecord
 
-            HStack(spacing: 8) {
-                ZStack {
-                    PixelHeartShape().fill(DesignSystem.Color.secondary)
-                    PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
-                }
-                .frame(width: 22, height: 18)
-
-                GeometryReader { geo in
-                    let clamped = min(max(Double(value) / 100.0, 0), 1)
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
-                        Capsule()
-                            .fill(DesignSystem.Color.secondary)
-                            .frame(width: geo.size.width * clamped)
-                    }
-                }
-                .frame(height: 14)
+        return HStack(spacing: 8) {
+            ZStack {
+                PixelHeartShape().fill(DesignSystem.Color.secondary)
+                PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                Capsule().fill(DesignSystem.Color.surface)
-            )
-            .overlay(
-                Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
-            )
+            .frame(width: 22, height: 18)
+
+            GeometryReader { geo in
+                let clamped = min(max(Double(value) / 100.0, 0), 1)
+                ZStack(alignment: .leading) {
+                    Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
+                    Capsule()
+                        .fill(DesignSystem.Color.secondary)
+                        .frame(width: geo.size.width * clamped)
+                }
+            }
+            .frame(height: 14)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            Capsule().fill(DesignSystem.Color.surface)
+        )
+        .overlay(
+            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+        )
     }
 
     // MARK: - Room Frame
-    private var roomFrame: some View {
+    private func roomFrame(now: Date) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.secondary.opacity(0.15))
@@ -195,7 +211,7 @@ struct HomeView: View {
                     Spacer()
                     CharacterView(
                         characterType: selectedCharacterType,
-                        characterState: characterState
+                        characterState: characterState(at: now)
                     )
                     .frame(width: 200, height: 200)
                     .padding(.bottom, -30)
