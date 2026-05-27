@@ -14,6 +14,7 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     private let analyzeRoomUseCase: AnalyzeRoomUseCaseProtocol
     private let generatePixelArtUseCase: GeneratePixelArtUseCaseProtocol
     private var roomRecordStore: LatestRoomRecordStore?
+    private var historyStore: RoomHistoryStoreProtocol?
     private var navigationRouter: NavigationRouter?
     
     // 解析結果を保持
@@ -30,6 +31,14 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     
     func setup(roomRecordStore: LatestRoomRecordStore, navigationRouter: NavigationRouter) {
         self.roomRecordStore = roomRecordStore
+        self.navigationRouter = navigationRouter
+    }
+
+    func setup(roomRecordStore: LatestRoomRecordStore,
+               historyStore: RoomHistoryStoreProtocol,
+               navigationRouter: NavigationRouter) {
+        self.roomRecordStore = roomRecordStore
+        self.historyStore = historyStore
         self.navigationRouter = navigationRouter
     }
     
@@ -74,18 +83,29 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
             isAnalyzing = false
             
             // データ保存
+            let capturedAt = Date()
             if let roomRecordStore = roomRecordStore {
                 let missions = analysis.messyPoints.map { MissionPersisted(from: $0) }
                 let messyPointLabels = analysis.messyPoints.map { "\($0.label):\($0.priority)" }
                 try roomRecordStore.save(
                     pixelArtImageData: pixelData,
                     originalImageData: imageData,
-                    capturedAt: Date(),
+                    capturedAt: capturedAt,
                     score: analysis.score,
                     comment: analysis.characterComment,
                     missions: missions,
                     messyPointLabels: messyPointLabels
                 )
+            }
+            if let historyStore = historyStore {
+                let rank = CleanlinessRank.fromScore(analysis.score).rawValue
+                let historyRecord = RoomHistoryRecord(
+                    capturedAt: capturedAt,
+                    score: analysis.score,
+                    rank: rank,
+                    pixelArtImageData: pixelData
+                )
+                try historyStore.save(historyRecord)
             }
             
             // 少し待ってから結果画面に遷移

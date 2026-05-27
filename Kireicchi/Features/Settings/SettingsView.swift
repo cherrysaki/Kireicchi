@@ -30,6 +30,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         captureTimeSection
                         notificationToggleSection
+                        historySection
                         commentSection
                     }
                     .padding(.bottom, 100)
@@ -159,6 +160,40 @@ struct SettingsView: View {
                 borderWidth: 2,
                 shadowOffset: 3
             )
+            .padding(.horizontal)
+            .padding(.trailing, 3)
+        }
+    }
+
+    private var historySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("きろく")
+
+            Button(action: {
+                navigationRouter.navigate(to: .history)
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("きろくを見る")
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                        Text("これまでの撮影とスコアの推移")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignSystem.Color.primary)
+                }
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
             .padding(.horizontal)
             .padding(.trailing, 3)
         }

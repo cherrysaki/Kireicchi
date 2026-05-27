@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
+    @Environment(\.modelContext) private var modelContext
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
 
     var body: some View {
@@ -27,6 +28,10 @@ struct RootView: View {
                         SettingsView()
                     case .cleanupTimer:
                         CleanupTimerView()
+                    case .history:
+                        HistoryView(viewModel: HistoryViewModel(
+                            historyStore: RoomHistoryStore(context: modelContext)
+                        ))
                     }
                 }
         }

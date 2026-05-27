@@ -32,6 +32,6 @@ struct KireicchiApp: App {
                     await deps.bootstrap()
                 }
         }
-        .modelContainer(for: [LatestRoomRecord.self])
+        .modelContainer(for: [LatestRoomRecord.self, RoomHistoryRecord.self])
     }
 }
