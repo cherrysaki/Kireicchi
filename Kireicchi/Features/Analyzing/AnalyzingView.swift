@@ -31,28 +31,29 @@ struct AnalyzingView: View {
             DesignSystem.Color.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Spacer()
-
-                if viewModel.errorMessage == nil {
-                    Text("解析中...")
-                        .font(DesignSystem.Font.largeTitle)
-                        .foregroundColor(DesignSystem.Color.primaryDark)
-                        .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
-                        .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
-                } else {
-                    Text("エラーが発生しました")
-                        .font(DesignSystem.Font.title2)
-                        .foregroundColor(DesignSystem.Color.accentWarm)
+                ZStack {
+                    if viewModel.errorMessage == nil {
+                        Text("解析中...")
+                            .font(DesignSystem.Font.largeTitle)
+                            .foregroundColor(DesignSystem.Color.primaryDark)
+                            .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
+                            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
+                    } else {
+                        Text("エラーが発生しました")
+                            .font(DesignSystem.Font.title2)
+                            .foregroundColor(DesignSystem.Color.accentWarm)
+                    }
                 }
+                .frame(height: 160)
 
-                Spacer().frame(height: 40)
+                Spacer()
 
                 CharacterView(
                     characterType: .character01,
                     characterState: nil,
                     forceGif: .run
                 )
-                .frame(width: 120, height: 120)
+                .frame(width: 200, height: 200)
                 .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
                 .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
