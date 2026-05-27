@@ -10,7 +10,7 @@ struct TutorialView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FFFBEF").ignoresSafeArea()
+            Color(hex: "FFF8E1").ignoresSafeArea()
 
             Group {
                 switch currentPage {
@@ -193,35 +193,39 @@ struct TutorialView: View {
         buttonTitle: String,
         action: @escaping () -> Void
     ) -> some View {
-        VStack(spacing: 24) {
-            Spacer().frame(height: 32)
+        VStack(spacing: 0) {
+            Spacer()
 
-            Text(title)
-                .font(DesignSystem.Font.title)
-                .foregroundColor(DesignSystem.Color.textPrimary)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.6)
-                .padding(.horizontal, 24)
+            VStack(spacing: 16) {
+                Text(title)
+                    .font(DesignSystem.Font.title)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, 24)
+                    .frame(height: 60, alignment: .center)
 
-            media
+                media
+                    .frame(height: 260)
 
-            Text(subtitle)
-                .font(DesignSystem.Font.body)
-                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.85))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
+                Text(subtitle)
+                    .font(DesignSystem.Font.body)
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .frame(height: 80, alignment: .top)
+            }
 
             Spacer()
 
             Button(buttonTitle, action: action)
-                .font(DesignSystem.Font.pixelSmall)
+                .font(DesignSystem.Font.pixelMedium)
                 .foregroundColor(DesignSystem.Color.textOnPrimary)
-                .padding(.horizontal, 48)
-                .padding(.vertical, 14)
+                .frame(width: 240)
+                .padding(.vertical, 16)
                 .background(DesignSystem.Color.primary)
-                .cornerRadius(8)
-                .padding(.bottom, 32)
-                .padding(.bottom, 24)
+                .cornerRadius(12)
+                .padding(.bottom, 64)
         }
     }
 }
