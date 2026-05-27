@@ -61,9 +61,9 @@ struct HomeView: View {
             DesignSystem.Color.background.ignoresSafeArea()
 
             VStack(spacing: 14) {
-                topBar
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     VStack(spacing: 14) {
+                        topBar(now: context.date)
                         statusRow(now: context.date)
                         roomFrame(now: context.date)
                     }
@@ -98,7 +98,7 @@ struct HomeView: View {
     }
 
     // MARK: - Top Bar
-    private var topBar: some View {
+    private func topBar(now: Date) -> some View {
         HStack(spacing: 12) {
             Button(action: {
                 navigationRouter.navigate(to: .settings)
@@ -110,7 +110,7 @@ struct HomeView: View {
 
             Spacer()
 
-            Text("次の撮影まで  8時間30分")
+            Text(nextCaptureText(capturedAt: latestRecord?.capturedAt, now: now))
                 .font(DesignSystem.Font.footnote)
                 .foregroundColor(DesignSystem.Color.textPrimary)
 
@@ -118,6 +118,16 @@ struct HomeView: View {
                 .frame(width: 28)
         }
         .padding(.horizontal, 20)
+    }
+
+    private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
+        guard let capturedAt else { return "今すぐ撮影しよう！" }
+        let next = capturedAt.addingTimeInterval(24 * 3600)
+        let remaining = next.timeIntervalSince(now)
+        guard remaining > 0 else { return "今すぐ撮影しよう！" }
+        let hours = Int(remaining) / 3600
+        let minutes = (Int(remaining) % 3600) / 60
+        return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
     // MARK: - Status Row (score pill + heart gauge)
