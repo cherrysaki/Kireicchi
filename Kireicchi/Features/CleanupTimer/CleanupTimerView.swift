@@ -60,10 +60,10 @@ struct CleanupTimerView: View {
                 }
                 
                 Spacer().frame(height: 16)
-                
+
                 timerControlSection
 
-                Spacer()
+                Spacer().frame(height: 24)
 
                 bottomButtonSection
             }
@@ -119,42 +119,35 @@ struct CleanupTimerView: View {
                 Text(timeString(from: viewModel.remainingSeconds))
                     .font(.system(size: fontSize, weight: .bold, design: .monospaced))
                     .foregroundColor(DesignSystem.Color.textPrimary)
-            }
 
-            ZStack {
-                Circle()
-                    .stroke(DesignSystem.Color.secondary.opacity(0.3), lineWidth: lineWidth)
-                    .frame(width: circleSize, height: circleSize)
+                ZStack {
+                    Circle()
+                        .stroke(DesignSystem.Color.secondary.opacity(0.3), lineWidth: lineWidth)
+                        .frame(width: circleSize, height: circleSize)
 
-                Circle()
-                    .trim(from: 0, to: viewModel.progress)
-                    .stroke(
-                        DesignSystem.Color.primary,
-                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                    )
-                    .frame(width: circleSize, height: circleSize)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.5), value: viewModel.progress)
+                    Circle()
+                        .trim(from: 0, to: viewModel.progress)
+                        .stroke(
+                            DesignSystem.Color.primary,
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                        )
+                        .frame(width: circleSize, height: circleSize)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.linear(duration: 0.5), value: viewModel.progress)
 
-                if viewModel.isRunning {
                     CharacterView(
                         characterType: .character01,
                         characterState: nil,
                         forceGif: .cheer
                     )
                     .frame(width: circleSize * 0.85, height: circleSize * 0.85)
-                } else {
-                    VStack {
-                        Text(timeString(from: viewModel.remainingSeconds))
-                            .font(.system(size: fontSize, weight: .bold, design: .monospaced))
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                        Text("MM:SS")
-                            .font(DesignSystem.Font.pixelSmall)
-                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-                    }
                 }
+                .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
+            } else {
+                Text(timeString(from: viewModel.remainingSeconds))
+                    .font(.system(size: fontSize, weight: .bold, design: .monospaced))
+                    .foregroundColor(DesignSystem.Color.textPrimary)
             }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
         }
     }
 
@@ -168,10 +161,10 @@ struct CleanupTimerView: View {
         }) {
             Text(viewModel.isRunning ? "いちじていし" : "はじめる")
                 .font(DesignSystem.Font.pixelMedium)
-                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .foregroundColor(.white)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 20)
-                .background(DesignSystem.Color.primary)
+                .background(Color(hex: "FD98B8"))
                 .clipShape(RoundedRectangle(cornerRadius: 18))
         }
     }
@@ -186,7 +179,7 @@ struct CleanupTimerView: View {
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 16)
         }
     }
 
