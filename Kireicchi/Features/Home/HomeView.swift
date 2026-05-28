@@ -124,23 +124,21 @@ struct HomeView: View {
 
     // MARK: - Top Bar
     private func topBar(now: Date) -> some View {
-        HStack(spacing: 12) {
-            Button(action: {
-                navigationRouter.navigate(to: .settings)
-            }) {
-                Image(systemName: "gearshape.fill")
-                    .font(DesignSystem.Font.title3)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-            }
-
-            Spacer()
-
+        ZStack {
             Text(nextCaptureText(capturedAt: latestRecord?.capturedAt, now: now))
                 .font(DesignSystem.Font.footnote)
                 .foregroundColor(DesignSystem.Color.textPrimary)
 
-            Spacer()
-                .frame(width: 28)
+            HStack {
+                Button(action: {
+                    navigationRouter.navigate(to: .settings)
+                }) {
+                    Image(systemName: "gearshape.fill")
+                        .font(DesignSystem.Font.title3)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                }
+                Spacer()
+            }
         }
         .padding(.horizontal, 20)
     }
