@@ -31,8 +31,11 @@ final class PeerSession: NSObject, PeerSessionProtocol {
         stop()
 
         // 表示名は MCPeerID 制約 (≤63bytes UTF-8) に収める
-        let safeName = String(displayName.prefix(40))
-        let peerID = MCPeerID(displayName: safeName)
+        // 両端末で displayName が同じだと招待ロジック (<) で tie-break しないため、
+        // 短い UUID suffix を付与して必ず順序が決まるようにする
+        let baseName = String(displayName.prefix(40))
+        let unique = String(UUID().uuidString.prefix(6))
+        let peerID = MCPeerID(displayName: "\(baseName)#\(unique)")
         localPeerID = peerID
 
         let session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
