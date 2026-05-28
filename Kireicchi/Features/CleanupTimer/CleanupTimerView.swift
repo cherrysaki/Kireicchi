@@ -32,6 +32,7 @@ struct CleanupTimerView: View {
                     }
                     Spacer()
                 }
+                Spacer()
                 .padding(.horizontal)
                 .padding(.top, 8)
 
@@ -55,16 +56,9 @@ struct CleanupTimerView: View {
 
                         timerDisplaySection
                     }
-                } else {
-                    timerDisplaySection
                 }
-                
-                Spacer().frame(height: 16)
 
                 timerControlSection
-
-                Spacer().frame(height: 24)
-
                 bottomButtonSection
             }
             .padding(viewModel.isRunning ? 20 : 16)
@@ -93,7 +87,7 @@ struct CleanupTimerView: View {
 
     private var timePickerSection: some View {
         VStack(spacing: 12) {
-            Text("タイマー時間")
+            Text("タイマー時間を選んでね")
                 .font(DesignSystem.Font.pixelSmall)
                 .foregroundColor(DesignSystem.Color.textPrimary)
 
@@ -170,7 +164,7 @@ struct CleanupTimerView: View {
     }
 
     private var bottomButtonSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 8) {
             Button(action: {
                 navigationRouter.popToRoot()
                 navigationRouter.navigate(to: .capture)
@@ -179,7 +173,6 @@ struct CleanupTimerView: View {
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
-            .padding(.bottom, 16)
         }
     }
 
