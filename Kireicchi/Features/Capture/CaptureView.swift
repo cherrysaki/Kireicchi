@@ -35,11 +35,6 @@ struct CaptureView: View {
 
                 Spacer()
 
-                Text("1×")
-                    .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(.white)
-                    .pixelFrame(pixelSize: 3, background: Color.black.opacity(0.4))
-
                 Spacer().frame(height: 40)
 
                 Button(action: shutterTapped) {
