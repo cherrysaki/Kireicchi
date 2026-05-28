@@ -1,10 +1,17 @@
 import SwiftUI
+import SwiftData
 
 struct FriendVisitView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject private var viewModel: FriendVisitViewModel
+    @Query private var records: [LatestRoomRecord]
 
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
+
+    private var myRoomImage: UIImage? {
+        guard let data = records.first?.pixelArtImageData else { return nil }
+        return UIImage(data: data)
+    }
 
     init(myDisplayName: String, myCharacterId: String) {
         let coordinator = AppDependencies.shared.makeFriendVisitCoordinator()
@@ -89,30 +96,32 @@ struct FriendVisitView: View {
         ZStack {
             Rectangle()
                 .fill(DesignSystem.Color.secondary.opacity(0.3))
-                .aspectRatio(1, contentMode: .fit)
-                .overlay(
-                    Rectangle()
-                        .stroke(DesignSystem.Color.primary, lineWidth: 3)
-                )
 
-            HStack(spacing: 24) {
+            if let img = myRoomImage {
+                Image(uiImage: img)
+                    .resizable()
+                    .interpolation(.none)
+                    .aspectRatio(contentMode: .fit)
+            }
+
+            CharacterView(
+                characterType: myCharacterType,
+                characterState: .happy
+            )
+            .frame(width: 200, height: 200)
+            .offset(x: isVisitingState ? -80 : 0)
+            .animation(.easeInOut(duration: 0.4), value: isVisitingState)
+
+            if let friend = viewModel.friend, isVisitingState {
                 CharacterView(
-                    characterType: myCharacterType,
-                    characterState: .happy
+                    characterType: friend.characterType,
+                    characterState: .happy,
+                    forceGif: .cheer
                 )
                 .frame(width: 200, height: 200)
-
-                if let friend = viewModel.friend, isVisitingState {
-                    CharacterView(
-                        characterType: friend.characterType,
-                        characterState: .happy,
-                        forceGif: .cheer
-                    )
-                    .frame(width: 200, height: 200)
-                    .transition(.scale.combined(with: .opacity))
-                }
+                .offset(x: 80)
+                .transition(.scale.combined(with: .opacity))
             }
-            .animation(.easeInOut(duration: 0.4), value: isVisitingState)
 
             if isVisitingState {
                 Text("✨")
@@ -120,6 +129,12 @@ struct FriendVisitView: View {
                     .offset(x: 0, y: -80)
             }
         }
+        .aspectRatio(1, contentMode: .fit)
+        .overlay(
+            Rectangle()
+                .stroke(DesignSystem.Color.primary, lineWidth: 3)
+        )
+        .clipped()
         .padding(.horizontal)
         .padding(.trailing, 4)
     }
