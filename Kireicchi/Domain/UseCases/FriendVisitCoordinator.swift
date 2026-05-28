@@ -69,14 +69,14 @@ final class FriendVisitCoordinator: FriendVisitCoordinatorProtocol {
         switch event {
         case .peerFound(_, let displayName):
             if connectedPeerId == nil {
-                state = .connecting(peerName: displayName)
+                state = .connecting(peerName: Self.stripSuffix(displayName))
             }
 
         case .peerLost:
             break
 
         case .peerConnecting(_, let displayName):
-            state = .connecting(peerName: displayName)
+            state = .connecting(peerName: Self.stripSuffix(displayName))
 
         case .peerConnected(let peerId, _):
             connectedPeerId = peerId
@@ -134,6 +134,10 @@ final class FriendVisitCoordinator: FriendVisitCoordinatorProtocol {
         } else if helloReceived {
             state = .connected
         }
+    }
+
+    private static func stripSuffix(_ name: String) -> String {
+        name.split(separator: "#").first.map(String.init) ?? name
     }
 
     private func handle(distance meters: Float) {
