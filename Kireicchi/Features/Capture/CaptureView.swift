@@ -13,6 +13,7 @@ struct CaptureView: View {
             } else {
                 CameraPreviewView(session: cameraController.session)
                     .ignoresSafeArea()
+                squareViewfinder
             }
 
             VStack {
@@ -58,6 +59,35 @@ struct CaptureView: View {
         .onDisappear {
             cameraController.stopSession()
         }
+    }
+
+    // 撮影される正方形領域だけ明るく、それ以外をマスクして撮影範囲を明示
+    private var squareViewfinder: some View {
+        GeometryReader { geo in
+            let side = geo.size.width
+            ZStack {
+                // 全面を半透明黒で覆い、正方形 (角丸 12) だけ穴を空ける
+                Color.black.opacity(0.55)
+                    .mask {
+                        Rectangle()
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .frame(width: side, height: side)
+                                    .blendMode(.destinationOut)
+                            )
+                            .compositingGroup()
+                    }
+                    .allowsHitTesting(false)
+
+                // 正方形の境界にスカイ枠 (HomeView と同じ太さ・角丸)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignSystem.Color.primary, lineWidth: 5)
+                    .frame(width: side, height: side)
+                    .allowsHitTesting(false)
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .ignoresSafeArea()
     }
 
     private var permissionDeniedView: some View {

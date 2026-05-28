@@ -44,6 +44,18 @@ extension UIImage {
         return UIImage(cgImage: cropped, scale: normalized.scale, orientation: .up)
     }
 
+    /// 中央正方形クロップ。短辺に揃えて中央を切り出す。orientation も .up に正規化。
+    func croppedToSquare() -> UIImage {
+        let normalized = self.normalizedOrientation()
+        guard let cg = normalized.cgImage else { return normalized }
+        let side = min(cg.width, cg.height)
+        let x = (cg.width - side) / 2
+        let y = (cg.height - side) / 2
+        let rect = CGRect(x: x, y: y, width: side, height: side)
+        guard let cropped = cg.cropping(to: rect) else { return normalized }
+        return UIImage(cgImage: cropped, scale: normalized.scale, orientation: .up)
+    }
+
     /// imageOrientation を .up に正規化した UIImage を返す。
     private func normalizedOrientation() -> UIImage {
         guard imageOrientation != .up else { return self }

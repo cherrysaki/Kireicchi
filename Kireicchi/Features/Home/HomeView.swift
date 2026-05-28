@@ -154,13 +154,11 @@ struct HomeView: View {
         return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
-    // MARK: - Status Row (score pill + heart gauge)
+    // MARK: - Status Row (score pill のみ、ハートゲージは roomFrame にオーバーレイ)
     private func statusRow(now: Date) -> some View {
-        HStack(spacing: 12) {
-            scorePill
-            heartGaugePill(now: now)
-        }
-        .padding(.horizontal, 20)
+        scorePill
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
     }
 
     private var scorePill: some View {
@@ -168,12 +166,13 @@ struct HomeView: View {
             Text("散らかり指数")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary)
+            Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
                 .font(DesignSystem.Font.footnote)
                 .foregroundColor(DesignSystem.Color.textPrimary)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 10)
         .background(
             Capsule().fill(DesignSystem.Color.primary)
         )
@@ -190,6 +189,8 @@ struct HomeView: View {
                 now: now
             )
         } ?? Happiness.defaultWhenNoRecord
+        let clamped = min(max(Double(value) / 100.0, 0), 1)
+        let barWidth: CGFloat = 110
 
         return HStack(spacing: 8) {
             ZStack {
@@ -198,19 +199,16 @@ struct HomeView: View {
             }
             .frame(width: 22, height: 18)
 
-            GeometryReader { geo in
-                let clamped = min(max(Double(value) / 100.0, 0), 1)
-                ZStack(alignment: .leading) {
-                    Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
-                    Capsule()
-                        .fill(DesignSystem.Color.secondary)
-                        .frame(width: geo.size.width * clamped)
-                }
+            ZStack(alignment: .leading) {
+                Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
+                Capsule()
+                    .fill(DesignSystem.Color.secondary)
+                    .frame(width: barWidth * clamped)
             }
-            .frame(height: 14)
+            .frame(width: barWidth, height: 14)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
         .background(
             Capsule().fill(DesignSystem.Color.surface)
         )
@@ -222,24 +220,21 @@ struct HomeView: View {
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(DesignSystem.Color.secondary.opacity(0.15))
-                .aspectRatio(1, contentMode: .fit)
+            DesignSystem.Color.secondary.opacity(0.15)
 
             if let data = latestRecord?.pixelArtImageData,
                let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .interpolation(.none)
-                    .aspectRatio(contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .aspectRatio(contentMode: .fill)
             }
 
             if isRunaway {
                 Image("okitegami")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 320, height: 320)
+                    .padding(40)
             } else {
                 VStack {
                     Spacer()
@@ -252,10 +247,17 @@ struct HomeView: View {
                 }
             }
         }
+        .aspectRatio(1, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 5)
         )
+        .overlay(alignment: .topTrailing) {
+            heartGaugePill(now: now)
+                .padding(.top, 12)
+                .padding(.trailing, 12)
+        }
         .padding(.horizontal, 20)
     }
 
