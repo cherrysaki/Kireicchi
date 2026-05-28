@@ -123,9 +123,10 @@ struct AnalysisResultView: View {
                 .interpolation(.none)
                 .aspectRatio(1, contentMode: .fit)
                 .background(DesignSystem.Color.secondary.opacity(0.2))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
-                    Rectangle()
-                        .stroke(DesignSystem.Color.primary, lineWidth: 3)
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DesignSystem.Color.primary, lineWidth: 5)
                 )
                 .padding(.horizontal)
                 .padding(.trailing, 4)

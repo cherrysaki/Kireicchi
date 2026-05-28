@@ -12,7 +12,7 @@ struct PixelArtRequest {
     init(imageData: Data) {
         self.imageData = UIImage(data: imageData)?.pngData() ?? imageData
         self.model = "gpt-image-1"
-        self.size = "1024x1536"
+        self.size = "1024x1024"
         self.quality = "medium"
         self.count = 1
         self.prompt = """

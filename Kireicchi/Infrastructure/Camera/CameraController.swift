@@ -1,6 +1,7 @@
 @preconcurrency import AVFoundation
 import Foundation
 import Combine
+import UIKit
 
 final class CameraController: NSObject, ObservableObject {
 
@@ -133,10 +134,15 @@ extension CameraController: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput,
                      didFinishProcessingPhoto photo: AVCapturePhoto,
                      error: Error?) {
-        let data = error == nil ? photo.fileDataRepresentation() : nil
+        let cropped: Data? = {
+            guard error == nil,
+                  let raw = photo.fileDataRepresentation(),
+                  let image = UIImage(data: raw) else { return nil }
+            return image.croppedToSquare().jpegData(compressionQuality: 0.9)
+        }()
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.captureCompletion?(data)
+            self.captureCompletion?(cropped)
             self.captureCompletion = nil
         }
     }
