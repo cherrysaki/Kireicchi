@@ -6,6 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
+    @Query private var historyRecords: [RoomHistoryRecord]
 
     @State private var selectedHour = 19
     @State private var selectedMinute = 0
@@ -13,15 +14,6 @@ struct SettingsView: View {
     @State private var selectedCharacterId = "cat"
     @State private var showTimePicker = false
     @State private var isSaving = false
-
-    private let characters: [(id: String, emoji: String, label: String)] = [
-        ("cat", "🐱", "キャラクタsー1"),
-        ("dog", "🐶", "キャラクター2")
-    ]
-
-    private var selectedEmoji: String {
-        characters.first { $0.id == selectedCharacterId }?.emoji ?? "🐱"
-    }
 
     var body: some View {
         ZStack {
@@ -36,22 +28,6 @@ struct SettingsView: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                     Spacer()
-                    Button(action: {
-                        navigationRouter.navigateBack()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(DesignSystem.Font.subheadline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                PixelCircle(pixelSize: 3)
-                                    .fill(DesignSystem.Color.surface)
-                            )
-                            .overlay(
-                                PixelCircleStroke(pixelSize: 3, lineWidth: 2)
-                                    .fill(DesignSystem.Color.primary)
-                            )
-                    }
                 }
                 .padding()
 
@@ -59,10 +35,10 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         captureTimeSection
                         notificationToggleSection
-                        characterSection
+                        historySection
                         commentSection
                         AppleLoginSection()
-                        
+
                         #if DEBUG
                         debugSection
                         #endif
@@ -199,29 +175,48 @@ struct SettingsView: View {
         }
     }
 
-    private var characterSection: some View {
+    private var historySection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("キャラクター")
+            sectionLabel("きろく")
 
-            Picker("キャラクターを 選ぶ", selection: $selectedCharacterId) {
-                ForEach(characters, id: \.id) { character in
-                    HStack {
-                        Text(character.emoji)
-                            .font(DesignSystem.Font.title)
-                        Text(character.label)
+            Button(action: {
+                navigationRouter.navigate(to: .history)
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("きろくを見る")
+                            .font(DesignSystem.Font.subheadline)
+                            .foregroundColor(DesignSystem.Color.textPrimary)
+                        Text("これまでの撮影とスコアの推移")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                     }
-                    .tag(character.id)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignSystem.Color.primary)
                 }
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
             }
-            .pickerStyle(.segmented)
+            .buttonStyle(PlainButtonStyle())
             .padding(.horizontal)
+            .padding(.trailing, 3)
         }
     }
 
     private var commentSection: some View {
         HStack(spacing: 12) {
-            Text(selectedEmoji)
-                .font(DesignSystem.Font.custom(size: 56))
+            CharacterView(
+                characterType: .character01,
+                characterState: nil,
+                forceGif: .cheer
+            )
+            .frame(width: 80, height: 80)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("設定ありがとう！")
@@ -336,7 +331,7 @@ struct SettingsView: View {
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
                     .padding(.horizontal)
-                
+
                 HStack(spacing: 12) {
                     debugRunawayButton(title: "家出させる", isRunaway: true)
                     debugRunawayButton(title: "家出解除", isRunaway: false)
@@ -344,7 +339,71 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal)
             }
+
+            // 撮影制限テスト
+            VStack(alignment: .leading, spacing: 8) {
+                Text("撮影制限テスト (今日: \(todayCaptureCount)回)")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+
+                HStack(spacing: 12) {
+                    debugCaptureLimitButton(title: "0回にする") {
+                        resetTodayHistoryRecords()
+                    }
+                    debugCaptureLimitButton(title: "2回にする") {
+                        markCapturedTwiceToday()
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal)
+            }
         }
+    }
+
+    private var todayCaptureCount: Int {
+        let calendar = Calendar.current
+        return historyRecords.filter { calendar.isDateInToday($0.capturedAt) }.count
+    }
+
+    private func debugCaptureLimitButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+        .buttonStyle(PixelButtonStyle())
+    }
+
+    private func resetTodayHistoryRecords() {
+        let calendar = Calendar.current
+        let todayRecords = historyRecords.filter { calendar.isDateInToday($0.capturedAt) }
+        print("🔧 Debug: 今日のRoomHistoryRecord \(todayRecords.count) 件を削除します")
+        for record in todayRecords {
+            modelContext.delete(record)
+        }
+        try? modelContext.save()
+    }
+
+    private func markCapturedTwiceToday() {
+        let needed = 2 - todayCaptureCount
+        guard needed > 0 else {
+            print("🔧 Debug: すでに今日 \(todayCaptureCount) 回撮影済み")
+            return
+        }
+        print("🔧 Debug: ダミーRoomHistoryRecord を \(needed) 件追加して今日2回扱いにします")
+        let now = Date()
+        for offset in 0..<needed {
+            let dummy = RoomHistoryRecord(
+                capturedAt: now.addingTimeInterval(TimeInterval(-offset * 60)),
+                score: 70,
+                rank: "B"
+            )
+            modelContext.insert(dummy)
+        }
+        try? modelContext.save()
     }
     
     private func debugStateButton(title: String, score: Int) -> some View {
