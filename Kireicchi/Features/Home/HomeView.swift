@@ -89,8 +89,19 @@ struct HomeView: View {
 
             VStack {
                 Spacer()
-                cameraButton
-                    .padding(.bottom, 12)
+                HomeTabBar(
+                    onHome: { navigationRouter.popToRoot() },
+                    onCapture: {
+                        if canCapture {
+                            navigationRouter.navigate(to: .capture)
+                        } else {
+                            showCaptureAlert = true
+                        }
+                    },
+                    onFriends: { navigationRouter.navigate(to: .friendVisit) },
+                    canCapture: canCapture
+                )
+                .padding(.bottom, 12)
             }
         }
         .navigationBarHidden(true)

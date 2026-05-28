@@ -13,6 +13,7 @@ final class NavigationRouter: ObservableObject {
         case settings
         case cleanupTimer
         case history
+        case friendVisit
     }
     
     // 画面遷移メソッド

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
+    @EnvironmentObject private var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
 
@@ -32,6 +33,11 @@ struct RootView: View {
                         HistoryView(viewModel: HistoryViewModel(
                             historyStore: RoomHistoryStore(context: modelContext)
                         ))
+                    case .friendVisit:
+                        FriendVisitView(
+                            myDisplayName: deps.currentUser?.displayName ?? "わたし",
+                            myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
+                        )
                     }
                 }
         }
