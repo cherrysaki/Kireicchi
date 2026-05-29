@@ -9,6 +9,8 @@ struct AnalysisResultView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
 
+    @State private var skippedIds: Set<String> = []
+
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
@@ -18,7 +20,9 @@ struct AnalysisResultView: View {
     }
 
     private var pendingMissions: [MissionPersisted] {
-        (records.first?.missions ?? []).filter { !$0.isDone }
+        (records.first?.missions ?? []).filter {
+            !$0.isDone && !skippedIds.contains($0.id)
+        }
     }
 
     var body: some View {
@@ -156,8 +160,9 @@ struct AnalysisResultView: View {
                     if direction == .right {
                         let store = LatestRoomRecordStore(context: modelContext)
                         try? store.updateMission(id: mission.id, isDone: true)
+                    } else {
+                        skippedIds.insert(mission.id)
                     }
-                    // 左スワイプ(未読)は永続化しない
                 }
             )
             .frame(height: 420)
