@@ -325,30 +325,38 @@ struct HomeView: View {
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(DesignSystem.Color.primary.opacity(0.2))
-                        .frame(width: 40, height: 40)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(DesignSystem.Color.surface)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
+                        )
                     Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(DesignSystem.Font.title3)
-                        .foregroundColor(DesignSystem.Color.secondaryDark)
+                        .font(.system(size: 16))
+                        .foregroundColor(DesignSystem.Color.primaryDark)
                 }
                 Text("これまでの記録")
-                    .font(DesignSystem.Font.subheadline)
+                    .font(DesignSystem.Font.footnote)
                     .foregroundColor(DesignSystem.Color.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .pixelSquareCard(
-                fill: DesignSystem.Color.surface,
-                border: DesignSystem.Color.primary,
-                borderWidth: 2,
-                shadowOffset: 3
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(DesignSystem.Color.secondary)
             )
-            .padding(.horizontal)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            )
         }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
     }
 }
 
