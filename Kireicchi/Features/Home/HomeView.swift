@@ -145,13 +145,30 @@ struct HomeView: View {
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
-        guard let capturedAt else { return "今すぐ撮影しよう！" }
-        let next = capturedAt.addingTimeInterval(24 * 3600)
-        let remaining = next.timeIntervalSince(now)
-        guard remaining > 0 else { return "今すぐ撮影しよう！" }
-        let hours = Int(remaining) / 3600
-        let minutes = (Int(remaining) % 3600) / 60
-        return "次の撮影まで \(hours)時間\(minutes)分"
+        if canCapture {
+            guard let capturedAt else { return "今すぐ撮影しよう！" }
+            let calendar = Calendar.current
+            if !calendar.isDate(capturedAt, inSameDayAs: now) {
+                return "今すぐ撮影しよう！"
+            }
+            let next = capturedAt.addingTimeInterval(24 * 3600)
+            let remaining = next.timeIntervalSince(now)
+            guard remaining > 0 else { return "今すぐ撮影しよう！" }
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        } else {
+            let calendar = Calendar.current
+            guard let tomorrow = calendar.nextDate(
+                after: now,
+                matching: DateComponents(hour: 0, minute: 0, second: 0),
+                matchingPolicy: .nextTime
+            ) else { return "また明日撮影しよう！" }
+            let remaining = tomorrow.timeIntervalSince(now)
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        }
     }
 
     private var scorePill: some View {
