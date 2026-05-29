@@ -77,11 +77,12 @@ struct HomeView: View {
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     VStack(spacing: 14) {
                         topBar(now: context.date)
-                        statusRow(now: context.date)
+                        scorePill
                         roomFrame(now: context.date)
                     }
                 }
                 missionBanner
+                historyBanner
                 Spacer(minLength: 0)
             }
             .padding(.top, 8)
@@ -144,40 +145,54 @@ struct HomeView: View {
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
-        guard let capturedAt else { return "今すぐ撮影しよう！" }
-        let next = capturedAt.addingTimeInterval(24 * 3600)
-        let remaining = next.timeIntervalSince(now)
-        guard remaining > 0 else { return "今すぐ撮影しよう！" }
-        let hours = Int(remaining) / 3600
-        let minutes = (Int(remaining) % 3600) / 60
-        return "次の撮影まで \(hours)時間\(minutes)分"
-    }
-
-    // MARK: - Status Row (score pill のみ、ハートゲージは roomFrame にオーバーレイ)
-    private func statusRow(now: Date) -> some View {
-        scorePill
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
+        if canCapture {
+            guard let capturedAt else { return "今すぐ撮影しよう！" }
+            let calendar = Calendar.current
+            if !calendar.isDate(capturedAt, inSameDayAs: now) {
+                return "今すぐ撮影しよう！"
+            }
+            let next = capturedAt.addingTimeInterval(24 * 3600)
+            let remaining = next.timeIntervalSince(now)
+            guard remaining > 0 else { return "今すぐ撮影しよう！" }
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        } else {
+            let calendar = Calendar.current
+            guard let tomorrow = calendar.nextDate(
+                after: now,
+                matching: DateComponents(hour: 0, minute: 0, second: 0),
+                matchingPolicy: .nextTime
+            ) else { return "また明日撮影しよう！" }
+            let remaining = tomorrow.timeIntervalSince(now)
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        }
     }
 
     private var scorePill: some View {
-        HStack(spacing: 8) {
+        HStack {
             Text("散らかり指数")
-                .font(DesignSystem.Font.caption)
+                .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
             Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                .font(DesignSystem.Font.footnote)
+                .font(DesignSystem.Font.title2)
+                .bold()
                 .foregroundColor(DesignSystem.Color.textPrimary)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
         .background(
-            Capsule().fill(DesignSystem.Color.primary)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
+        .padding(.horizontal, 20)
     }
 
     private func heartGaugePill(now: Date) -> some View {
@@ -218,44 +233,54 @@ struct HomeView: View {
 
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
-        ZStack {
-            DesignSystem.Color.secondary.opacity(0.15)
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.secondary.opacity(0.15))
+                .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DesignSystem.Color.primary, lineWidth: 5)
+                )
 
-            if let data = latestRecord?.pixelArtImageData,
-               let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .interpolation(.none)
-                    .aspectRatio(contentMode: .fill)
-            }
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if let data = latestRecord?.pixelArtImageData,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                            .clipped()
+                    }
 
-            if isRunaway {
-                Image("okitegami")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(40)
-            } else {
-                VStack {
-                    Spacer()
-                    CharacterView(
-                        characterType: selectedCharacterType,
-                        characterState: characterState(at: now)
-                    )
-                    .frame(width: 200, height: 200)
-                    .padding(.bottom, -30)
+                    if isRunaway {
+                        Image("okitegami")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(16)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                    } else {
+                        VStack {
+                            Spacer()
+                            CharacterView(
+                                characterType: selectedCharacterType,
+                                characterState: characterState(at: now)
+                            )
+                            .frame(
+                                width: geo.size.width * 0.5,
+                                height: geo.size.width * 0.5
+                            )
+                            .padding(.bottom, 8)
+                        }
+                        .frame(width: geo.size.width, height: geo.size.width)
+                    }
+
+                    heartGaugePill(now: now)
+                        .padding(10)
                 }
             }
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DesignSystem.Color.primary, lineWidth: 5)
-        )
-        .overlay(alignment: .topTrailing) {
-            heartGaugePill(now: now)
-                .padding(.top, 12)
-                .padding(.trailing, 12)
+            .aspectRatio(1, contentMode: .fit)
         }
         .padding(.horizontal, 20)
     }
@@ -291,7 +316,7 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary)
+                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
@@ -308,6 +333,47 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
+    }
+
+    // MARK: - History Banner
+    private var historyBanner: some View {
+        Button(action: {
+            navigationRouter.navigate(to: .history)
+        }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(DesignSystem.Color.surface)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
+                        )
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 16))
+                        .foregroundColor(DesignSystem.Color.primaryDark)
+                }
+                Text("これまでの記録")
+                    .font(DesignSystem.Font.footnote)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(DesignSystem.Color.secondary.opacity(0.4))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
     }
 }
 
