@@ -77,11 +77,12 @@ struct HomeView: View {
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     VStack(spacing: 14) {
                         topBar(now: context.date)
-                        statusRow(now: context.date)
+                        scorePill
                         roomFrame(now: context.date)
                     }
                 }
                 missionBanner
+                historyBanner
                 Spacer(minLength: 0)
             }
             .padding(.top, 8)
@@ -153,31 +154,28 @@ struct HomeView: View {
         return "次の撮影まで \(hours)時間\(minutes)分"
     }
 
-    // MARK: - Status Row (score pill のみ、ハートゲージは roomFrame にオーバーレイ)
-    private func statusRow(now: Date) -> some View {
-        scorePill
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-    }
-
     private var scorePill: some View {
-        HStack(spacing: 8) {
+        HStack {
             Text("散らかり指数")
-                .font(DesignSystem.Font.caption)
+                .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
             Spacer()
             Text(latestRecord.map { "\($0.score)/100" } ?? "--/100")
-                .font(DesignSystem.Font.footnote)
+                .font(DesignSystem.Font.title2)
+                .bold()
                 .foregroundColor(DesignSystem.Color.textPrimary)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
         .background(
-            Capsule().fill(DesignSystem.Color.primary)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
+        .padding(.horizontal, 20)
     }
 
     private func heartGaugePill(now: Date) -> some View {
@@ -218,45 +216,50 @@ struct HomeView: View {
 
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
-        ZStack {
-            DesignSystem.Color.secondary.opacity(0.15)
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(DesignSystem.Color.secondary.opacity(0.15))
+                .aspectRatio(1, contentMode: .fit)
 
             if let data = latestRecord?.pixelArtImageData,
                let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .interpolation(.none)
-                    .aspectRatio(contentMode: .fill)
+                    .aspectRatio(contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
 
             if isRunaway {
                 Image("okitegami")
                     .resizable()
                     .scaledToFit()
-                    .padding(40)
+                    .padding(16)
             } else {
-                VStack {
-                    Spacer()
-                    CharacterView(
-                        characterType: selectedCharacterType,
-                        characterState: characterState(at: now)
-                    )
-                    .frame(width: 200, height: 200)
-                    .padding(.bottom, -30)
+                GeometryReader { geo in
+                    VStack {
+                        Spacer()
+                        CharacterView(
+                            characterType: selectedCharacterType,
+                            characterState: characterState(at: now)
+                        )
+                        .frame(
+                            width: geo.size.width * 0.5,
+                            height: geo.size.width * 0.5
+                        )
+                        .padding(.bottom, 8)
+                    }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
             }
+
+            heartGaugePill(now: now)
+                .padding(10)
         }
-        .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 5)
         )
-        .overlay(alignment: .topTrailing) {
-            heartGaugePill(now: now)
-                .padding(.top, 12)
-                .padding(.trailing, 12)
-        }
         .padding(.horizontal, 20)
     }
 
@@ -308,6 +311,39 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
+    }
+
+    // MARK: - History Banner
+    private var historyBanner: some View {
+        Button(action: {
+            navigationRouter.navigate(to: .history)
+        }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignSystem.Color.secondary.opacity(0.3))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(DesignSystem.Font.title3)
+                        .foregroundColor(DesignSystem.Color.secondaryDark)
+                }
+                Text("これまでの記録")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.surface,
+                border: DesignSystem.Color.secondary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
+            .padding(.horizontal)
+        }
     }
 }
 
