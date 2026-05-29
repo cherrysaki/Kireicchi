@@ -20,12 +20,12 @@ enum VisitConnectionState: Equatable, Sendable {
 
     var headlineText: String {
         switch self {
-        case .idle:                    return "まだ さがしていません"
-        case .discovering:             return "ともだちを さがして います..."
-        case .connecting(let name):    return "\(name) と つないで います..."
-        case .connected:               return "つながりました!"
-        case .tracking:                return "ちかづいて みよう"
-        case .visiting:                return "ともだちが きました!"
+        case .idle:                    return "まだ探していません"
+        case .discovering:             return "友達を探しています..."
+        case .connecting(let name):    return "\(name) と接続しています..."
+        case .connected:               return "繋がりました!"
+        case .tracking:                return "近づいてみよう"
+        case .visiting:                return "友達が来ました!"
         case .error(let msg):          return "エラー: \(msg)"
         }
     }

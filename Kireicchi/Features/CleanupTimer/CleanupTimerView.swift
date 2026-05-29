@@ -16,7 +16,7 @@ struct CleanupTimerView: View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea(.all)
 
-            VStack(spacing: viewModel.isRunning ? 40 : 24) {
+            VStack(spacing: 24) {
                 // 戻るボタン（画面上部）
                 HStack {
                     Button(action: {
@@ -25,7 +25,7 @@ struct CleanupTimerView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                                 .font(DesignSystem.Font.title3)
-                            Text("もどる")
+                            Text("戻る")
                                 .font(DesignSystem.Font.subheadline)
                         }
                         .foregroundColor(DesignSystem.Color.textPrimary)
@@ -67,10 +67,9 @@ struct CleanupTimerView: View {
 
                 bottomButtonSection
             }
-            .padding(viewModel.isRunning ? 20 : 16)
+            .padding(16)
         }
         .navigationBarHidden(true)
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
         .alert("お片付け完了！", isPresented: $viewModel.isFinished) {
             Button("もう一度撮影") {
                 viewModel.isFinished = false
@@ -99,7 +98,7 @@ struct CleanupTimerView: View {
 
             Picker("分", selection: $viewModel.selectedMinutes) {
                 ForEach(1...30, id: \.self) { minute in
-                    Text("\(minute) ふん")
+                    Text("\(minute) 分")
                         .tag(minute)
                 }
             }
@@ -111,9 +110,9 @@ struct CleanupTimerView: View {
 
     private var timerDisplaySection: some View {
         VStack(spacing: 12) {
-            let circleSize: CGFloat = viewModel.isRunning ? 330 : 220
-            let lineWidth: CGFloat = viewModel.isRunning ? 20 : 15
-            let fontSize: CGFloat = viewModel.isRunning ? 52 : 39
+            let circleSize: CGFloat = 220
+            let lineWidth: CGFloat = 15
+            let fontSize: CGFloat = 39
 
             if viewModel.isRunning {
                 Text(timeString(from: viewModel.remainingSeconds))
@@ -143,6 +142,7 @@ struct CleanupTimerView: View {
                         forceGif: .cheer
                     )
                     .frame(width: circleSize * 0.85, height: circleSize * 0.85)
+                    .transition(.opacity)
                 } else {
                     VStack {
                         Text(timeString(from: viewModel.remainingSeconds))
@@ -152,9 +152,10 @@ struct CleanupTimerView: View {
                             .font(DesignSystem.Font.pixelSmall)
                             .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                     }
+                    .transition(.opacity)
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.isRunning)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.isRunning)
         }
     }
 
@@ -166,7 +167,7 @@ struct CleanupTimerView: View {
                 viewModel.start()
             }
         }) {
-            Text(viewModel.isRunning ? "いちじていし" : "はじめる")
+            Text(viewModel.isRunning ? "一時停止" : "始める")
                 .font(DesignSystem.Font.pixelMedium)
                 .foregroundColor(DesignSystem.Color.textOnPrimary)
                 .padding(.horizontal, 40)

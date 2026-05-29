@@ -45,7 +45,7 @@ final class AppDependencies: ObservableObject {
             self.currentUser = user
             self.authProvider = session.provider
         } catch {
-            self.bootstrapError = "サーバーと つながれないみたい (\(error.localizedDescription))"
+            self.bootstrapError = "サーバーに接続できませんでした (\(error.localizedDescription))"
             print("[bootstrap] failed: \(error)")
         }
     }
@@ -59,7 +59,7 @@ final class AppDependencies: ObservableObject {
             self.currentUser = user
             self.authProvider = user.authProvider
         } catch {
-            self.bootstrapError = "Apple サインインに しっぱい (\(error.localizedDescription))"
+            self.bootstrapError = "Apple サインインに失敗 (\(error.localizedDescription))"
             print("[completeAppleSignIn] failed: \(error)")
         }
     }

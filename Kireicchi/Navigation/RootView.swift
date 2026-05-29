@@ -31,7 +31,7 @@ struct RootView: View {
                         CleanupTimerView()
                     case .friendVisit:
                         FriendVisitView(
-                            myDisplayName: deps.currentUser?.displayName ?? "わたし",
+                            myDisplayName: deps.currentUser?.displayName ?? "私",
                             myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
                         )
                     case .history:

@@ -60,7 +60,7 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
                     .frame(width: 32, height: 32)
             }
             Spacer()
-            Text("きろく")
+            Text("記録")
                 .font(DesignSystem.Font.title2)
                 .foregroundColor(DesignSystem.Color.textPrimary)
             Spacer()
@@ -127,7 +127,7 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
     private var emptyChartPlaceholder: some View {
         VStack {
             Spacer()
-            Text("まだきろくがありません")
+            Text("まだ記録がありません")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             Spacer()

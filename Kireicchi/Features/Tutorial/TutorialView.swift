@@ -168,13 +168,13 @@ struct TutorialView: View {
     // MARK: - Page 5: Start
     private var startPage: some View {
         contentPage(
-            title: "さあはじめよう！",
+            title: "さあ始めよう！",
             subtitle: "毎日撮影して\nきれいっちを元気にしてあげてね！",
             media: AnyView(
                 CharacterView(characterType: .character01, characterState: .happy)
                     .frame(width: 280, height: 280)
             ),
-            buttonTitle: "はじめる",
+            buttonTitle: "始める",
             action: {
                 Task {
                     await AVCaptureDevice.requestAccess(for: .video)

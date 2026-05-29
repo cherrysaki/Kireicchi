@@ -59,10 +59,10 @@ struct SwipeMissionStack: View {
         VStack(spacing: 14) {
             CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
                 .frame(width: 140, height: 140)
-            Text("ぜんぶ おわった！")
+            Text("全部終わった！")
                 .font(DesignSystem.Font.title2)
                 .foregroundColor(DesignSystem.Color.textPrimary)
-            Text("おつかれさま✨")
+            Text("お疲れさま✨")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
         }
