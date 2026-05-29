@@ -24,8 +24,17 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>近くの友達と繋がるために Bluetooth を使います</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_kireicchi-fv._tcp</string>
+		<string>_kireicchi-fv._udp</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>AIで部屋の解析をするためにカメラを使用します</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>近くの友達を探すためにローカルネットワークを使います</string>
 	<key>NSNearbyInteractionUsageDescription</key>
 	<string>近くの友達とキャラクターを共有するために使用します。</string>
 	<key>OPENAI_API_KEY</key>
