@@ -220,46 +220,51 @@ struct HomeView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.secondary.opacity(0.15))
                 .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DesignSystem.Color.primary, lineWidth: 5)
+                )
 
-            if let data = latestRecord?.pixelArtImageData,
-               let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .interpolation(.none)
-                    .aspectRatio(contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            if isRunaway {
-                Image("okitegami")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(16)
-            } else {
-                GeometryReader { geo in
-                    VStack {
-                        Spacer()
-                        CharacterView(
-                            characterType: selectedCharacterType,
-                            characterState: characterState(at: now)
-                        )
-                        .frame(
-                            width: geo.size.width * 0.5,
-                            height: geo.size.width * 0.5
-                        )
-                        .padding(.bottom, 8)
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if let data = latestRecord?.pixelArtImageData,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                            .clipped()
                     }
-                    .frame(width: geo.size.width, height: geo.size.height)
+
+                    if isRunaway {
+                        Image("okitegami")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(16)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                    } else {
+                        VStack {
+                            Spacer()
+                            CharacterView(
+                                characterType: selectedCharacterType,
+                                characterState: characterState(at: now)
+                            )
+                            .frame(
+                                width: geo.size.width * 0.5,
+                                height: geo.size.width * 0.5
+                            )
+                            .padding(.bottom, 8)
+                        }
+                        .frame(width: geo.size.width, height: geo.size.width)
+                    }
+
+                    heartGaugePill(now: now)
+                        .padding(10)
                 }
             }
-
-            heartGaugePill(now: now)
-                .padding(10)
+            .aspectRatio(1, contentMode: .fit)
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DesignSystem.Color.primary, lineWidth: 5)
-        )
         .padding(.horizontal, 20)
     }
 
@@ -321,7 +326,7 @@ struct HomeView: View {
             HStack(spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(DesignSystem.Color.secondary.opacity(0.3))
+                        .fill(DesignSystem.Color.primary.opacity(0.2))
                         .frame(width: 40, height: 40)
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .font(DesignSystem.Font.title3)
@@ -338,7 +343,7 @@ struct HomeView: View {
             .padding(.vertical, 12)
             .pixelSquareCard(
                 fill: DesignSystem.Color.surface,
-                border: DesignSystem.Color.secondary,
+                border: DesignSystem.Color.primary,
                 borderWidth: 2,
                 shadowOffset: 3
             )
