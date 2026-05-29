@@ -299,7 +299,7 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary)
+                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
@@ -348,7 +348,7 @@ struct HomeView: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(DesignSystem.Color.secondary)
+                    .fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
