@@ -25,21 +25,6 @@ struct HomeView: View {
 
     private var latestRecord: LatestRoomRecord? { records.first }
 
-    private var pendingMissions: [MissionPersisted] {
-        (latestRecord?.missions ?? []).filter { !$0.isDone }
-    }
-
-    private var legacyMissionLabels: [String] {
-        latestRecord?.messyPointLabels ?? []
-    }
-
-    private var pendingMissionCount: Int {
-        if !pendingMissions.isEmpty || (latestRecord?.missions.isEmpty == false) {
-            return pendingMissions.count
-        }
-        return legacyMissionLabels.count
-    }
-
     private var selectedCharacterType: CharacterType {
         CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
     }
@@ -69,6 +54,21 @@ struct HomeView: View {
         return daysSince >= 7
     }
 
+    private var pendingMissions: [MissionPersisted] {
+        (latestRecord?.missions ?? []).filter { !$0.isDone }
+    }
+
+    private var legacyMissionLabels: [String] {
+        latestRecord?.messyPointLabels ?? []
+    }
+
+    private var pendingMissionCount: Int {
+        if !pendingMissions.isEmpty || (latestRecord?.missions.isEmpty == false) {
+            return pendingMissions.count
+        }
+        return legacyMissionLabels.count
+    }
+
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
@@ -82,6 +82,7 @@ struct HomeView: View {
                     }
                 }
                 missionBanner
+                historyBanner
                 Spacer(minLength: 0)
             }
             .padding(.top, 8)
@@ -110,14 +111,13 @@ struct HomeView: View {
         } message: {
             Text("1日2回まで撮影できます。\nまた明日撮影してね！")
         }
-        .sheet(isPresented: $isMissionSheetPresented) {
-            MissionListSheet(
+        .fullScreenCover(isPresented: $isMissionSheetPresented) {
+            HomeMissionSwipeView(
                 missions: pendingMissions,
-                legacyLabels: pendingMissions.isEmpty && latestRecord?.missions.isEmpty != false
-                    ? legacyMissionLabels : [],
-                onToggleDone: { mission in
+                originalImage: latestRecord?.originalImageData.flatMap { UIImage(data: $0) },
+                onComplete: { mission in
                     let store = LatestRoomRecordStore(context: modelContext)
-                    try? store.updateMission(id: mission.id, isDone: !mission.isDone)
+                    try? store.updateMission(id: mission.id, isDone: true)
                 }
             )
         }
@@ -145,13 +145,30 @@ struct HomeView: View {
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
-        guard let capturedAt else { return "今すぐ撮影しよう！" }
-        let next = capturedAt.addingTimeInterval(24 * 3600)
-        let remaining = next.timeIntervalSince(now)
-        guard remaining > 0 else { return "今すぐ撮影しよう！" }
-        let hours = Int(remaining) / 3600
-        let minutes = (Int(remaining) % 3600) / 60
-        return "次の撮影まで \(hours)時間\(minutes)分"
+        if canCapture {
+            guard let capturedAt else { return "今すぐ撮影しよう！" }
+            let calendar = Calendar.current
+            if !calendar.isDate(capturedAt, inSameDayAs: now) {
+                return "今すぐ撮影しよう！"
+            }
+            let next = capturedAt.addingTimeInterval(24 * 3600)
+            let remaining = next.timeIntervalSince(now)
+            guard remaining > 0 else { return "今すぐ撮影しよう！" }
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        } else {
+            let calendar = Calendar.current
+            guard let tomorrow = calendar.nextDate(
+                after: now,
+                matching: DateComponents(hour: 0, minute: 0, second: 0),
+                matchingPolicy: .nextTime
+            ) else { return "また明日撮影しよう！" }
+            let remaining = tomorrow.timeIntervalSince(now)
+            let hours = Int(remaining) / 3600
+            let minutes = (Int(remaining) % 3600) / 60
+            return "次の撮影まで \(hours)時間\(minutes)分"
+        }
     }
 
     private var scorePill: some View {
@@ -189,33 +206,28 @@ struct HomeView: View {
         let clamped = min(max(Double(value) / 100.0, 0), 1)
         let barWidth: CGFloat = 110
 
-        return HStack(spacing: 6) {
+        return HStack(spacing: 8) {
             ZStack {
                 PixelHeartShape().fill(DesignSystem.Color.secondary)
                 PixelHeartStrokeShape().fill(DesignSystem.Color.secondaryDark)
             }
-            .frame(width: 18, height: 14)
+            .frame(width: 22, height: 18)
 
-            GeometryReader { geo in
-                let clamped = min(max(Double(value) / 100.0, 0), 1)
-                ZStack(alignment: .leading) {
-                    Capsule().fill(DesignSystem.Color.primary.opacity(0.3))
-                    Capsule()
-                        .fill(DesignSystem.Color.secondary)
-                        .frame(width: geo.size.width * clamped)
-                }
+            ZStack(alignment: .leading) {
+                Capsule().fill(DesignSystem.Color.primary.opacity(0.5))
+                Capsule()
+                    .fill(DesignSystem.Color.secondary)
+                    .frame(width: barWidth * clamped)
             }
-            .frame(width: 80, height: 10)
+            .frame(width: barWidth, height: 14)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(
-            Capsule()
-                .fill(DesignSystem.Color.surface.opacity(0.85))
+            Capsule().fill(DesignSystem.Color.surface)
         )
         .overlay(
-            Capsule()
-                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
+            Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
         )
     }
 
@@ -225,45 +237,50 @@ struct HomeView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.secondary.opacity(0.15))
                 .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DesignSystem.Color.primary, lineWidth: 5)
+                )
 
-            if let data = latestRecord?.pixelArtImageData,
-               let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .interpolation(.none)
-                    .aspectRatio(contentMode: .fill)
-            }
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if let data = latestRecord?.pixelArtImageData,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                            .clipped()
+                    }
 
-            if isRunaway {
-                Image("okitegami")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(40)
-            } else {
-                VStack {
-                    Spacer()
-                    CharacterView(
-                        characterType: selectedCharacterType,
-                        characterState: characterState(at: now)
-                    )
-                    .frame(width: 200, height: 200)
-                    .padding(.bottom, -30)
+                    if isRunaway {
+                        Image("okitegami")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(16)
+                            .frame(width: geo.size.width, height: geo.size.width)
+                    } else {
+                        VStack {
+                            Spacer()
+                            CharacterView(
+                                characterType: selectedCharacterType,
+                                characterState: characterState(at: now)
+                            )
+                            .frame(
+                                width: geo.size.width * 0.5,
+                                height: geo.size.width * 0.5
+                            )
+                            .padding(.bottom, 8)
+                        }
+                        .frame(width: geo.size.width, height: geo.size.width)
+                    }
+
+                    heartGaugePill(now: now)
+                        .padding(10)
                 }
             }
-
-            heartGaugePill(now: now)
-                .padding(10)
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DesignSystem.Color.primary, lineWidth: 5)
-        )
-        .overlay(alignment: .topTrailing) {
-            heartGaugePill(now: now)
-                .padding(.top, 12)
-                .padding(.trailing, 12)
+            .aspectRatio(1, contentMode: .fit)
         }
         .padding(.horizontal, 20)
     }
@@ -271,32 +288,43 @@ struct HomeView: View {
     // MARK: - Mission Banner
     private var missionBanner: some View {
         Button(action: {
+            guard !pendingMissions.isEmpty else { return }
             isMissionSheetPresented = true
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(DesignSystem.Color.primary.opacity(0.2))
-                        .frame(width: 40, height: 40)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(DesignSystem.Color.surface)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
+                        )
                     PixelStar(size: 22)
                 }
+
                 Text(missionBannerText)
-                    .font(DesignSystem.Font.subheadline)
+                    .font(DesignSystem.Font.footnote)
                     .foregroundColor(DesignSystem.Color.textPrimary)
+
                 Spacer()
+
                 Image(systemName: "chevron.right")
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.5))
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .pixelSquareCard(
-                fill: DesignSystem.Color.surface,
-                border: DesignSystem.Color.primary,
-                borderWidth: 2,
-                shadowOffset: 3
+            .background(
+                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
             )
-            .padding(.horizontal)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            )
         }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
     }
 
     private var missionBannerText: String {
@@ -307,136 +335,45 @@ struct HomeView: View {
         return "撮影してお部屋を分析しよう！"
     }
 
-    // MARK: - Camera Button
-    private var cameraButton: some View {
+    // MARK: - History Banner
+    private var historyBanner: some View {
         Button(action: {
-            if canCapture {
-                navigationRouter.navigate(to: .capture)
-            } else {
-                showCaptureAlert = true
-            }
+            navigationRouter.navigate(to: .history)
         }) {
-            Image(systemName: "camera.fill")
-                .font(DesignSystem.Font.title)
-                .foregroundColor(DesignSystem.Color.textOnPrimary)
-                .frame(width: 72, height: 72)
-                .background(
-                    PixelCircle(pixelSize: 5)
-                        .fill(canCapture ? DesignSystem.Color.primary : Color.gray)
-                )
-                .overlay(
-                    PixelCircleStroke(pixelSize: 5, lineWidth: 4)
-                        .fill(canCapture ? DesignSystem.Color.primaryDark : Color.gray.opacity(0.7))
-                )
-        }
-    }
-
-}
-
-// MARK: - Mission List Sheet
-private struct MissionListSheet: View {
-    let missions: [MissionPersisted]
-    let legacyLabels: [String]
-    let onToggleDone: (MissionPersisted) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ZStack {
-            DesignSystem.Color.background.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 8) {
-                    PixelStar(size: 24)
-                    Text("お片付けミッション")
-                        .font(DesignSystem.Font.title3)
-                        .foregroundColor(DesignSystem.Color.textPrimary)
-                    Spacer()
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(DesignSystem.Font.headline)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                    }
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(DesignSystem.Color.surface)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
+                        )
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 16))
+                        .foregroundColor(DesignSystem.Color.primaryDark)
                 }
-
-                if missions.isEmpty && legacyLabels.isEmpty {
-                    Text("まだミッションがありません。\nお部屋を撮影してみよう！")
-                        .font(DesignSystem.Font.subheadline)
-                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                } else if !missions.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(missions) { mission in
-                                MissionTaskRow(mission: mission) {
-                                    onToggleDone(mission)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 12)
-                                .pixelSquareCard(
-                                    fill: DesignSystem.Color.surface,
-                                    border: DesignSystem.Color.primaryDark,
-                                    borderWidth: 2,
-                                    shadowOffset: 3
-                                )
-                                .padding(.trailing, 3)
-                            }
-                        }
-                    }
-                } else {
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(Array(legacyLabels.enumerated()), id: \.offset) { index, label in
-                                CleanupTaskRow(label: label, index: index)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 12)
-                                    .pixelSquareCard(
-                                        fill: DesignSystem.Color.surface,
-                                        border: DesignSystem.Color.primaryDark,
-                                        borderWidth: 2,
-                                        shadowOffset: 3
-                                    )
-                                    .padding(.trailing, 3)
-                            }
-                        }
-                    }
-                }
-
+                Text("これまでの記録")
+                    .font(DesignSystem.Font.footnote)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
                 Spacer()
+                Image(systemName: "chevron.right")
+                    .font(DesignSystem.Font.caption)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
             }
-            .padding(20)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(DesignSystem.Color.secondary.opacity(0.4))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            )
         }
-        .presentationDetents([.medium, .large])
-    }
-}
-
-// MARK: - Mission Task Row
-private struct MissionTaskRow: View {
-    let mission: MissionPersisted
-    let onToggle: () -> Void
-
-    private var starCount: Int { min(max(mission.priority, 1), 5) }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onToggle) {
-                Image(systemName: mission.isDone ? "checkmark.circle.fill" : "circle")
-                    .font(DesignSystem.Font.title3)
-                    .foregroundColor(mission.isDone ? DesignSystem.Color.primaryDark : DesignSystem.Color.textPrimary.opacity(0.6))
-            }
-            .buttonStyle(.plain)
-
-            Text(mission.label)
-                .font(DesignSystem.Font.subheadline)
-                .strikethrough(mission.isDone)
-                .foregroundColor(mission.isDone ? DesignSystem.Color.textPrimary.opacity(0.5) : DesignSystem.Color.textPrimary)
-
-            Spacer()
-
-            HStack(spacing: 2) {
-                ForEach(0..<starCount, id: \.self) { _ in
-                    PixelStar(size: 12)
-                }
-            }
-        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
     }
 }
 
