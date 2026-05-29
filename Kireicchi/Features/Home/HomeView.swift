@@ -3,6 +3,7 @@ import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
     @Query private var historyRecords: [RoomHistoryRecord]
@@ -145,29 +146,41 @@ struct HomeView: View {
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
-        if canCapture {
-            guard let capturedAt else { return "今すぐ撮影しよう！" }
-            let calendar = Calendar.current
-            if !calendar.isDate(capturedAt, inSameDayAs: now) {
+        let calendar = Calendar.current
+
+        let hour = deps.currentUser?.notificationSettings.hour ?? 19
+        let minute = deps.currentUser?.notificationSettings.minute ?? 0
+
+        var components = calendar.dateComponents([.year, .month, .day], from: now)
+        components.hour = hour
+        components.minute = minute
+        components.second = 0
+        let todayScheduled = calendar.date(from: components) ?? now
+
+        let isPastScheduled = now >= todayScheduled
+
+        let hasCapturedToday = historyRecords.contains {
+            calendar.isDateInToday($0.capturedAt)
+        }
+
+        if isPastScheduled {
+            if hasCapturedToday {
+                return "また明日も撮影しようね！"
+            } else {
                 return "今すぐ撮影しよう！"
             }
-            let next = capturedAt.addingTimeInterval(24 * 3600)
-            let remaining = next.timeIntervalSince(now)
-            guard remaining > 0 else { return "今すぐ撮影しよう！" }
-            let hours = Int(remaining) / 3600
-            let minutes = (Int(remaining) % 3600) / 60
-            return "次の撮影まで \(hours)時間\(minutes)分"
         } else {
-            let calendar = Calendar.current
-            guard let tomorrow = calendar.nextDate(
-                after: now,
-                matching: DateComponents(hour: 0, minute: 0, second: 0),
-                matchingPolicy: .nextTime
-            ) else { return "また明日撮影しよう！" }
-            let remaining = tomorrow.timeIntervalSince(now)
-            let hours = Int(remaining) / 3600
-            let minutes = (Int(remaining) % 3600) / 60
-            return "次の撮影まで \(hours)時間\(minutes)分"
+            if hasCapturedToday {
+                let remaining = todayScheduled.timeIntervalSince(now)
+                let hours = Int(remaining) / 3600
+                let minutes = (Int(remaining) % 3600) / 60
+                return "次の撮影まで \(hours)時間\(minutes)分"
+            } else {
+                let remaining = todayScheduled.timeIntervalSince(now)
+                let hours = Int(remaining) / 3600
+                let minutes = (Int(remaining) % 3600) / 60
+                return "次の撮影まで \(hours)時間\(minutes)分"
+            }
         }
     }
 
