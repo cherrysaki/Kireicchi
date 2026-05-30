@@ -107,6 +107,8 @@ struct HomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear { saveWidgetSnapshot() }
+        .onChange(of: records.first?.capturedAt) { _, _ in saveWidgetSnapshot() }
         .alert("本日の撮影は終了しました", isPresented: $showCaptureAlert) {
             Button("OK") {}
         } message: {
@@ -343,6 +345,34 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
+    }
+
+    private func saveWidgetSnapshot() {
+        let now = Date()
+        if let record = latestRecord {
+            let happiness = Happiness.calculate(score: record.score, capturedAt: record.capturedAt, now: now)
+            let state = CharacterState.fromHappiness(happiness)
+            let daysSince = Calendar.current.dateComponents([.day], from: record.capturedAt, to: now).day ?? 0
+            let snapshot = KireicchiWidgetSnapshot(
+                happiness: happiness,
+                characterState: state.rawValue,
+                latestPixelRoomImageData: record.pixelArtImageData,
+                lastCapturedAt: record.capturedAt,
+                isGone: daysSince >= 7,
+                updatedAt: now
+            )
+            deps.widgetDataStore.save(snapshot: snapshot)
+        } else {
+            let snapshot = KireicchiWidgetSnapshot(
+                happiness: Happiness.defaultWhenNoRecord,
+                characterState: CharacterState.happy.rawValue,
+                latestPixelRoomImageData: nil,
+                lastCapturedAt: nil,
+                isGone: false,
+                updatedAt: now
+            )
+            deps.widgetDataStore.save(snapshot: snapshot)
+        }
     }
 
     // MARK: - History Banner

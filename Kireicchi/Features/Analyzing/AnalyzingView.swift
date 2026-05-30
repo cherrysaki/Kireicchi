@@ -4,6 +4,7 @@ import SwiftData
 struct AnalyzingView: View {
     let imageData: Data
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: AnalyzingViewModel
 
@@ -94,7 +95,8 @@ struct AnalyzingView: View {
             viewModel.setup(
                 roomRecordStore: roomRecordStore,
                 historyStore: historyStore,
-                navigationRouter: navigationRouter
+                navigationRouter: navigationRouter,
+                widgetDataStore: deps.widgetDataStore
             )
             
             Task {

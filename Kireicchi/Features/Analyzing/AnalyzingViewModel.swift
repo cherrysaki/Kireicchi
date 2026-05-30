@@ -16,6 +16,7 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     private var roomRecordStore: LatestRoomRecordStore?
     private var historyStore: RoomHistoryStoreProtocol?
     private var navigationRouter: NavigationRouter?
+    private var widgetDataStore: KireicchiWidgetDataStoreProtocol?
     
     // 解析結果を保持
     private var roomAnalysis: RoomAnalysis?
@@ -40,6 +41,16 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
         self.roomRecordStore = roomRecordStore
         self.historyStore = historyStore
         self.navigationRouter = navigationRouter
+    }
+
+    func setup(roomRecordStore: LatestRoomRecordStore,
+               historyStore: RoomHistoryStoreProtocol,
+               navigationRouter: NavigationRouter,
+               widgetDataStore: KireicchiWidgetDataStoreProtocol) {
+        self.roomRecordStore = roomRecordStore
+        self.historyStore = historyStore
+        self.navigationRouter = navigationRouter
+        self.widgetDataStore = widgetDataStore
     }
     
     func startAnalysis(imageData: Data) async {
@@ -106,6 +117,20 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                     pixelArtImageData: pixelData
                 )
                 try historyStore.save(historyRecord)
+            }
+
+            if let widgetDataStore = widgetDataStore {
+                let happiness = Happiness.calculate(score: analysis.score, capturedAt: capturedAt)
+                let state = CharacterState.fromHappiness(happiness)
+                let snapshot = KireicchiWidgetSnapshot(
+                    happiness: happiness,
+                    characterState: state.rawValue,
+                    latestPixelRoomImageData: pixelData,
+                    lastCapturedAt: capturedAt,
+                    isGone: false,
+                    updatedAt: Date()
+                )
+                widgetDataStore.save(snapshot: snapshot)
             }
             
             // 少し待ってから結果画面に遷移
