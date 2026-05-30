@@ -7,17 +7,55 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		697A302D2FCA803E00854ED8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 697A302C2FCA803E00854ED8 /* WidgetKit.framework */; };
+		697A302F2FCA803E00854ED8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 697A302E2FCA803E00854ED8 /* SwiftUI.framework */; };
+		697A30402FCA804000854ED8 /* KireicchiWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 697A302A2FCA803E00854ED8 /* KireicchiWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E429E1122F9898A00093C195 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1112F9898A00093C195 /* FirebaseAnalytics */; };
 		E429E1142F9898A00093C195 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1132F9898A00093C195 /* FirebaseAuth */; };
 		E429E1162F9898A00093C195 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1152F9898A00093C195 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		697A303E2FCA804000854ED8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E429E0F82F988F140093C195 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 697A30292FCA803E00854ED8;
+			remoteInfo = KireicchiWidgetExtensionExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		697A30452FCA804000854ED8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				697A30402FCA804000854ED8 /* KireicchiWidgetExtensionExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		697A302A2FCA803E00854ED8 /* KireicchiWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KireicchiWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		697A302C2FCA803E00854ED8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		697A302E2FCA803E00854ED8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		697A304B2FCA8B9F00854ED8 /* KireicchiWidgetExtensionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KireicchiWidgetExtensionExtension.entitlements; sourceTree = "<group>"; };
 		E429E1002F988F140093C195 /* Kireicchi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kireicchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E429E1172F9898B00093C195 /* Secrets.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		697A30442FCA804000854ED8 /* Exceptions for "KireicchiWidgetExtension" folder in "KireicchiWidgetExtensionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 697A30292FCA803E00854ED8 /* KireicchiWidgetExtensionExtension */;
+		};
 		E41BD3222F9FCFD000A01E4D /* Exceptions for "Kireicchi" folder in "Kireicchi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -28,6 +66,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		4C00A1B2C3D4E5F600000001 /* Kireicchi/Shared/Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Kireicchi/Shared/Widget;
+			sourceTree = "<group>";
+		};
+		697A30302FCA803E00854ED8 /* KireicchiWidgetExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				697A30442FCA804000854ED8 /* Exceptions for "KireicchiWidgetExtension" folder in "KireicchiWidgetExtensionExtension" target */,
+			);
+			path = KireicchiWidgetExtension;
+			sourceTree = "<group>";
+		};
 		E429E1022F988F140093C195 /* Kireicchi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -39,6 +90,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		697A30272FCA803E00854ED8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				697A302F2FCA803E00854ED8 /* SwiftUI.framework in Frameworks */,
+				697A302D2FCA803E00854ED8 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E429E0FD2F988F140093C195 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -52,12 +112,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		697A302B2FCA803E00854ED8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				697A302C2FCA803E00854ED8 /* WidgetKit.framework */,
+				697A302E2FCA803E00854ED8 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		697A315D2FCA8E4D00854ED8 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				4C00A1B2C3D4E5F600000001 /* Kireicchi/Shared/Widget */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		E429E0F72F988F140093C195 = {
 			isa = PBXGroup;
 			children = (
+				697A304B2FCA8B9F00854ED8 /* KireicchiWidgetExtensionExtension.entitlements */,
 				E429E1172F9898B00093C195 /* Secrets.xcconfig */,
 				E429E1022F988F140093C195 /* Kireicchi */,
+				697A30302FCA803E00854ED8 /* KireicchiWidgetExtension */,
+				697A302B2FCA803E00854ED8 /* Frameworks */,
 				E429E1012F988F140093C195 /* Products */,
+				697A315D2FCA8E4D00854ED8 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -65,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				E429E1002F988F140093C195 /* Kireicchi.app */,
+				697A302A2FCA803E00854ED8 /* KireicchiWidgetExtensionExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,6 +154,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		697A30292FCA803E00854ED8 /* KireicchiWidgetExtensionExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 697A30412FCA804000854ED8 /* Build configuration list for PBXNativeTarget "KireicchiWidgetExtensionExtension" */;
+			buildPhases = (
+				697A30262FCA803E00854ED8 /* Sources */,
+				697A30272FCA803E00854ED8 /* Frameworks */,
+				697A30282FCA803E00854ED8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4C00A1B2C3D4E5F600000001 /* Kireicchi/Shared/Widget */,
+				697A30302FCA803E00854ED8 /* KireicchiWidgetExtension */,
+			);
+			name = KireicchiWidgetExtensionExtension;
+			packageProductDependencies = (
+			);
+			productName = KireicchiWidgetExtensionExtension;
+			productReference = 697A302A2FCA803E00854ED8 /* KireicchiWidgetExtensionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		E429E0FF2F988F140093C195 /* Kireicchi */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E429E10B2F988F170093C195 /* Build configuration list for PBXNativeTarget "Kireicchi" */;
@@ -79,10 +184,12 @@
 				E429E0FC2F988F140093C195 /* Sources */,
 				E429E0FD2F988F140093C195 /* Frameworks */,
 				E429E0FE2F988F140093C195 /* Resources */,
+				697A30452FCA804000854ED8 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				697A303F2FCA804000854ED8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E429E1022F988F140093C195 /* Kireicchi */,
@@ -104,9 +211,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					697A30292FCA803E00854ED8 = {
+						CreatedOnToolsVersion = 26.3;
+					};
 					E429E0FF2F988F140093C195 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -130,11 +240,19 @@
 			projectRoot = "";
 			targets = (
 				E429E0FF2F988F140093C195 /* Kireicchi */,
+				697A30292FCA803E00854ED8 /* KireicchiWidgetExtensionExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		697A30282FCA803E00854ED8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E429E0FE2F988F140093C195 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -145,6 +263,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		697A30262FCA803E00854ED8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E429E0FC2F988F140093C195 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,7 +279,79 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		697A303F2FCA804000854ED8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 697A30292FCA803E00854ED8 /* KireicchiWidgetExtensionExtension */;
+			targetProxy = 697A303E2FCA804000854ED8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		697A30422FCA804000854ED8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KireicchiWidgetExtensionExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 24NW965W29;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KireicchiWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KireicchiWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.kambayashi.yukke.Kireicchi.KireicchiWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		697A30432FCA804000854ED8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KireicchiWidgetExtensionExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 24NW965W29;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KireicchiWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KireicchiWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.kambayashi.yukke.Kireicchi.KireicchiWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		E429E1092F988F170093C195 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -282,9 +479,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kireicchi/Kireicchi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V4AXAW7D47;
+				DEVELOPMENT_TEAM = 24NW965W29;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Kireicchi/Info.plist;
@@ -312,9 +510,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kireicchi/Kireicchi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V4AXAW7D47;
+				DEVELOPMENT_TEAM = 24NW965W29;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Kireicchi/Info.plist;
@@ -339,6 +538,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		697A30412FCA804000854ED8 /* Build configuration list for PBXNativeTarget "KireicchiWidgetExtensionExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				697A30422FCA804000854ED8 /* Debug */,
+				697A30432FCA804000854ED8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E429E0FB2F988F140093C195 /* Build configuration list for PBXProject "Kireicchi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

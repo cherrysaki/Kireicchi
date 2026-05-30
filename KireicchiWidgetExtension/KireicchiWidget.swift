@@ -24,7 +24,6 @@ struct KireicchiWidgetProvider: TimelineProvider {
     }
 }
 
-@main
 struct KireicchiWidget: Widget {
     let kind: String = "KireicchiWidget"
 
