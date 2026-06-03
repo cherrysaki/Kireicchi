@@ -115,15 +115,26 @@ struct SettingsView: View {
                     }
                     .frame(height: 140)
 
+//                    Button(action: {
+//                        showTimePicker = false
+//                    }) {
+//                        Text("決定")
+//                            .font(DesignSystem.Font.subheadline)
+//                            .foregroundColor(DesignSystem.Color.textOnPrimary)
+//                            .frame(width: 360, height: 60)
+//                    }
                     Button(action: {
                         showTimePicker = false
                     }) {
                         Text("決定")
                             .font(DesignSystem.Font.subheadline)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 8)
+                            .foregroundColor(DesignSystem.Color.textOnPrimary)
                     }
                     .buttonStyle(PixelButtonStyle())
+                    .frame(width: 280, height: 36)
+                    
+                    .buttonStyle(PixelButtonStyle())
+                    .padding(.horizontal, 24)
                 }
                 .padding(14)
                 .pixelSquareCard(
@@ -209,7 +220,7 @@ struct SettingsView: View {
     #if DEBUG
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionLabel("🎬 スクショ用デバッグ")
+            sectionLabel("🎬 デバッグ用")
 
             // Mock 通信トグル
             HStack {
