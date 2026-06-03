@@ -14,6 +14,8 @@ final class CameraController: NSObject, ObservableObject {
     private let photoOutput = AVCapturePhotoOutput()
     private let sessionQueue = DispatchQueue(label: "kireicchi.camera.session")
     private var captureCompletion: ((Data?) -> Void)?
+    /// 撮影時のプレビュー表示領域のアスペクト比（幅 / 高さ）。ガイド枠に合わせたクロップに使用。
+    private var viewportAspect: CGFloat = 1
 
     override init() {
         super.init()
@@ -32,12 +34,13 @@ final class CameraController: NSObject, ObservableObject {
         }
     }
 
-    func capturePhoto(completion: @escaping (Data?) -> Void) {
+    func capturePhoto(viewportAspect: CGFloat = 1, completion: @escaping (Data?) -> Void) {
         guard isAuthorized, isConfigured else {
             completion(nil)
             return
         }
 
+        self.viewportAspect = viewportAspect
         captureCompletion = completion
 
         let settings = AVCapturePhotoSettings()
@@ -134,11 +137,12 @@ extension CameraController: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput,
                      didFinishProcessingPhoto photo: AVCapturePhoto,
                      error: Error?) {
+        let aspect = self.viewportAspect
         let cropped: Data? = {
             guard error == nil,
                   let raw = photo.fileDataRepresentation(),
                   let image = UIImage(data: raw) else { return nil }
-            return image.croppedToSquare().jpegData(compressionQuality: 0.9)
+            return image.croppedToViewfinder(viewportAspect: aspect).jpegData(compressionQuality: 0.9)
         }()
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
