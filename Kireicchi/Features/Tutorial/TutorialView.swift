@@ -218,14 +218,18 @@ struct TutorialView: View {
 
             Spacer()
 
-            Button(buttonTitle, action: action)
-                .font(DesignSystem.Font.pixelMedium)
-                .foregroundColor(DesignSystem.Color.textOnPrimary)
-                .frame(width: 240)
-                .padding(.vertical, 16)
-                .background(DesignSystem.Color.primary)
-                .cornerRadius(12)
-                .padding(.bottom, 64)
+            Button(action: action) {
+                Text(buttonTitle)
+                    .font(DesignSystem.Font.pixelMedium)
+                    .foregroundColor(DesignSystem.Color.textOnPrimary)
+                    .frame(width: 240)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(DesignSystem.Color.primary)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 64)
         }
     }
 }
