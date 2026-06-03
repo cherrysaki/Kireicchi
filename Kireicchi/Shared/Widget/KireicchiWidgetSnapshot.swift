@@ -1,4 +1,9 @@
 import Foundation
+import os
+
+extension Logger {
+    static let widget = Logger(subsystem: "app.kambayashi.yukke.sakai.Kireicchi", category: "widget")
+}
 
 struct KireicchiWidgetSnapshot: Codable {
     let happiness: Int

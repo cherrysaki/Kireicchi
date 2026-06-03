@@ -1,5 +1,6 @@
 import SwiftUI
 import WidgetKit
+import os
 
 private enum WidgetColor {
     static let primaryPink = Color(red: 0.76, green: 0.384, blue: 0.494)  // #C2627E secondaryDark
@@ -31,8 +32,17 @@ struct KireicchiWidgetEntryView: View {
         entry.snapshot?.latestPixelRoomImageData.flatMap { UIImage(data: $0) }
     }
 
+    private func logRenderState() {
+        let assetName = characterAssetName ?? "<nil>"
+        let imageData = entry.snapshot?.latestPixelRoomImageData
+        let roomDecoded = roomImage != nil
+        Logger.widget.debug("[view] snapshotNil=\(entry.snapshot == nil) characterState=\(characterState, privacy: .public) isGone=\(isGone) assetName=\(assetName, privacy: .public) roomDataNil=\(imageData == nil) roomDataCount=\(imageData?.count ?? -1) roomDecoded=\(roomDecoded)")
+        WidgetDebugLog.append("view.RENDER snapshotNil=\(entry.snapshot == nil) state=\(characterState) isGone=\(isGone) assetName=\(assetName) roomDataNil=\(imageData == nil) roomDataCount=\(imageData?.count ?? -1) roomDecoded=\(roomDecoded)")
+    }
+
     var body: some View {
-        ZStack {
+        let _ = logRenderState()
+        return ZStack {
             roomBackground
 
             if isGone {
