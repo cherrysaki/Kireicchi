@@ -5,6 +5,8 @@ struct CaptureView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject private var cameraController = CameraController()
     @State private var isCapturing = false
+    /// プレビュー表示領域（＝ガイド枠が乗っている領域）のサイズ。クロップ範囲の算出に使用。
+    @State private var viewportSize: CGSize = .zero
 
     var body: some View {
         ZStack {
@@ -86,6 +88,8 @@ struct CaptureView: View {
                     .allowsHitTesting(false)
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .onAppear { viewportSize = geo.size }
+            .onChange(of: geo.size) { _, newValue in viewportSize = newValue }
         }
         .ignoresSafeArea()
     }
@@ -124,7 +128,8 @@ struct CaptureView: View {
     private func shutterTapped() {
         guard !isCapturing else { return }
         isCapturing = true
-        cameraController.capturePhoto { data in
+        let aspect = viewportSize.height > 0 ? viewportSize.width / viewportSize.height : 1
+        cameraController.capturePhoto(viewportAspect: aspect) { data in
             isCapturing = false
             guard let data else { return }
             navigationRouter.navigate(to: .analyzing(imageData: data))

@@ -56,6 +56,31 @@ extension UIImage {
         return UIImage(cgImage: cropped, scale: normalized.scale, orientation: .up)
     }
 
+    /// プレビュー (.resizeAspectFill) 上のガイド枠（画面幅いっぱいの中央正方形）に
+    /// 一致する中央正方形をクロップする。
+    /// - Parameter viewportAspect: プレビュー表示領域の幅 / 高さ（縦画面では < 1）。
+    ///
+    /// aspectFill ではプレビューが画面全体を覆うようにスケールされるため、
+    /// 画面に映っている範囲は元画像の中央 `min(imgW, imgH * viewportAspect)` 四方となる。
+    /// この値を一辺とした中央正方形を切り出すことで、ガイド枠の中身と一致させる。
+    func croppedToViewfinder(viewportAspect: CGFloat) -> UIImage {
+        guard viewportAspect > 0 else { return croppedToSquare() }
+
+        let normalized = self.normalizedOrientation()
+        guard let cg = normalized.cgImage else { return normalized }
+
+        let imgW = CGFloat(cg.width)
+        let imgH = CGFloat(cg.height)
+
+        let side = min(imgW, imgH * viewportAspect).rounded()
+        let x = ((imgW - side) / 2).rounded()
+        let y = ((imgH - side) / 2).rounded()
+        let rect = CGRect(x: x, y: y, width: side, height: side)
+
+        guard let cropped = cg.cropping(to: rect) else { return normalized }
+        return UIImage(cgImage: cropped, scale: normalized.scale, orientation: .up)
+    }
+
     /// imageOrientation を .up に正規化した UIImage を返す。
     private func normalizedOrientation() -> UIImage {
         guard imageOrientation != .up else { return self }
