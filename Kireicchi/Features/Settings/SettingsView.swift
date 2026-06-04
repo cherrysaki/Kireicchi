@@ -211,6 +211,21 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("🎬 スクショ用デバッグ")
 
+            // Widget ログ表示（原因調査用・一時）
+            NavigationLink {
+                WidgetLogDebugView()
+            } label: {
+                HStack {
+                    Image(systemName: "doc.text.magnifyingglass")
+                    Text("Widgetログを表示")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                }
+                .font(DesignSystem.Font.subheadline)
+                .foregroundColor(DesignSystem.Color.primary)
+                .padding(.horizontal)
+            }
+
             // Mock 通信トグル
             HStack {
                 Text("Mock 通信 (シミュレータ用)")
