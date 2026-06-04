@@ -38,6 +38,8 @@ struct RootView: View {
                             myDisplayName: deps.currentUser?.displayName ?? "わたし",
                             myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
                         )
+                    case .recordDetail(let record):
+                        RecordDetailView(record: record)
                     }
                 }
         }
