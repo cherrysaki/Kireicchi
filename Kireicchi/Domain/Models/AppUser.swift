@@ -7,6 +7,7 @@ struct AppUser: Codable, Equatable {
     var updatedAt: Date
     var authProvider: String
     var displayName: String?
+    var username: String?
     var selectedCharacterId: String
     var notificationSettings: NotificationSettingsData
 
@@ -17,6 +18,7 @@ struct AppUser: Codable, Equatable {
             updatedAt: now,
             authProvider: authProvider,
             displayName: nil,
+            username: nil,
             selectedCharacterId: "cat",
             notificationSettings: .default
         )

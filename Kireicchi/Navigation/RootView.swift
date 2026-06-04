@@ -5,10 +5,13 @@ struct RootView: View {
     @EnvironmentObject private var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
+    @AppStorage("hasRegisteredUsername") private var hasRegisteredUsername: Bool = false
 
     var body: some View {
         if !hasShownTutorial {
             TutorialView()
+        } else if !hasRegisteredUsername {
+            UsernameRegistrationView()
         } else {
             mainStack
         }
@@ -31,13 +34,15 @@ struct RootView: View {
                         CleanupTimerView()
                     case .friendVisit:
                         FriendVisitView(
-                            myDisplayName: deps.currentUser?.displayName ?? "私",
+                            myDisplayName: deps.currentUser?.username ?? deps.currentUser?.displayName ?? "私",
                             myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
                         )
                     case .history:
                         HistoryView(viewModel: HistoryViewModel(
                             historyStore: RoomHistoryStore(context: modelContext)
                         ))
+                    case .recordDetail(let record):
+                        RecordDetailView(record: record)
                     }
                 }
         }

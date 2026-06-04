@@ -240,42 +240,49 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
     }
 
     private func historyRow(record: RoomHistoryRecord) -> some View {
-        HStack(spacing: 12) {
-            if let data = record.pixelArtImageData, let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .interpolation(.none)
-                    .frame(width: 48, height: 48)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignSystem.Color.secondary.opacity(0.25))
-                    .frame(width: 48, height: 48)
-            }
+        Button(action: { navigationRouter.navigate(to: .recordDetail(record: record)) }) {
+            HStack(spacing: 12) {
+                if let data = record.pixelArtImageData, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .frame(width: 48, height: 48)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignSystem.Color.secondary.opacity(0.25))
+                        .frame(width: 48, height: 48)
+                }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(record.capturedAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                Text("ランク \(record.rank)")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(record.capturedAt.formatted(date: .abbreviated, time: .shortened))
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                    Text("ランク \(record.rank)")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                }
+
+                Spacer()
+
+                Text("\(record.score)")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(DesignSystem.Color.primaryDark)
+
+                Image(systemName: "chevron.right")
                     .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                    .foregroundColor(DesignSystem.Color.primary)
             }
-
-            Spacer()
-
-            Text("\(record.score)")
-                .font(DesignSystem.Font.title3)
-                .foregroundColor(DesignSystem.Color.primaryDark)
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignSystem.Color.primary, lineWidth: 1.5)
+            )
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DesignSystem.Color.primary, lineWidth: 1.5)
-        )
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

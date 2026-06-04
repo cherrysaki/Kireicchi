@@ -12,8 +12,11 @@ struct SettingsView: View {
     @State private var selectedMinute = 0
     @State private var notificationsEnabled = true
     @State private var selectedCharacterId = "cat"
+    @State private var username = ""
     @State private var showTimePicker = false
     @State private var isSaving = false
+
+    private let usernameMaxLength = 12
 
     var body: some View {
         ZStack {
@@ -33,6 +36,7 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
+                        usernameSection
                         captureTimeSection
                         notificationToggleSection
                         commentSection
@@ -64,6 +68,31 @@ struct SettingsView: View {
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
+    }
+
+    private var usernameSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("ユーザーネーム")
+
+            TextField("ユーザーネーム", text: $username)
+                .font(DesignSystem.Font.custom(size: 20))
+                .foregroundColor(DesignSystem.Color.textPrimary)
+                .submitLabel(.done)
+                .onChange(of: username) { _, newValue in
+                    if newValue.count > usernameMaxLength {
+                        username = String(newValue.prefix(usernameMaxLength))
+                    }
+                }
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
+                .padding(.horizontal)
+                .padding(.trailing, 3)
+        }
     }
 
     private var captureTimeSection: some View {
@@ -477,6 +506,7 @@ struct SettingsView: View {
         selectedMinute = user.notificationSettings.minute
         notificationsEnabled = user.notificationSettings.isEnabled
         selectedCharacterId = user.selectedCharacterId
+        username = user.username ?? ""
     }
 
     private func saveSettings() {
@@ -485,12 +515,14 @@ struct SettingsView: View {
         let minute = selectedMinute
         let isEnabled = notificationsEnabled
         let characterId = selectedCharacterId
+        let name = username
         Task {
             await deps.updateSettings(
                 hour: hour,
                 minute: minute,
                 isEnabled: isEnabled,
-                characterId: characterId
+                characterId: characterId,
+                username: name
             )
             isSaving = false
             navigationRouter.navigateBack()
