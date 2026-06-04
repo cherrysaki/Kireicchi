@@ -1,0 +1,40 @@
+name: PR Check
+
+# develop 向けの Pull Request 品質チェック。
+# コスト方針: 軽い処理はすべて Linux(ubuntu) に寄せ、課金の高い macOS ランナーは使わない。
+on:
+  pull_request:
+    branches: [ develop ]
+
+# 同一 PR で新しい push があったら古い実行をキャンセルしてコストを節約する
+concurrency:
+  group: pr-check-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: SwiftLint (Linux, --strict)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # メジャータグで固定
+
+      # 公式 SwiftLint Docker イメージ(Linux)をバージョン固定で実行。
+      # ubuntu-latest には Docker がプリインストールされている。
+      # ローカル検証に使った 0.63.3 と同一バージョンに固定して挙動を一致させる。
+      - name: Run SwiftLint
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            ghcr.io/realm/swiftlint:0.63.3 \
+            swiftlint lint --strict --reporter github-actions-logging
+
+# 補足:
+# - test ジョブは作成していない。理由: このプロジェクトには XCTest/Swift Testing の
+#   テストターゲットが存在しないため（xcodebuild の productType はアプリのみ）。
+#   テストを追加したら、macOS ランナー上に xcodebuild test ジョブと
+#   DerivedData / SwiftPM のキャッシュを追加する想定。
