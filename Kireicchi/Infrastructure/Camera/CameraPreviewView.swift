@@ -3,6 +3,8 @@ import AVFoundation
 
 struct CameraPreviewView: UIViewRepresentable {
     let session: AVCaptureSession
+    /// true の間はプレビューレイヤーへのフレーム供給を止め、最後のフレームで静止させる。
+    var isFrozen: Bool = false
 
     func makeUIView(context: Context) -> PreviewUIView {
         let view = PreviewUIView()
@@ -11,7 +13,10 @@ struct CameraPreviewView: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: PreviewUIView, context: Context) {}
+    func updateUIView(_ uiView: PreviewUIView, context: Context) {
+        // connection を無効化するとライブ更新が止まり、直前のフレームが画面に残る（セッションは止めない）。
+        uiView.videoPreviewLayer.connection?.isEnabled = !isFrozen
+    }
 }
 
 final class PreviewUIView: UIView {

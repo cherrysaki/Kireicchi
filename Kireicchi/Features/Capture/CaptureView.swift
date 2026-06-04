@@ -7,15 +7,24 @@ struct CaptureView: View {
     @State private var isCapturing = false
     /// プレビュー表示領域（＝ガイド枠が乗っている領域）のサイズ。クロップ範囲の算出に使用。
     @State private var viewportSize: CGSize = .zero
+    /// 撮影完了後、解析画面へ遷移するまで表示し続ける静止画。ライブ映像の上に重ねる。
+    @State private var frozenImage: UIImage?
+    /// シャッターを押した瞬間にライブプレビューを静止させるフラグ。
+    @State private var isPreviewFrozen = false
 
     var body: some View {
         ZStack {
             if cameraController.permissionDenied {
                 permissionDeniedView
             } else {
-                CameraPreviewView(session: cameraController.session)
+                CameraPreviewView(session: cameraController.session, isFrozen: isPreviewFrozen)
                     .ignoresSafeArea()
                 squareViewfinder
+            }
+
+            // 撮影直後の静止画。ライブ映像・ガイド枠を覆い、遷移するまで表示し続ける。
+            if let frozenImage {
+                frozenStill(frozenImage)
             }
 
             VStack {
@@ -50,12 +59,14 @@ struct CaptureView: View {
                             .frame(width: 60, height: 60)
                     }
                 }
-                .disabled(isCapturing || cameraController.permissionDenied || !cameraController.isConfigured)
+                .disabled(isCapturing || frozenImage != nil || cameraController.permissionDenied || !cameraController.isConfigured)
                 .padding(.bottom, 50)
             }
         }
         .navigationBarHidden(true)
         .onAppear {
+            frozenImage = nil
+            isPreviewFrozen = false
             cameraController.startSession()
         }
         .onDisappear {
@@ -128,12 +139,34 @@ struct CaptureView: View {
     private func shutterTapped() {
         guard !isCapturing else { return }
         isCapturing = true
+        isPreviewFrozen = true   // タップ直後にライブ映像を即停止（最後のフレームで静止）
         let aspect = viewportSize.height > 0 ? viewportSize.width / viewportSize.height : 1
         cameraController.capturePhoto(viewportAspect: aspect) { data in
             isCapturing = false
-            guard let data else { return }
+            guard let data else {
+                isPreviewFrozen = false   // 失敗時はライブへ戻す
+                return
+            }
+            // 撮影した瞬間の画像で固定表示してから解析へ遷移
+            frozenImage = UIImage(data: data)
             navigationRouter.navigate(to: .analyzing(imageData: data))
         }
+    }
+
+    // ガイド枠と同じ「中央・一辺＝画面幅の正方形」で撮影画像を静止表示する。
+    private func frozenStill(_ image: UIImage) -> some View {
+        GeometryReader { geo in
+            ZStack {
+                Color.black
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.width)
+                    .clipped()
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .ignoresSafeArea()
     }
 }
 
