@@ -25,13 +25,15 @@ jobs:
       # 公式 SwiftLint Docker イメージ(Linux)をバージョン固定で実行。
       # ubuntu-latest には Docker がプリインストールされている。
       # ローカル検証に使った 0.63.3 と同一バージョンに固定して挙動を一致させる。
+      # 注: このイメージの ENTRYPOINT は `swiftlint` のため、コマンド側は
+      #     サブコマンド以降のみ（`lint ...`）を渡す（`swiftlint` を重複させない）。
       - name: Run SwiftLint
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/work" \
             -w /work \
             ghcr.io/realm/swiftlint:0.63.3 \
-            swiftlint lint --strict --reporter github-actions-logging
+            lint --strict --reporter github-actions-logging
 
 # 補足:
 # - test ジョブは作成していない。理由: このプロジェクトには XCTest/Swift Testing の
