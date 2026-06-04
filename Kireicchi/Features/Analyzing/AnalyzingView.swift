@@ -35,7 +35,7 @@ struct AnalyzingView: View {
                 ZStack {
                     if viewModel.errorMessage == nil {
                         Text("解析中...")
-                            .font(DesignSystem.Font.largeTitle)
+                            .font(DesignSystem.Font.title2)
                             .foregroundColor(DesignSystem.Color.primaryDark)
                             .scaleEffect(viewModel.isAnalyzing ? 1.1 : 1.0)
                             .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
@@ -45,7 +45,7 @@ struct AnalyzingView: View {
                             .foregroundColor(DesignSystem.Color.accentWarm)
                     }
                 }
-                .frame(height: 240)
+                .frame(height: 200)
 
                 Spacer()
 
@@ -54,7 +54,7 @@ struct AnalyzingView: View {
                     characterState: nil,
                     forceGif: .run
                 )
-                .frame(width: 200, height: 200)
+                .frame(width: 360, height: 360)
                 .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)
                 .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: viewModel.isAnalyzing)
 
@@ -96,7 +96,6 @@ struct AnalyzingView: View {
                 historyStore: historyStore,
                 navigationRouter: navigationRouter
             )
-            
             Task {
                 await viewModel.startAnalysis(imageData: imageData)
             }
