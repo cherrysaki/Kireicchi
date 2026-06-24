@@ -14,6 +14,19 @@ struct RootView: View {
             WorldviewOnboardingView()
         } else if !hasCompletedOwnerRegistration {
             OwnerRegistrationView()
+            #if DEBUG
+                .overlay(alignment: .topTrailing) {
+                    Button("スキップ（デバッグ）") {
+                        hasCompletedOwnerRegistration = true
+                    }
+                    .font(.caption)
+                    .padding(8)
+                    .background(Color.red.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .padding()
+                }
+            #endif
         } else {
             mainStack
         }
