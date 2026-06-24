@@ -17,7 +17,6 @@ struct SettingsView: View {
     @State private var isSaving = false
 
     @AppStorage("hasShownCoachMark") private var hasShownCoachMark: Bool = false
-    @State private var timerSettingFrame: CGRect = .zero
     @State private var showSettingsCoachMark: Bool = false
 
     private let usernameMaxLength = 12
@@ -42,12 +41,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         usernameSection
                         captureTimeSection
-                            .background(
-                                GeometryReader { geo in
-                                    Color.clear
-                                        .preference(key: TimerSettingFrameKey.self, value: geo.frame(in: .named("settingsView")))
-                                }
-                            )
+                            .anchorPreference(key: TimerSettingAnchorKey.self, value: .bounds) { $0 }
                         notificationToggleSection
                         commentSection
                         AppleLoginSection()
@@ -75,11 +69,9 @@ struct SettingsView: View {
                 .padding()
             }
         }
-        .coordinateSpace(name: "settingsView")
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
-        .onPreferenceChange(TimerSettingFrameKey.self) { timerSettingFrame = $0 }
         .onAppear {
             guard !hasShownCoachMark else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -89,35 +81,32 @@ struct SettingsView: View {
         .onChange(of: showTimePicker) { _, isOpen in
             if isOpen { withAnimation { showSettingsCoachMark = false } }
         }
-        .overlay {
-            if showSettingsCoachMark {
-                ZStack {
-                    Color.black.opacity(0.5)
-                        .reversedMask {
-                            RoundedRectangle(cornerRadius: 12)
-                                .frame(
-                                    width: timerSettingFrame.width + 20,
-                                    height: timerSettingFrame.height + 20
-                                )
-                                .position(
-                                    x: timerSettingFrame.midX,
-                                    y: timerSettingFrame.midY
-                                )
-                        }
-                        .ignoresSafeArea()
-                        .allowsHitTesting(false)
+        .overlayPreferenceValue(TimerSettingAnchorKey.self) { anchor in
+            GeometryReader { geo in
+                if let anchor = anchor, showSettingsCoachMark {
+                    let frame = geo[anchor]
 
-                    CoachBubble(
-                        text: "撮影する時間を\n設定しよう！",
-                        arrowDirection: .up
-                    )
-                    .position(
-                        x: timerSettingFrame.midX,
-                        y: timerSettingFrame.maxY + 80
-                    )
-                    .allowsHitTesting(false)
+                    ZStack {
+                        Color.black.opacity(0.5)
+                            .reversedMask {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .frame(
+                                        width: frame.width + 20,
+                                        height: frame.height + 20
+                                    )
+                                    .position(x: frame.midX, y: frame.midY)
+                            }
+                            .allowsHitTesting(false)
+
+                        CoachBubble(
+                            text: "撮影する時間を\n設定しよう！",
+                            arrowDirection: .up
+                        )
+                        .position(x: frame.midX, y: frame.maxY + 60)
+                        .allowsHitTesting(false)
+                    }
+                    .ignoresSafeArea()
                 }
-                .transition(.opacity)
             }
         }
     }

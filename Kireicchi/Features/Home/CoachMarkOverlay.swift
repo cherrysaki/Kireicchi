@@ -1,83 +1,28 @@
 import SwiftUI
 
-// MARK: - Button Frame PreferenceKeys
-// HomeView（設定ボタン）と HomeTabBar（カメラボタン）から座標を吸い上げるため internal。
+// MARK: - Anchor PreferenceKeys
+// anchorPreference 方式: ボタンの .bounds アンカーを吸い上げ、overlayPreferenceValue 内の
+// GeometryReader で geo[anchor] として解決することで座標空間のずれを根本的に解消する。
+// カメラボタンは別ファイル（HomeTabBar）から設定するため internal。
 
-struct SettingsButtonFrameKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
+struct CoachAnchors: Equatable {
+    var settings: Anchor<CGRect>?
+    var camera: Anchor<CGRect>?
+}
+
+struct CoachAnchorKey: PreferenceKey {
+    static var defaultValue = CoachAnchors()
+    static func reduce(value: inout CoachAnchors, nextValue: () -> CoachAnchors) {
+        let next = nextValue()
+        value.settings = value.settings ?? next.settings
+        value.camera = value.camera ?? next.camera
     }
 }
 
-struct CameraButtonFrameKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
-    }
-}
-
-struct TimerSettingFrameKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
-    }
-}
-
-// MARK: - Coach Mark Overlay
-
-struct CoachMarkOverlay: View {
-    let currentStep: Int
-    let highlightFrame: CGRect
-
-    var body: some View {
-        ZStack {
-            // 半透明オーバーレイ（ハイライト部分を切り抜き）
-            Color.black.opacity(0.5)
-                .reversedMask {
-                    RoundedRectangle(cornerRadius: 12)
-                        .frame(
-                            width: highlightFrame.width + 20,
-                            height: highlightFrame.height + 20
-                        )
-                        .position(
-                            x: highlightFrame.midX,
-                            y: highlightFrame.midY
-                        )
-                }
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-                // ↑ オーバーレイはタップを透過（ハイライト部分のボタンを実際に押せるように）
-
-            // 吹き出し
-            coachBubble
-        }
-    }
-
-    @ViewBuilder
-    private var coachBubble: some View {
-        switch currentStep {
-        case 0:
-            CoachBubble(
-                text: "まずはここから\n撮影する時間を決めよう！",
-                arrowDirection: .up
-            )
-            .position(
-                x: highlightFrame.midX,
-                y: highlightFrame.maxY + 80
-            )
-        case 1:
-            CoachBubble(
-                text: "つぎはお部屋を\n撮影してみよう！",
-                arrowDirection: .down
-            )
-            .position(
-                x: highlightFrame.midX,
-                y: highlightFrame.minY - 80
-            )
-        default:
-            EmptyView()
-        }
+struct TimerSettingAnchorKey: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
     }
 }
 
@@ -150,26 +95,6 @@ extension View {
 }
 
 // MARK: - Previews
-
-#Preview("Step 0: 設定ボタン") {
-    ZStack {
-        DesignSystem.Color.background.ignoresSafeArea()
-        CoachMarkOverlay(
-            currentStep: 0,
-            highlightFrame: CGRect(x: 30, y: 80, width: 44, height: 44)
-        )
-    }
-}
-
-#Preview("Step 1: 撮影ボタン") {
-    ZStack {
-        DesignSystem.Color.background.ignoresSafeArea()
-        CoachMarkOverlay(
-            currentStep: 1,
-            highlightFrame: CGRect(x: 175, y: 720, width: 64, height: 64)
-        )
-    }
-}
 
 #Preview("CoachBubble") {
     ZStack {

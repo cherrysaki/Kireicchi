@@ -50,12 +50,9 @@ struct HomeTabBar: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(canCapture ? DesignSystem.Color.primaryDark : Color.white.opacity(0.8))
                 }
-                .background(
-                    GeometryReader { geo in
-                        Color.clear
-                            .preference(key: CameraButtonFrameKey.self, value: geo.frame(in: .named("homeView")))
-                    }
-                )
+                .anchorPreference(key: CoachAnchorKey.self, value: .bounds) {
+                    CoachAnchors(settings: nil, camera: $0)
+                }
             }
             .offset(y: -18)
         }
