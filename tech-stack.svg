@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1020" width="1320" height="1020" font-family="-apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5C3D2E"/>
+    </marker>
+    <marker id="arrowExt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#FD98B8"/>
+    </marker>
+    <style>
+      .title { font-size: 26px; font-weight: 700; fill: #5C3D2E; }
+      .subtitle { font-size: 14px; fill: #5C3D2E; }
+      .layerLabel { font-size: 13px; font-weight: 700; fill: #5C3D2E; letter-spacing: 1px; }
+      .layerSub { font-size: 11px; fill: #5C3D2E; opacity: 0.7; }
+      .boxTitle { font-size: 13px; font-weight: 700; fill: #5C3D2E; }
+      .boxSub { font-size: 10.5px; fill: #5C3D2E; opacity: 0.85; }
+      .extTitle { font-size: 14px; font-weight: 700; fill: #FFFFFF; }
+      .extSub { font-size: 11px; fill: #FFFFFF; opacity: 0.95; }
+      .fwTitle { font-size: 12px; font-weight: 700; fill: #1F4D6B; }
+      .fwSub { font-size: 10px; fill: #1F4D6B; opacity: 0.85; }
+      .arch { stroke: #FD98B8; stroke-width: 2; fill: #FFFFFF; }
+      .archHead { fill: #FD98B8; }
+      .fw { fill: #92D9FD; stroke: #5DB8E6; stroke-width: 1.5; }
+      .conn { stroke: #5C3D2E; stroke-width: 1.5; fill: none; }
+      .connExt { stroke: #FD98B8; stroke-width: 2; fill: none; stroke-dasharray: 6 3; }
+    </style>
+  </defs>
+
+  <rect width="1320" height="1020" fill="#FFF9E6"/>
+
+  <!-- Title -->
+  <text x="660" y="44" text-anchor="middle" class="title">きれいっち — 技術スタック関係図</text>
+  <text x="660" y="66" text-anchor="middle" class="subtitle">iOS 26 / SwiftUI / MVVM + UseCases / Protocol-driven DI</text>
+
+  <!-- ============ External Services (top) ============ -->
+  <text x="40" y="100" class="layerLabel">EXTERNAL SERVICES</text>
+  <text x="40" y="115" class="layerSub">クラウド・サードパーティ</text>
+
+  <!-- OpenAI -->
+  <g>
+    <rect x="180" y="90" width="280" height="80" rx="14" fill="#10A37F"/>
+    <text x="320" y="118" text-anchor="middle" class="extTitle">OpenAI API</text>
+    <text x="320" y="138" text-anchor="middle" class="extSub">GPT-4o (Vision) — 部屋解析</text>
+    <text x="320" y="154" text-anchor="middle" class="extSub">DALL-E 3 — ドット絵生成</text>
+  </g>
+
+  <!-- Firebase -->
+  <g>
+    <rect x="500" y="90" width="280" height="80" rx="14" fill="#FFA000"/>
+    <text x="640" y="118" text-anchor="middle" class="extTitle">Firebase</text>
+    <text x="640" y="138" text-anchor="middle" class="extSub">Authentication（匿名 / Apple）</text>
+    <text x="640" y="154" text-anchor="middle" class="extSub">Cloud Firestore（ユーザー / フレンド）</text>
+  </g>
+
+  <!-- Apple ID -->
+  <g>
+    <rect x="820" y="90" width="280" height="80" rx="14" fill="#1D1D1F"/>
+    <text x="960" y="118" text-anchor="middle" class="extTitle">Apple ID</text>
+    <text x="960" y="138" text-anchor="middle" class="extSub">Sign in with Apple</text>
+    <text x="960" y="154" text-anchor="middle" class="extSub">APNs / ローカル通知基盤</text>
+  </g>
+
+  <!-- ============ Layer 1: Features (Presentation) ============ -->
+  <text x="40" y="220" class="layerLabel">FEATURES</text>
+  <text x="40" y="235" class="layerSub">SwiftUI View + ViewModel (MVVM)</text>
+
+  <rect x="180" y="200" width="1100" height="110" rx="14" class="arch"/>
+  <rect x="180" y="200" width="1100" height="22" rx="14" class="archHead"/>
+  <text x="730" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">Presentation Layer — SwiftUI Views ＋ Combine</text>
+
+  <!-- Feature boxes -->
+  <g>
+    <rect x="195" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="267" y="252" text-anchor="middle" class="boxTitle">Home</text>
+    <text x="267" y="270" text-anchor="middle" class="boxSub">スコア / キャラ表示</text>
+    <text x="267" y="286" text-anchor="middle" class="boxSub">家出 / ミッション</text>
+  </g>
+  <g>
+    <rect x="350" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="422" y="252" text-anchor="middle" class="boxTitle">Capture</text>
+    <text x="422" y="270" text-anchor="middle" class="boxSub">AVFoundation</text>
+    <text x="422" y="286" text-anchor="middle" class="boxSub">カメラプレビュー</text>
+  </g>
+  <g>
+    <rect x="505" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="577" y="252" text-anchor="middle" class="boxTitle">Analyzing</text>
+    <text x="577" y="270" text-anchor="middle" class="boxSub">解析待ちUI</text>
+    <text x="577" y="286" text-anchor="middle" class="boxSub">ステップ表示</text>
+  </g>
+  <g>
+    <rect x="660" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="732" y="252" text-anchor="middle" class="boxTitle">AnalysisResult</text>
+    <text x="732" y="270" text-anchor="middle" class="boxSub">スコア / ランク</text>
+    <text x="732" y="286" text-anchor="middle" class="boxSub">優先箇所</text>
+  </g>
+  <g>
+    <rect x="815" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="887" y="252" text-anchor="middle" class="boxTitle">Settings</text>
+    <text x="887" y="270" text-anchor="middle" class="boxSub">通知 / アカウント</text>
+    <text x="887" y="286" text-anchor="middle" class="boxSub">Sign in with Apple</text>
+  </g>
+  <g>
+    <rect x="970" y="232" width="145" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="1042" y="252" text-anchor="middle" class="boxTitle">FriendVisit</text>
+    <text x="1042" y="270" text-anchor="middle" class="boxSub">マルチプレイ / 訪問</text>
+    <text x="1042" y="286" text-anchor="middle" class="boxSub">距離計測</text>
+  </g>
+  <g>
+    <rect x="1125" y="232" width="140" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="1195" y="252" text-anchor="middle" class="boxTitle">CleanupTimer</text>
+    <text x="1195" y="270" text-anchor="middle" class="boxSub">片付けタイマー</text>
+    <text x="1195" y="286" text-anchor="middle" class="boxSub">UserNotifications</text>
+  </g>
+
+  <!-- ============ Layer 2: Domain ============ -->
+  <text x="40" y="360" class="layerLabel">DOMAIN</text>
+  <text x="40" y="375" class="layerSub">UseCase + Model（純粋ロジック）</text>
+
+  <rect x="180" y="340" width="1100" height="110" rx="14" class="arch"/>
+  <rect x="180" y="340" width="1100" height="22" rx="14" class="archHead"/>
+  <text x="730" y="356" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">Domain Layer — UseCases / Models（Protocol駆動）</text>
+
+  <g>
+    <rect x="200" y="372" width="220" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="310" y="392" text-anchor="middle" class="boxTitle">AnalyzeRoomUseCase</text>
+    <text x="310" y="408" text-anchor="middle" class="boxSub">画像 → スコア / 散らかり箇所</text>
+    <text x="310" y="424" text-anchor="middle" class="boxSub">RoomAnalysis を返却</text>
+  </g>
+  <g>
+    <rect x="430" y="372" width="220" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="540" y="392" text-anchor="middle" class="boxTitle">GeneratePixelArtUseCase</text>
+    <text x="540" y="408" text-anchor="middle" class="boxSub">画像 → ドット絵化</text>
+    <text x="540" y="424" text-anchor="middle" class="boxSub">DALL-E 3 経由</text>
+  </g>
+  <g>
+    <rect x="660" y="372" width="220" height="68" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="770" y="392" text-anchor="middle" class="boxTitle">ScheduleNotificationUseCase</text>
+    <text x="770" y="408" text-anchor="middle" class="boxSub">撮影リマインダー登録</text>
+    <text x="770" y="424" text-anchor="middle" class="boxSub">毎日繰り返し</text>
+  </g>
+  <g>
+    <rect x="890" y="372" width="370" height="68" rx="10" fill="#FFFBEC" stroke="#E6CD52" stroke-width="1.5"/>
+    <text x="1075" y="392" text-anchor="middle" class="boxTitle">Models</text>
+    <text x="1075" y="408" text-anchor="middle" class="boxSub">RoomAnalysis / CleanlinessRank / CharacterState</text>
+    <text x="1075" y="424" text-anchor="middle" class="boxSub">Character / CleanupTask / NotificationSettings</text>
+  </g>
+
+  <!-- ============ Layer 3: Data + Infrastructure ============ -->
+  <text x="40" y="500" class="layerLabel">DATA &amp; INFRA</text>
+  <text x="40" y="515" class="layerSub">外部I/O・永続化・端末機能</text>
+
+  <!-- Data sub-layer -->
+  <rect x="180" y="480" width="540" height="180" rx="14" class="arch"/>
+  <rect x="180" y="480" width="540" height="22" rx="14" class="archHead"/>
+  <text x="450" y="496" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">Data Layer</text>
+
+  <g>
+    <rect x="200" y="514" width="160" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="280" y="534" text-anchor="middle" class="boxTitle">OpenAIClient</text>
+    <text x="280" y="552" text-anchor="middle" class="boxSub">REST (JSON / Vision)</text>
+    <text x="280" y="568" text-anchor="middle" class="boxSub">DTO 変換</text>
+  </g>
+  <g>
+    <rect x="370" y="514" width="160" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="450" y="534" text-anchor="middle" class="boxTitle">UserRepository</text>
+    <text x="450" y="552" text-anchor="middle" class="boxSub">Firestore CRUD</text>
+    <text x="450" y="568" text-anchor="middle" class="boxSub">フレンド同期</text>
+  </g>
+  <g>
+    <rect x="540" y="514" width="160" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="620" y="534" text-anchor="middle" class="boxTitle">RoomRecordStore</text>
+    <text x="620" y="552" text-anchor="middle" class="boxSub">SwiftData @Model</text>
+    <text x="620" y="568" text-anchor="middle" class="boxSub">撮影履歴を永続化</text>
+  </g>
+  <g>
+    <rect x="200" y="586" width="500" height="60" rx="10" fill="#FFFBEC" stroke="#E6CD52" stroke-width="1.5"/>
+    <text x="450" y="606" text-anchor="middle" class="boxTitle">DTOs</text>
+    <text x="450" y="624" text-anchor="middle" class="boxSub">RoomAnalysisRequest / RoomAnalysisResponse / PixelArtResponse</text>
+  </g>
+
+  <!-- Infra sub-layer -->
+  <rect x="740" y="480" width="540" height="180" rx="14" class="arch"/>
+  <rect x="740" y="480" width="540" height="22" rx="14" class="archHead"/>
+  <text x="1010" y="496" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">Infrastructure Layer</text>
+
+  <g>
+    <rect x="758" y="514" width="170" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="843" y="534" text-anchor="middle" class="boxTitle">AuthService</text>
+    <text x="843" y="552" text-anchor="middle" class="boxSub">FirebaseAuth ＋</text>
+    <text x="843" y="568" text-anchor="middle" class="boxSub">AuthenticationServices</text>
+  </g>
+  <g>
+    <rect x="938" y="514" width="170" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="1023" y="534" text-anchor="middle" class="boxTitle">PeerSession</text>
+    <text x="1023" y="552" text-anchor="middle" class="boxSub">MultipeerConnectivity</text>
+    <text x="1023" y="568" text-anchor="middle" class="boxSub">P2P 接続</text>
+  </g>
+  <g>
+    <rect x="1118" y="514" width="150" height="64" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="1193" y="534" text-anchor="middle" class="boxTitle">DistanceTracker</text>
+    <text x="1193" y="552" text-anchor="middle" class="boxSub">NearbyInteraction</text>
+    <text x="1193" y="568" text-anchor="middle" class="boxSub">U1 距離測定</text>
+  </g>
+  <g>
+    <rect x="758" y="586" width="250" height="60" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="883" y="606" text-anchor="middle" class="boxTitle">NotificationScheduler</text>
+    <text x="883" y="624" text-anchor="middle" class="boxSub">UserNotifications（ローカル通知）</text>
+  </g>
+  <g>
+    <rect x="1018" y="586" width="250" height="60" rx="10" fill="#FFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="1143" y="606" text-anchor="middle" class="boxTitle">Camera / Config</text>
+    <text x="1143" y="624" text-anchor="middle" class="boxSub">AVFoundation / Secrets.xcconfig</text>
+  </g>
+
+  <!-- ============ Layer 4: iOS Frameworks (foundation) ============ -->
+  <text x="40" y="710" class="layerLabel">iOS FRAMEWORKS</text>
+  <text x="40" y="725" class="layerSub">標準 SDK / 端末ハードウェア</text>
+
+  <rect x="180" y="690" width="1100" height="200" rx="14" fill="#E6F4FC" stroke="#5DB8E6" stroke-width="1.5"/>
+
+  <!-- row 1 -->
+  <g>
+    <rect x="200" y="708" width="160" height="56" rx="8" class="fw"/>
+    <text x="280" y="730" text-anchor="middle" class="fwTitle">SwiftUI</text>
+    <text x="280" y="748" text-anchor="middle" class="fwSub">宣言的UI（iOS 26）</text>
+  </g>
+  <g>
+    <rect x="370" y="708" width="160" height="56" rx="8" class="fw"/>
+    <text x="450" y="730" text-anchor="middle" class="fwTitle">Combine</text>
+    <text x="450" y="748" text-anchor="middle" class="fwSub">@Published / Publisher</text>
+  </g>
+  <g>
+    <rect x="540" y="708" width="160" height="56" rx="8" class="fw"/>
+    <text x="620" y="730" text-anchor="middle" class="fwTitle">SwiftData</text>
+    <text x="620" y="748" text-anchor="middle" class="fwSub">@Model 永続化</text>
+  </g>
+  <g>
+    <rect x="710" y="708" width="160" height="56" rx="8" class="fw"/>
+    <text x="790" y="730" text-anchor="middle" class="fwTitle">AVFoundation</text>
+    <text x="790" y="748" text-anchor="middle" class="fwSub">カメラ / セッション</text>
+  </g>
+  <g>
+    <rect x="880" y="708" width="180" height="56" rx="8" class="fw"/>
+    <text x="970" y="730" text-anchor="middle" class="fwTitle">UserNotifications</text>
+    <text x="970" y="748" text-anchor="middle" class="fwSub">UNUserNotificationCenter</text>
+  </g>
+  <g>
+    <rect x="1070" y="708" width="190" height="56" rx="8" class="fw"/>
+    <text x="1165" y="730" text-anchor="middle" class="fwTitle">UIKit</text>
+    <text x="1165" y="748" text-anchor="middle" class="fwSub">UIViewRepresentable 連携</text>
+  </g>
+
+  <!-- row 2 -->
+  <g>
+    <rect x="200" y="774" width="200" height="56" rx="8" class="fw"/>
+    <text x="300" y="796" text-anchor="middle" class="fwTitle">MultipeerConnectivity</text>
+    <text x="300" y="814" text-anchor="middle" class="fwSub">近距離 P2P 通信</text>
+  </g>
+  <g>
+    <rect x="410" y="774" width="180" height="56" rx="8" class="fw"/>
+    <text x="500" y="796" text-anchor="middle" class="fwTitle">NearbyInteraction</text>
+    <text x="500" y="814" text-anchor="middle" class="fwSub">U1 / 距離・方向</text>
+  </g>
+  <g>
+    <rect x="600" y="774" width="220" height="56" rx="8" class="fw"/>
+    <text x="710" y="796" text-anchor="middle" class="fwTitle">AuthenticationServices</text>
+    <text x="710" y="814" text-anchor="middle" class="fwSub">Sign in with Apple</text>
+  </g>
+  <g>
+    <rect x="830" y="774" width="160" height="56" rx="8" class="fw"/>
+    <text x="910" y="796" text-anchor="middle" class="fwTitle">CryptoKit</text>
+    <text x="910" y="814" text-anchor="middle" class="fwSub">nonce 署名</text>
+  </g>
+  <g>
+    <rect x="1000" y="774" width="260" height="56" rx="8" fill="#FFE7B5" stroke="#FFA000" stroke-width="1.5"/>
+    <text x="1130" y="796" text-anchor="middle" class="fwTitle">Firebase iOS SDK</text>
+    <text x="1130" y="814" text-anchor="middle" class="fwSub">FirebaseAuth / FirebaseFirestore / Core</text>
+  </g>
+
+  <!-- row 3 (notes) -->
+  <g>
+    <rect x="200" y="840" width="1060" height="36" rx="8" fill="#FFFFFF" stroke="#92D9FD" stroke-width="1.2"/>
+    <text x="730" y="862" text-anchor="middle" font-size="11" fill="#5C3D2E">DI: AppDependencies が各 Protocol を解決 ／ Mock は Feature/Mock・*/Mock に配置 ／ Secrets.xcconfig で OpenAI APIキーを注入</text>
+  </g>
+
+  <!-- ============ ARROWS ============ -->
+  <!-- Features → Domain -->
+  <line x1="267" y1="300" x2="310" y2="372" class="conn" marker-end="url(#arrow)"/>
+  <line x1="577" y1="300" x2="540" y2="372" class="conn" marker-end="url(#arrow)"/>
+  <line x1="732" y1="300" x2="540" y2="372" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1195" y1="300" x2="770" y2="372" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- Domain → Data/Infra -->
+  <line x1="310" y1="440" x2="280" y2="514" class="conn" marker-end="url(#arrow)"/>
+  <line x1="540" y1="440" x2="280" y2="514" class="conn" marker-end="url(#arrow)"/>
+  <line x1="770" y1="440" x2="883" y2="586" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- Features (Settings/FriendVisit) → Infra direct -->
+  <line x1="887" y1="300" x2="843" y2="514" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1042" y1="300" x2="1023" y2="514" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1042" y1="300" x2="1193" y2="514" class="conn" marker-end="url(#arrow)"/>
+  <line x1="422" y1="300" x2="1143" y2="586" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- Home → Persistence -->
+  <line x1="267" y1="300" x2="620" y2="514" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- Data/Infra → Frameworks -->
+  <line x1="620" y1="578" x2="620" y2="708" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1143" y1="646" x2="790" y2="708" class="conn" marker-end="url(#arrow)"/>
+  <line x1="883" y1="646" x2="970" y2="708" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1023" y1="578" x2="300" y2="774" class="conn" marker-end="url(#arrow)"/>
+  <line x1="1193" y1="578" x2="500" y2="774" class="conn" marker-end="url(#arrow)"/>
+  <line x1="843" y1="578" x2="710" y2="774" class="conn" marker-end="url(#arrow)"/>
+  <line x1="843" y1="578" x2="910" y2="774" class="conn" marker-end="url(#arrow)"/>
+  <line x1="843" y1="578" x2="1130" y2="774" class="conn" marker-end="url(#arrow)"/>
+  <line x1="450" y1="578" x2="1130" y2="774" class="conn" marker-end="url(#arrow)"/>
+
+  <!-- External arrows (to top external services) -->
+  <path d="M 280 514 C 280 360, 320 220, 320 170" class="connExt" marker-end="url(#arrowExt)"/>
+  <path d="M 450 514 C 450 360, 640 220, 640 170" class="connExt" marker-end="url(#arrowExt)"/>
+  <path d="M 843 514 C 843 360, 640 220, 640 170" class="connExt" marker-end="url(#arrowExt)"/>
+  <path d="M 843 514 C 843 360, 960 220, 960 170" class="connExt" marker-end="url(#arrowExt)"/>
+
+  <!-- Legend -->
+  <g transform="translate(40, 940)">
+    <rect x="0" y="0" width="1240" height="60" rx="10" fill="#FFFFFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="20" y="22" font-size="12" font-weight="700" fill="#5C3D2E">凡例</text>
+
+    <rect x="70" y="10" width="22" height="14" rx="3" fill="#FFFFFF" stroke="#FD98B8" stroke-width="1.5"/>
+    <text x="100" y="22" font-size="11" fill="#5C3D2E">アプリ実装（自前コード）</text>
+
+    <rect x="270" y="10" width="22" height="14" rx="3" fill="#92D9FD" stroke="#5DB8E6" stroke-width="1.2"/>
+    <text x="300" y="22" font-size="11" fill="#5C3D2E">iOS / Apple 標準フレームワーク</text>
+
+    <rect x="500" y="10" width="22" height="14" rx="3" fill="#FFE7B5" stroke="#FFA000" stroke-width="1.2"/>
+    <text x="530" y="22" font-size="11" fill="#5C3D2E">サードパーティ SDK</text>
+
+    <rect x="680" y="10" width="22" height="14" rx="3" fill="#10A37F"/>
+    <text x="710" y="22" font-size="11" fill="#5C3D2E">外部クラウドサービス</text>
+
+    <line x1="70" y1="44" x2="100" y2="44" stroke="#5C3D2E" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="108" y="48" font-size="11" fill="#5C3D2E">依存関係（呼び出し方向）</text>
+
+    <line x1="280" y1="44" x2="320" y2="44" stroke="#FD98B8" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#arrowExt)"/>
+    <text x="330" y="48" font-size="11" fill="#5C3D2E">外部サービスへの通信</text>
+
+    <text x="500" y="48" font-size="11" fill="#5C3D2E">※ Protocol駆動DI のため、Domain は Data/Infra の具象に依存しません（Protocol を介して逆転）</text>
+  </g>
+</svg>
