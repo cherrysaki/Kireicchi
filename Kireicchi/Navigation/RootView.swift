@@ -7,17 +7,15 @@ struct RootView: View {
     @AppStorage("hasShownLogoSplash") private var hasShownLogoSplash: Bool = false
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
-    @AppStorage("hasRegisteredUsername") private var hasRegisteredUsername: Bool = false
+    @AppStorage("hasCompletedOwnerRegistration") private var hasCompletedOwnerRegistration: Bool = false
 
     var body: some View {
         if !hasShownLogoSplash {
             LogoSplashView()
         } else if !hasShownWorldviewOnboarding {
             WorldviewOnboardingView()
-        } else if !hasShownTutorial {
-            TutorialView()
-        } else if !hasRegisteredUsername {
-            UsernameRegistrationView()
+        } else if !hasCompletedOwnerRegistration {
+            OwnerRegistrationView()
         } else {
             mainStack
         }
