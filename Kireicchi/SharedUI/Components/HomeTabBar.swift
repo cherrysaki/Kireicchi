@@ -50,6 +50,12 @@ struct HomeTabBar: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(canCapture ? DesignSystem.Color.primaryDark : Color.white.opacity(0.8))
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(key: CameraButtonFrameKey.self, value: geo.frame(in: .global))
+                    }
+                )
             }
             .offset(y: -18)
         }

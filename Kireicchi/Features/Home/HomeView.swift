@@ -13,6 +13,12 @@ struct HomeView: View {
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
 
+    @AppStorage("hasShownCoachMark") private var hasShownCoachMark: Bool = false
+    @State private var coachStep: Int = 0
+    @State private var showCoachMark: Bool = false
+    @State private var settingsButtonFrame: CGRect = .zero
+    @State private var cameraButtonFrame: CGRect = .zero
+
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
         return historyRecords.filter {
@@ -94,6 +100,10 @@ struct HomeView: View {
                 HomeTabBar(
                     onHome: { navigationRouter.popToRoot() },
                     onCapture: {
+                        if showCoachMark {
+                            withAnimation { showCoachMark = false }
+                            hasShownCoachMark = true
+                        }
                         if canCapture {
                             navigationRouter.navigate(to: .capture)
                         } else {
@@ -122,6 +132,29 @@ struct HomeView: View {
                 }
             )
         }
+        .onPreferenceChange(SettingsButtonFrameKey.self) { settingsButtonFrame = $0 }
+        .onPreferenceChange(CameraButtonFrameKey.self) { cameraButtonFrame = $0 }
+        .overlay {
+            if showCoachMark {
+                CoachMarkOverlay(
+                    currentStep: coachStep,
+                    highlightFrame: coachStep == 0 ? settingsButtonFrame : cameraButtonFrame
+                )
+                .transition(.opacity)
+            }
+        }
+        .onAppear {
+            guard !hasShownCoachMark else { return }
+            if !showCoachMark && coachStep == 0 {
+                // 初回表示
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation { showCoachMark = true }
+                }
+            } else if showCoachMark && coachStep == 0 {
+                // 設定画面から戻ってきた → ステップ2へ
+                withAnimation { coachStep = 1 }
+            }
+        }
     }
 
     // MARK: - Top Bar
@@ -139,6 +172,12 @@ struct HomeView: View {
                         .font(DesignSystem.Font.title3)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(key: SettingsButtonFrameKey.self, value: geo.frame(in: .global))
+                    }
+                )
                 Spacer()
             }
         }
