@@ -116,6 +116,7 @@ struct HomeView: View {
                 .padding(.bottom, 12)
             }
         }
+        .coordinateSpace(name: "homeView")
         .navigationBarHidden(true)
         .alert("本日の撮影は終了しました", isPresented: $showCaptureAlert) {
             Button("OK") {}
@@ -134,6 +135,11 @@ struct HomeView: View {
         }
         .onPreferenceChange(SettingsButtonFrameKey.self) { settingsButtonFrame = $0 }
         .onPreferenceChange(CameraButtonFrameKey.self) { cameraButtonFrame = $0 }
+        #if DEBUG
+        .onChange(of: settingsButtonFrame) { _, newValue in
+            print("Settings button frame: \(newValue)")
+        }
+        #endif
         .overlay {
             if showCoachMark {
                 CoachMarkOverlay(
@@ -175,7 +181,7 @@ struct HomeView: View {
                 .background(
                     GeometryReader { geo in
                         Color.clear
-                            .preference(key: SettingsButtonFrameKey.self, value: geo.frame(in: .global))
+                            .preference(key: SettingsButtonFrameKey.self, value: geo.frame(in: .named("homeView")))
                     }
                 )
                 Spacer()

@@ -17,6 +17,13 @@ struct CameraButtonFrameKey: PreferenceKey {
     }
 }
 
+struct TimerSettingFrameKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
+}
+
 // MARK: - Coach Mark Overlay
 
 struct CoachMarkOverlay: View {
@@ -76,7 +83,7 @@ struct CoachMarkOverlay: View {
 
 // MARK: - Coach Bubble
 
-private struct CoachBubble: View {
+struct CoachBubble: View {
     let text: String
     var arrowDirection: ArrowDirection = .down
 

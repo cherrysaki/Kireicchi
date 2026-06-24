@@ -53,7 +53,7 @@ struct HomeTabBar: View {
                 .background(
                     GeometryReader { geo in
                         Color.clear
-                            .preference(key: CameraButtonFrameKey.self, value: geo.frame(in: .global))
+                            .preference(key: CameraButtonFrameKey.self, value: geo.frame(in: .named("homeView")))
                     }
                 )
             }
