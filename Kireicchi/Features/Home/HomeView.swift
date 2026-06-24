@@ -148,6 +148,7 @@ struct HomeView: View {
                                     .position(x: targetFrame.midX, y: targetFrame.midY)
                             }
                             .allowsHitTesting(false)
+                            .ignoresSafeArea()
 
                         if coachStep == 0 {
                             CoachBubble(
@@ -165,7 +166,6 @@ struct HomeView: View {
                             .allowsHitTesting(false)
                         }
                     }
-                    .ignoresSafeArea()
                 }
             }
         }

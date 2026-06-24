@@ -97,6 +97,7 @@ struct SettingsView: View {
                                     .position(x: frame.midX, y: frame.midY)
                             }
                             .allowsHitTesting(false)
+                            .ignoresSafeArea()
 
                         CoachBubble(
                             text: "撮影する時間を\n設定しよう！",
@@ -105,7 +106,6 @@ struct SettingsView: View {
                         .position(x: frame.midX, y: frame.maxY + 60)
                         .allowsHitTesting(false)
                     }
-                    .ignoresSafeArea()
                 }
             }
         }
