@@ -25,10 +25,10 @@ struct UsernameRegistrationView: View {
                     .frame(width: 220, height: 220)
 
                 VStack(spacing: 8) {
-                    Text("なまえを おしえてね")
+                    Text("名前をおしえてね")
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(DesignSystem.Color.textPrimary)
-                    Text("きれいっちが あなたを\nなんて よべばいいかな？")
+                    Text("きれいっちが あなたを\nなんて 呼べばいいかな？")
                         .font(DesignSystem.Font.subheadline)
                         .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         .multilineTextAlignment(.center)
@@ -66,8 +66,9 @@ struct UsernameRegistrationView: View {
                 }
                 .buttonStyle(PixelButtonStyle())
                 .disabled(trimmedName.isEmpty || isSaving)
-                .opacity(trimmedName.isEmpty ? 0.5 : 1)
-                .padding(.bottom, 48)
+                .opacity(trimmedName.isEmpty ? 0.3 : 1)
+                .frame(width: 320, height: 56)
+                .padding(.bottom, 172)
             }
 
             VStack {
