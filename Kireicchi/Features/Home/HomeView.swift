@@ -246,55 +246,53 @@ struct HomeView: View {
 
     // MARK: - Room Frame
     private func roomFrame(now: Date) -> some View {
-        ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(DesignSystem.Color.secondary.opacity(0.15))
-                .aspectRatio(1, contentMode: .fit)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(DesignSystem.Color.primary, lineWidth: 5)
-                )
+        GeometryReader { geo in
+            ZStack(alignment: .topLeading) {
+                DesignSystem.Color.secondary.opacity(0.15)
 
-            GeometryReader { geo in
-                ZStack(alignment: .topLeading) {
-                    if let data = latestRecord?.pixelArtImageData,
-                       let uiImage = UIImage(data: data) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .interpolation(.none)
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: geo.size.width, height: geo.size.width)
-                            .clipped()
-                    }
-
-                    if isRunaway {
-                        Image("okitegami")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(16)
-                            .frame(width: geo.size.width, height: geo.size.width)
-                    } else {
-                        VStack {
-                            Spacer()
-                            CharacterView(
-                                characterType: selectedCharacterType,
-                                characterState: characterState(at: now)
-                            )
-                            .frame(
-                                width: geo.size.width * 0.5,
-                                height: geo.size.width * 0.5
-                            )
-                            .padding(.bottom, 8)
-                        }
+                if let data = latestRecord?.pixelArtImageData,
+                   let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: geo.size.width, height: geo.size.width)
-                    }
-
-                    heartGaugePill(now: now)
-                        .padding(10)
+                        .clipped()
                 }
+
+                if isRunaway {
+                    Image("okitegami")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(16)
+                        .frame(width: geo.size.width, height: geo.size.width)
+                } else {
+                    VStack {
+                        Spacer()
+                        CharacterView(
+                            characterType: selectedCharacterType,
+                            characterState: characterState(at: now)
+                        )
+                        .frame(
+                            width: geo.size.width * 0.5,
+                            height: geo.size.width * 0.5
+                        )
+                        .padding(.bottom, 8)
+                    }
+                    .frame(width: geo.size.width, height: geo.size.width)
+                }
+
+                heartGaugePill(now: now)
+                    .padding(10)
             }
             .aspectRatio(1, contentMode: .fit)
         }
+        .aspectRatio(1, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(DesignSystem.Color.primary, lineWidth: 5)
+        )
         .padding(.horizontal, 20)
     }
 

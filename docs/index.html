@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>きれいっち — AI×キャラ育成のお片づけアプリ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink: #FD98B8;
+  --pink-dark: #C2627E;
+  --blue: #92D9FD;
+  --blue-dark: #1A6FAD;
+  --cream: #FFF9E6;
+  --brown: #5C3D2E;
+  --purple: #C8A8D8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background: var(--cream);
+  color: var(--brown);
+  overflow-x: hidden;
+}
+
+/* ========== HERO ========== */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--pink) 0%, var(--purple) 45%, var(--blue) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.18) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(255,255,255,0.12) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.pixel-dots {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 700px;
+}
+
+.award-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.9);
+  border: 2px solid var(--pink-dark);
+  border-radius: 999px;
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pink-dark);
+  margin-bottom: 28px;
+  animation: fadeSlideDown 0.6s ease both;
+}
+
+.hero-title {
+  font-family: 'DotGothic16', monospace;
+  font-size: clamp(72px, 18vw, 120px);
+  color: var(--blue-dark);
+  text-shadow: 4px 4px 0 #0D4F8A, 6px 6px 0 rgba(255,255,255,0.3);
+  line-height: 1;
+  margin-bottom: 16px;
+  animation: fadeSlideDown 0.7s ease 0.1s both;
+  letter-spacing: 2px;
+}
+
+.hero-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'DotGothic16', monospace;
+  font-size: clamp(14px, 3.5vw, 20px);
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  margin-bottom: 32px;
+  animation: fadeSlideDown 0.7s ease 0.2s both;
+}
+
+.hero-sub::before, .hero-sub::after {
+  content: '◇';
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+}
+
+.hero-catch {
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: white;
+  text-shadow: 2px 2px 0 var(--pink-dark);
+  margin-bottom: 40px;
+  line-height: 1.5;
+  animation: fadeSlideDown 0.7s ease 0.3s both;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeSlideDown 0.7s ease 0.4s both;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--pink-dark);
+  color: white;
+  font-family: 'DotGothic16', monospace;
+  font-size: 16px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 3px solid #9B3D5A;
+  box-shadow: 0 4px 0 #9B3D5A;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-primary:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #9B3D5A;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  color: var(--blue-dark);
+  font-family: 'DotGothic16', monospace;
+  font-size: 16px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 3px solid var(--blue-dark);
+  box-shadow: 0 4px 0 var(--blue-dark);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-secondary:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--blue-dark);
+}
+
+/* ========== BEFORE/AFTER ========== */
+.section-ba {
+  background: linear-gradient(180deg, var(--blue) 0%, var(--cream) 100%);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.section-title {
+  font-family: 'DotGothic16', monospace;
+  font-size: clamp(22px, 5vw, 36px);
+  color: var(--pink-dark);
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+}
+
+.section-desc {
+  font-size: 15px;
+  color: var(--brown);
+  opacity: 0.8;
+  margin-bottom: 48px;
+  line-height: 1.8;
+}
+
+.ba-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ba-card {
+  background: white;
+  border: 3px solid var(--blue-dark);
+  border-radius: 16px;
+  padding: 20px;
+  width: 280px;
+  box-shadow: 4px 4px 0 var(--blue-dark);
+  position: relative;
+}
+
+.ba-label {
+  font-family: 'DotGothic16', monospace;
+  font-size: 13px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.ba-label.before { background: var(--brown); color: white; }
+.ba-label.after { background: var(--pink-dark); color: white; }
+
+.ba-room {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+}
+
+.ba-room.messy {
+  background: linear-gradient(135deg, #D4A76A 0%, #C49A55 50%, #B8864A 100%);
+  font-family: 'DotGothic16', monospace;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ba-room.clean {
+  background: linear-gradient(135deg, #AEE8D0 0%, #7FCBB8 50%, #5BB5A0 100%);
+  font-family: 'DotGothic16', monospace;
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chara-bubble {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.chara-face {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--blue-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.bubble-text {
+  background: var(--cream);
+  border: 2px solid var(--blue-dark);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--brown);
+  line-height: 1.6;
+  position: relative;
+  text-align: left;
+}
+
+.bubble-text::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 12px;
+  border: 5px solid transparent;
+  border-right-color: var(--blue-dark);
+}
+
+.arrow-icon {
+  font-size: 40px;
+  color: var(--pink-dark);
+  font-weight: bold;
+}
+
+/* ========== FEATURES ========== */
+.section-features {
+  background: var(--cream);
+  padding: 80px 24px;
+}
+
+.features-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 48px;
+}
+
+.feature-card {
+  background: white;
+  border: 3px solid var(--pink);
+  border-radius: 16px;
+  padding: 28px 20px;
+  box-shadow: 4px 4px 0 var(--pink);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 8px 0 var(--pink);
+}
+
+.feature-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.feature-title {
+  font-family: 'DotGothic16', monospace;
+  font-size: 15px;
+  color: var(--blue-dark);
+  margin-bottom: 10px;
+}
+
+.feature-desc {
+  font-size: 13px;
+  color: var(--brown);
+  line-height: 1.8;
+  opacity: 0.85;
+}
+
+/* ========== HOW TO ========== */
+.section-howto {
+  background: linear-gradient(160deg, var(--pink) 0%, var(--purple) 50%, var(--blue) 100%);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.section-howto .section-title { color: white; text-shadow: 2px 2px 0 var(--pink-dark); }
+.section-howto .section-desc { color: rgba(255,255,255,0.9); }
+
+.steps {
+  display: flex;
+  gap: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.step {
+  background: rgba(255,255,255,0.92);
+  border: 3px solid white;
+  border-radius: 16px;
+  padding: 28px 20px;
+  width: 200px;
+  position: relative;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+}
+
+.step-num {
+  font-family: 'DotGothic16', monospace;
+  font-size: 11px;
+  background: var(--pink-dark);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.step-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+
+.step-title {
+  font-family: 'DotGothic16', monospace;
+  font-size: 14px;
+  color: var(--blue-dark);
+  margin-bottom: 6px;
+}
+
+.step-desc { font-size: 12px; color: var(--brown); line-height: 1.7; }
+
+.step-arrow {
+  align-self: center;
+  font-size: 28px;
+  color: white;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ========== TECH ========== */
+.section-tech {
+  background: var(--cream);
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 36px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tech-tag {
+  background: var(--blue);
+  border: 2px solid var(--blue-dark);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: 'DotGothic16', monospace;
+  font-size: 13px;
+  color: var(--blue-dark);
+  font-weight: bold;
+}
+
+/* ========== TEAM ========== */
+.section-team {
+  background: linear-gradient(180deg, var(--blue) 0%, var(--purple) 100%);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.section-team .section-title { color: white; text-shadow: 2px 2px 0 var(--blue-dark); }
+
+.team-name-big {
+  font-family: 'DotGothic16', monospace;
+  font-size: clamp(32px, 8vw, 56px);
+  color: var(--cream);
+  text-shadow: 3px 3px 0 var(--pink-dark);
+  margin-bottom: 40px;
+}
+
+.members {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.member-card {
+  background: rgba(255,255,255,0.9);
+  border: 3px solid white;
+  border-radius: 16px;
+  padding: 28px 32px;
+  min-width: 220px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+}
+
+.member-role {
+  font-family: 'DotGothic16', monospace;
+  font-size: 11px;
+  color: var(--pink-dark);
+  margin-bottom: 8px;
+}
+
+.member-name {
+  font-family: 'DotGothic16', monospace;
+  font-size: 20px;
+  color: var(--blue-dark);
+  margin-bottom: 4px;
+}
+
+.member-real {
+  font-size: 13px;
+  color: var(--brown);
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.member-univ {
+  font-size: 13px;
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+
+/* ========== CTA ========== */
+.section-cta {
+  background: var(--cream);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.cta-box {
+  background: white;
+  border: 3px solid var(--pink);
+  border-radius: 24px;
+  padding: 48px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 6px 6px 0 var(--pink);
+}
+
+.cta-title {
+  font-family: 'DotGothic16', monospace;
+  font-size: clamp(20px, 5vw, 28px);
+  color: var(--blue-dark);
+  margin-bottom: 8px;
+}
+
+.cta-desc {
+  font-size: 14px;
+  color: var(--brown);
+  opacity: 0.8;
+  margin-bottom: 28px;
+  line-height: 1.8;
+}
+
+.qr-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.qr-img {
+  width: 120px;
+  height: 120px;
+  border: 3px solid var(--blue-dark);
+  border-radius: 12px;
+  padding: 4px;
+  background: white;
+}
+
+.qr-note {
+  text-align: left;
+  font-size: 13px;
+  color: var(--brown);
+  line-height: 2;
+}
+
+.contact-box {
+  background: var(--cream);
+  border: 2px solid var(--pink-dark);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--brown);
+  margin-top: 16px;
+}
+
+/* ========== FOOTER ========== */
+footer {
+  background: var(--blue-dark);
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.float { animation: float 3s ease-in-out infinite; }
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .ba-row { flex-direction: column; align-items: center; }
+  .arrow-icon { transform: rotate(90deg); }
+  .steps { gap: 8px; }
+  .step { width: 100%; max-width: 300px; }
+  .step-arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="pixel-dots"></div>
+  <div class="hero-inner">
+    <div class="award-badge">🏆 技育CAMPハッカソン2026 vol.2 最優秀賞</div>
+    <h1 class="hero-title float">きれいっち</h1>
+    <p class="hero-sub">AI×キャラ育成のお片づけアプリ</p>
+    <p class="hero-catch">始めよう、自分のためだけじゃない<br>片付け習慣。</p>
+    <div class="hero-btns">
+      <a href="https://apps.apple.com/jp/app/%E3%81%8D%E3%82%8C%E3%81%84%E3%81%A3%E3%81%A1/id6770149722" class="btn-primary" target="_blank">
+        🍎 App Storeでダウンロード
+      </a>
+      <a href="#features" class="btn-secondary">
+        ✨ 詳しく見る
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER -->
+<section class="section-ba fade-in">
+  <p class="section-title">お部屋が変わると、きれいっちも変わる</p>
+  <p class="section-desc">散らかった部屋を撮影するだけで<br>AIがスコア化。きれいっちと一緒に片付けを楽しもう！</p>
+  <div class="ba-row">
+    <div class="ba-card">
+      <span class="ba-label before">Before...</span>
+      <div class="ba-room messy">
+        <span>🧦👕📚</span>
+        <span style="font-size:12px">散らかり度 高め...</span>
+      </div>
+      <div class="chara-bubble">
+        <div class="chara-face">😢</div>
+        <div class="bubble-text">そろそろ、お片づけしてくれたら嬉しいな</div>
+      </div>
+    </div>
+    <div class="arrow-icon">→</div>
+    <div class="ba-card">
+      <span class="ba-label after">After!</span>
+      <div class="ba-room clean">
+        <span>✨🌱💐</span>
+        <span style="font-size:12px">スコア 90/100！</span>
+      </div>
+      <div class="chara-bubble">
+        <div class="chara-face">😊</div>
+        <div class="bubble-text">わーい！キレイになって元気100倍！</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section-features fade-in" id="features">
+  <div class="features-inner">
+    <p class="section-title">主な特徴</p>
+    <p class="section-desc">きれいっちが持つ、ちょっと特別な機能たち</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🔍</span>
+        <p class="feature-title">AIが散らかり度を採点</p>
+        <p class="feature-desc">写真を撮るだけで0〜100点でスコア化。どこから片付ければいいか一目でわかる！</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎨</span>
+        <p class="feature-title">お部屋がドット絵に</p>
+        <p class="feature-desc">AIがお部屋をドット絵に変換。スコアに応じてきれいっちの表情が変わる！</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👥</span>
+        <p class="feature-title">友達をお部屋に招待</p>
+        <p class="feature-desc">友達のきれいっちをお部屋に呼べる。人が来るから片付けたくなる仕組み。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏃</span>
+        <p class="feature-title">放置すると家出する！？</p>
+        <p class="feature-desc">7日間撮影しないとキャラが家出しちゃう…だから自然と続けられる。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⏱️</span>
+        <p class="feature-title">お片づけタイマー</p>
+        <p class="feature-desc">時間を決めて片付けにチャレンジ。きれいっちが応援してくれる！</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <p class="feature-title">記録グラフで可視化</p>
+        <p class="feature-desc">スコアの履歴をグラフで確認。頑張りの積み重ねが一目でわかる！</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO -->
+<section class="section-howto fade-in">
+  <p class="section-title">使い方はかんたん3ステップ</p>
+  <p class="section-desc">むずかしい操作は一切なし。撮るだけでOK！</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <span class="step-icon">📸</span>
+      <p class="step-title">お部屋を撮影</p>
+      <p class="step-desc">カメラボタンを押してお部屋をパシャり。1日2回まで撮影できる。</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <span class="step-icon">🤖</span>
+      <p class="step-title">AIが自動診断</p>
+      <p class="step-desc">AIがスコア化＆ドット絵に変換。片付けミッションも自動生成！</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <span class="step-icon">✨</span>
+      <p class="step-title">きれいっちが元気に</p>
+      <p class="step-desc">スコアが上がるほどきれいっちがハッピーに！継続で習慣化。</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section class="section-tech fade-in">
+  <p class="section-title">使用技術</p>
+  <div class="tech-tags">
+    <span class="tech-tag">Swift / SwiftUI</span>
+    <span class="tech-tag">OpenAI API (GPT-4o)</span>
+    <span class="tech-tag">gpt-image-1</span>
+    <span class="tech-tag">Firebase Auth</span>
+    <span class="tech-tag">Firestore</span>
+    <span class="tech-tag">SwiftData</span>
+    <span class="tech-tag">Multipeer Connectivity</span>
+    <span class="tech-tag">NearbyInteraction</span>
+    <span class="tech-tag">AVFoundation</span>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section-team fade-in">
+  <p class="section-title" style="color:white;text-shadow:2px 2px 0 var(--blue-dark)">開発チーム</p>
+  <div class="team-name-big">ちゃみっけ！</div>
+  <div class="members">
+    <div class="member-card">
+      <p class="member-role">iOS開発・デザイン</p>
+      <p class="member-name">ちゃみこ</p>
+      <p class="member-real">酒井 みな実</p>
+      <p class="member-univ">お茶の水女子大学・3年</p>
+    </div>
+    <div class="member-card">
+      <p class="member-role">iOS開発・通信機能</p>
+      <p class="member-name">ゆっけ</p>
+      <p class="member-real">神林 沙希</p>
+      <p class="member-univ">慶應義塾大学・2年</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta fade-in">
+  <div class="cta-box">
+    <p class="cta-title">App Storeで配信中！</p>
+    <p class="cta-desc">「きれいっち」で検索、またはQRコードからダウンロード🎉</p>
+    <div class="qr-wrap">
+      <img class="qr-img"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://apps.apple.com/jp/app/id6770149722&color=1A6FAD&bgcolor=FFFFFF"
+        alt="App Store QRコード"
+      />
+      <div class="qr-note">
+        📱 QRコードを読み取る<br>
+        🔍「きれいっち」で検索<br>
+        🍎 App Storeで無料配信中
+      </div>
+    </div>
+    <a href="https://apps.apple.com/jp/app/%E3%81%8D%E3%82%8C%E3%81%84%E3%81%A3%E3%81%A1/id6770149722"
+      class="btn-primary" target="_blank" style="display:inline-flex;margin-bottom:16px;">
+      🍎 ダウンロードする
+    </a>
+    <div class="contact-box">
+      ✉️ お問い合わせ：chamiko.dev@gmail.com
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 ちゃみっけ！ — きれいっち</p>
+  <p style="margin-top:6px;">技育CAMPハッカソン2026 vol.2 最優秀賞受賞</p>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

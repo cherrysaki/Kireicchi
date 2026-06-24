@@ -19,7 +19,6 @@ struct HomeMissionSwipeView: View {
 
     private let swipeThreshold: CGFloat = 100
     private let maxBackCards = 2
-    private static let completeColor = SwiftUI.Color(hex: "1ABA7F")
 
     private var remaining: Int { max(0, missions.count - topIndex) }
 
@@ -70,7 +69,7 @@ struct HomeMissionSwipeView: View {
                     let isTop = depth == 0
                     let isExiting = exitingId == mission.id
 
-                    HomeMissionCard(
+                    SwipeMissionCard(
                         mission: mission,
                         originalImage: originalImage,
                         dragOffset: isTop ? dragOffset : .zero,
@@ -78,7 +77,7 @@ struct HomeMissionSwipeView: View {
                     )
                     .frame(width: geo.size.width, height: geo.size.height)
                     .scaleEffect(isTop ? 1.0 : 1.0 - 0.04 * CGFloat(depth))
-                    .offset(y: isTop ? 0 : CGFloat(depth) * 10)
+                    .offset(y: isTop ? 0 : CGFloat(depth) * 8)
                     .offset(isExiting ? exitOffset : (isTop ? dragOffset : .zero))
                     .rotationEffect(.degrees(rotation(for: isTop ? dragOffset : (isExiting ? exitOffset : .zero))))
                     .zIndex(isTop ? 10 : Double(maxBackCards - depth))
@@ -88,7 +87,7 @@ struct HomeMissionSwipeView: View {
                 }
             }
         }
-        .aspectRatio(2.0 / 3.0, contentMode: .fit)
+        .aspectRatio(3.0 / 4.0, contentMode: .fit)
         .frame(maxHeight: 560)
     }
 
@@ -103,13 +102,13 @@ struct HomeMissionSwipeView: View {
     private var actionButtons: some View {
         HStack(spacing: 14) {
             Button(action: { tap(.later) }) {
-                Text("後でやる")
+                Text("SKIP")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
-                        Capsule().fill(DesignSystem.Color.surface)
+                        Capsule().fill(DesignSystem.Color.secondary)
                     )
                     .overlay(
                         Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
@@ -119,13 +118,13 @@ struct HomeMissionSwipeView: View {
             .disabled(remaining == 0)
 
             Button(action: { tap(.complete) }) {
-                Text("完了")
+                Text("DONE")
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
-                        Capsule().fill(Self.completeColor)
+                        Capsule().fill(DesignSystem.Color.primary)
                     )
                     .overlay(
                         Capsule().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)

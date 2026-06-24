@@ -45,7 +45,7 @@ final class AppDependencies: ObservableObject {
             self.currentUser = user
             self.authProvider = session.provider
         } catch {
-            self.bootstrapError = "サーバーと つながれないみたい (\(error.localizedDescription))"
+            self.bootstrapError = "サーバーに接続できませんでした (\(error.localizedDescription))"
             print("[bootstrap] failed: \(error)")
         }
     }
@@ -59,21 +59,37 @@ final class AppDependencies: ObservableObject {
             self.currentUser = user
             self.authProvider = user.authProvider
         } catch {
-            self.bootstrapError = "Apple サインインに しっぱい (\(error.localizedDescription))"
+            self.bootstrapError = "Apple サインインに失敗 (\(error.localizedDescription))"
             print("[completeAppleSignIn] failed: \(error)")
         }
     }
 
-    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String) async {
+    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String, username: String) async {
         guard let uid = currentUser?.uid else { return }
+        let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
         do {
             let updated = try await userRepository.update(uid: uid) { user in
                 user.notificationSettings = NotificationSettingsData(hour: hour, minute: minute, isEnabled: isEnabled)
                 user.selectedCharacterId = characterId
+                user.username = trimmed.isEmpty ? nil : trimmed
             }
             self.currentUser = updated
         } catch {
             print("[updateSettings] failed: \(error)")
+        }
+    }
+
+    func updateUsername(_ username: String) async {
+        guard let uid = currentUser?.uid else { return }
+        let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        do {
+            let updated = try await userRepository.update(uid: uid) { user in
+                user.username = trimmed
+            }
+            self.currentUser = updated
+        } catch {
+            print("[updateUsername] failed: \(error)")
         }
     }
 

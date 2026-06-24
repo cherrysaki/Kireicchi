@@ -72,7 +72,7 @@ struct FriendVisitView: View {
     // MARK: - Status Headline
     private var statusHeadline: some View {
         VStack(spacing: 4) {
-            Text("🫂 ともだちと あう")
+            Text("🫂 友達と会う")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             Text(viewModel.state.headlineText)
@@ -163,7 +163,7 @@ struct FriendVisitView: View {
             .padding(.trailing, 3)
 
             HStack {
-                Text("ちかい")
+                Text("近い")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 Spacer()
@@ -173,7 +173,7 @@ struct FriendVisitView: View {
                         .foregroundColor(DesignSystem.Color.primaryDark)
                 }
                 Spacer()
-                Text("とおい")
+                Text("遠い")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
@@ -203,7 +203,7 @@ struct FriendVisitView: View {
                 Text(friend.displayName)
                     .font(DesignSystem.Font.subheadline)
                     .foregroundColor(DesignSystem.Color.textPrimary)
-                Text("と つながりました")
+                Text("と繋がりました")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
@@ -223,7 +223,7 @@ struct FriendVisitView: View {
 
 #Preview("Visiting") {
     NavigationStack {
-        FriendVisitView(myDisplayName: "わたし", myCharacterId: CharacterType.character01.rawValue)
+        FriendVisitView(myDisplayName: "私", myCharacterId: CharacterType.character01.rawValue)
             .environmentObject(NavigationRouter())
     }
 }

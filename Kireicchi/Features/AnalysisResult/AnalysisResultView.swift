@@ -9,8 +9,6 @@ struct AnalysisResultView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
 
-    @State private var skippedIds: Set<String> = []
-
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
@@ -20,9 +18,7 @@ struct AnalysisResultView: View {
     }
 
     private var pendingMissions: [MissionPersisted] {
-        (records.first?.missions ?? []).filter {
-            !$0.isDone && !skippedIds.contains($0.id)
-        }
+        (records.first?.missions ?? []).filter { !$0.isDone }
     }
 
     var body: some View {
@@ -63,7 +59,7 @@ struct AnalysisResultView: View {
                 Text("\(analysis.score)/100")
                     .font(DesignSystem.Font.title)
                     .foregroundColor(DesignSystem.Color.primaryDark)
-                Text("ひとことコメント")
+                Text("一言コメント")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                     .padding(.top, 6)
@@ -137,7 +133,7 @@ struct AnalysisResultView: View {
         }
     }
 
-    // MARK: - Mission Swipe Section
+    // MARK: - Mission List Section
     private var priorityListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -146,36 +142,45 @@ struct AnalysisResultView: View {
                     .foregroundColor(DesignSystem.Color.textPrimary)
                 Spacer()
                 if !pendingMissions.isEmpty {
-                    Text("\(pendingMissions.count)件のこってる")
+                    Text("\(pendingMissions.count)件残ってる")
                         .font(DesignSystem.Font.caption)
                         .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                 }
             }
             .padding(.horizontal)
 
-            SwipeMissionStack(
-                missions: pendingMissions,
-                originalImage: originalImage,
-                onSwipe: { mission, direction in
-                    if direction == .right {
-                        let store = LatestRoomRecordStore(context: modelContext)
-                        try? store.updateMission(id: mission.id, isDone: true)
-                    } else {
-                        skippedIds.insert(mission.id)
+            if pendingMissions.isEmpty {
+                missionEmptyState
+                    .padding(.horizontal)
+                    .padding(.trailing, 4)
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(pendingMissions, id: \.id) { mission in
+                        MissionListRow(mission: mission) {
+                            let store = LatestRoomRecordStore(context: modelContext)
+                            try? store.updateMission(id: mission.id, isDone: true)
+                        }
                     }
                 }
-            )
-            .frame(height: 420)
-            .padding(.horizontal)
-            .padding(.trailing, 6)
-
-            if !pendingMissions.isEmpty {
-                Text("← スキップ        DONE →")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-                    .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal)
+                .padding(.trailing, 4)
             }
         }
+    }
+
+    private var missionEmptyState: some View {
+        VStack(spacing: 12) {
+            CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
+                .frame(width: 120, height: 120)
+            Text("全部終わった！")
+                .font(DesignSystem.Font.title2)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+            Text("お疲れさま✨")
+                .font(DesignSystem.Font.subheadline)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
     }
 
     // MARK: - Action Buttons
@@ -202,7 +207,7 @@ struct AnalysisResultView: View {
             }) {
                 HStack {
                     Image(systemName: "house.fill")
-                    Text("ホームがめんに もどる")
+                    Text("ホーム画面に戻る")
                 }
                 .font(DesignSystem.Font.subheadline)
                 .frame(maxWidth: .infinity)
@@ -233,16 +238,55 @@ struct AnalysisResultView: View {
 
 }
 
+private struct MissionListRow: View {
+    let mission: MissionPersisted
+    let onComplete: () -> Void
+
+    private var starCount: Int { min(max(mission.priority, 1), 5) }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: onComplete) {
+                Image(systemName: "circle")
+                    .font(.system(size: 24, weight: .regular))
+                    .foregroundColor(DesignSystem.Color.primary)
+            }
+            .buttonStyle(.plain)
+
+            Text(mission.label)
+                .font(DesignSystem.Font.subheadline)
+                .foregroundColor(DesignSystem.Color.textPrimary)
+                .multilineTextAlignment(.leading)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 2) {
+                ForEach(0..<starCount, id: \.self) { _ in
+                    PixelStar(size: 14)
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .pixelSquareCard(
+            fill: DesignSystem.Color.surface,
+            border: DesignSystem.Color.primary,
+            borderWidth: 2,
+            shadowOffset: 3
+        )
+    }
+}
+
 #Preview {
     let mockAnalysis = RoomAnalysis(
         score: 75,
         rank: .b,
         messyPoints: [
-            MessyPoint(label: "ゆかの ふく", priority: 3,
+            MessyPoint(label: "床の服", priority: 3,
                        bbox: NormalizedRect(x: 0.1, y: 0.55, w: 0.45, h: 0.35)),
-            MessyPoint(label: "つくえの うえの かみ", priority: 2,
+            MessyPoint(label: "机の上の紙", priority: 2,
                        bbox: NormalizedRect(x: 0.2, y: 0.15, w: 0.4, h: 0.25)),
-            MessyPoint(label: "ほんだなの せいり", priority: 1, bbox: nil)
+            MessyPoint(label: "本棚の整理", priority: 1, bbox: nil)
         ],
         characterComment: "もう少し片付けるといいかも！"
     )

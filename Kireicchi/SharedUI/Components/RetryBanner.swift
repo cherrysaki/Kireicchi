@@ -44,7 +44,7 @@ struct RetryBanner: View {
 #Preview {
     VStack {
         RetryBanner(
-            message: "サーバーと つながれないみたい",
+            message: "サーバーに接続できませんでした",
             onRetry: {}
         )
         Spacer()

@@ -110,11 +110,11 @@ struct CaptureView: View {
             Image(systemName: "camera.slash")
                 .font(DesignSystem.Font.custom(size: 60))
                 .foregroundColor(.white.opacity(0.7))
-            Text("カメラへの アクセスが きょかされて いません")
+            Text("カメラへのアクセスが許可されていません")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
-            Text("せってい アプリで カメラの アクセスを きょかして ください")
+            Text("設定アプリでカメラのアクセスを許可してください")
                 .font(DesignSystem.Font.caption)
                 .foregroundColor(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -123,7 +123,7 @@ struct CaptureView: View {
                     UIApplication.shared.open(url)
                 }
             }) {
-                Text("せっていを ひらく")
+                Text("設定を開く")
                     .font(DesignSystem.Font.subheadline)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
