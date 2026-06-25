@@ -4,11 +4,12 @@ import Combine
 @MainActor
 final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     @Published var currentStep = 0
+    @Published var progress: Double = 0
     @Published var isAnalyzing = true
     @Published var errorMessage: String?
     @Published var errorDetails: (rawResponse: String?, apiKeyPrefix: String?)?
-    
-    let steps = ["準備中", "AI解析中", "ドット絵変換中", "完了"]
+
+    let steps = ["準備", "解析", "変換", "完了"]
     
     private let shouldSucceed: Bool
     private let delay: TimeInterval
@@ -32,11 +33,13 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
     
     private func performMockAnalysis() async {
         currentStep = 0
-        
+        progress = 0
+
         for step in 0..<steps.count {
             currentStep = step
+            progress = Double(step + 1) / Double(steps.count)
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            
+
             if step == 2 && !shouldSucceed {
                 isAnalyzing = false
                 errorMessage = "JSONデコードエラー: Mock simulated error"
@@ -55,7 +58,8 @@ final class MockAnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject
                 return
             }
         }
-        
+
+        progress = 1.0
         isAnalyzing = false
     }
 }

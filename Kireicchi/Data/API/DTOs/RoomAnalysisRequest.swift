@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 struct RoomAnalysisRequest: Codable {
     let model: String
@@ -15,7 +16,15 @@ struct RoomAnalysisRequest: Codable {
         self.model = "gpt-4o"
         self.maxTokens = 700
 
-        let base64Image = imageData.base64EncodedString()
+        // アップロード時間・トークン削減のため送信前に縮小（bboxは正規化座標なので影響なし）
+        let payloadData: Data
+        if let resized = UIImage(data: imageData)?.resized(maxDimension: 768),
+           let jpeg = resized.jpegData(compressionQuality: 0.8) {
+            payloadData = jpeg
+        } else {
+            payloadData = imageData
+        }
+        let base64Image = payloadData.base64EncodedString()
 
         let systemMessage = ChatMessage(
             role: "system",

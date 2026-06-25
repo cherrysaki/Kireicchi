@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 protocol AnalyzingViewModelProtocol: ObservableObject {
     var currentStep: Int { get }
+    var progress: Double { get }
     var isAnalyzing: Bool { get }
     var errorMessage: String? { get }
     var errorDetails: (rawResponse: String?, apiKeyPrefix: String?)? { get }
