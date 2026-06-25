@@ -82,9 +82,10 @@ struct SwipeMissionCard: View {
             .background(DesignSystem.Color.surface)
         }
         .background(DesignSystem.Color.surface)
-        .overlay(Rectangle().stroke(DesignSystem.Color.primaryDark, lineWidth: 3))
+        .clipShape(PixelCornerRectangle(cornerRadius: 10))
+        .overlay(PixelCornerRectangle(cornerRadius: 10).stroke(DesignSystem.Color.primaryDark, lineWidth: 3))
         .background(
-            Rectangle()
+            PixelCornerRectangle(cornerRadius: 10)
                 .fill(DesignSystem.Color.primaryDark.opacity(0.35))
                 .offset(x: 5, y: 5)
         )

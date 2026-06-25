@@ -49,7 +49,7 @@ struct ErrorDetailView: View {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(Color.gray.opacity(0.1))
-                            .cornerRadius(4)
+                            .clipShape(PixelCornerRectangle(cornerRadius: 4))
                     }
                     .padding(.horizontal)
                 }
@@ -77,7 +77,7 @@ struct ErrorDetailView: View {
                                     .textSelection(.enabled)
                                     .padding(8)
                                     .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                                    .clipShape(PixelCornerRectangle(cornerRadius: 8))
                                     .frame(maxHeight: 200)
                             }
                             
@@ -93,7 +93,7 @@ struct ErrorDetailView: View {
                                 .foregroundColor(.secondary)
                                 .padding(8)
                                 .background(Color.gray.opacity(0.1))
-                                .cornerRadius(8)
+                                .clipShape(PixelCornerRectangle(cornerRadius: 8))
                         }
                     }
                     .padding(.horizontal)
@@ -107,7 +107,7 @@ struct ErrorDetailView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
                     .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 8))
                     
                     Spacer()
                     
@@ -118,7 +118,7 @@ struct ErrorDetailView: View {
                     .padding(.vertical, 10)
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 8))
                 }
                 .padding(.horizontal)
                 .padding(.top, 20)

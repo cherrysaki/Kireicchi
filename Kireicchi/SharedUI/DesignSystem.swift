@@ -48,6 +48,7 @@ struct DesignSystem {
         static let cardBorderWidth: CGFloat = 2.0
         static let shadowRadius: CGFloat = 8
         static let shadowOffset: CGFloat = 4
+        static let pixelStep: CGFloat = 4.5  // ギザギザ角の1段のドットサイズ（小さいほど段が細かい・ここで全体の粗さを調整）
     }
 }
 
@@ -79,16 +80,102 @@ extension SwiftUI.Color {
     }
 }
 
+// MARK: - Pixel Corner Rectangle (stair-step rounded corners)
+/// `RoundedRectangle` のドロップイン代替。辺は直線、四隅だけをドット階段状にする。
+/// `.fill` / `.stroke` / `.strokeBorder` / `.clipShape` で `RoundedRectangle` と同じ感覚で使える。
+struct PixelCornerRectangle: InsettableShape {
+    var cornerRadius: CGFloat = DesignSystem.Layout.cardCornerRadius
+    var pixelStep: CGFloat = DesignSystem.Layout.pixelStep
+    var insetAmount: CGFloat = 0
+
+    func inset(by amount: CGFloat) -> PixelCornerRectangle {
+        var copy = self
+        copy.insetAmount += amount
+        copy.cornerRadius = max(0, cornerRadius - amount)
+        return copy
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let r = rect.insetBy(dx: insetAmount, dy: insetAmount)
+        guard r.width > 0, r.height > 0 else { return Path() }
+
+        let step = max(1, pixelStep)
+        let maxCorner = min(r.width, r.height) / 2
+        let steps = max(0, min(Int((cornerRadius / step).rounded()), Int(maxCorner / step)))
+        let corner = CGFloat(steps) * step
+
+        var path = Path()
+
+        if steps == 0 {
+            path.addRect(r)
+            return path
+        }
+
+        // 時計回りに周をたどる。四隅は階段セグメントで丸める。
+        // 上辺（左コーナー終わり → 右コーナー始まり）
+        path.move(to: CGPoint(x: r.minX + corner, y: r.minY))
+        path.addLine(to: CGPoint(x: r.maxX - corner, y: r.minY))
+
+        // 右上コーナー: 右へstep→下へstep を繰り返す
+        for i in 0..<steps {
+            let x = r.maxX - corner + CGFloat(i + 1) * step
+            let yTop = r.minY + CGFloat(i) * step
+            let yBottom = r.minY + CGFloat(i + 1) * step
+            path.addLine(to: CGPoint(x: x, y: yTop))
+            path.addLine(to: CGPoint(x: x, y: yBottom))
+        }
+
+        // 右辺
+        path.addLine(to: CGPoint(x: r.maxX, y: r.maxY - corner))
+
+        // 右下コーナー: 下へstep→左へstep
+        for i in 0..<steps {
+            let xRight = r.maxX - CGFloat(i) * step
+            let xLeft = r.maxX - CGFloat(i + 1) * step
+            let y = r.maxY - corner + CGFloat(i + 1) * step
+            path.addLine(to: CGPoint(x: xRight, y: y))
+            path.addLine(to: CGPoint(x: xLeft, y: y))
+        }
+
+        // 下辺
+        path.addLine(to: CGPoint(x: r.minX + corner, y: r.maxY))
+
+        // 左下コーナー: 左へstep→上へstep
+        for i in 0..<steps {
+            let x = r.minX + corner - CGFloat(i + 1) * step
+            let yBottom = r.maxY - CGFloat(i) * step
+            let yTop = r.maxY - CGFloat(i + 1) * step
+            path.addLine(to: CGPoint(x: x, y: yBottom))
+            path.addLine(to: CGPoint(x: x, y: yTop))
+        }
+
+        // 左辺
+        path.addLine(to: CGPoint(x: r.minX, y: r.minY + corner))
+
+        // 左上コーナー: 上へstep→右へstep
+        for i in 0..<steps {
+            let xLeft = r.minX + CGFloat(i) * step
+            let xRight = r.minX + CGFloat(i + 1) * step
+            let y = r.minY + corner - CGFloat(i + 1) * step
+            path.addLine(to: CGPoint(x: xLeft, y: y))
+            path.addLine(to: CGPoint(x: xRight, y: y))
+        }
+
+        path.closeSubpath()
+        return path
+    }
+}
+
 // MARK: - ViewModifiers
 struct PixelCardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(DesignSystem.Color.surface)
+            .clipShape(PixelCornerRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius)
+                PixelCornerRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius)
                     .stroke(DesignSystem.Color.primary, lineWidth: DesignSystem.Layout.cardBorderWidth)
             )
-            .cornerRadius(DesignSystem.Layout.cardCornerRadius)
             .shadow(
                 color: DesignSystem.Color.primary.opacity(0.15),
                 radius: DesignSystem.Layout.shadowRadius,
@@ -101,11 +188,11 @@ struct BluePixelCardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(DesignSystem.Color.secondary.opacity(0.3))
+            .clipShape(PixelCornerRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius)
+                PixelCornerRectangle(cornerRadius: DesignSystem.Layout.cardCornerRadius)
                     .stroke(DesignSystem.Color.secondary, lineWidth: DesignSystem.Layout.cardBorderWidth)
             )
-            .cornerRadius(DesignSystem.Layout.cardCornerRadius)
             .shadow(
                 color: DesignSystem.Color.secondary.opacity(0.15),
                 radius: DesignSystem.Layout.shadowRadius,
@@ -164,15 +251,18 @@ struct PixelSquareCardModifier: ViewModifier {
     var borderWidth: CGFloat = 3
     var shadowOffset: CGFloat = 4
 
+    var cornerRadius: CGFloat = 10
+
     func body(content: Content) -> some View {
         content
             .background(fill)
+            .clipShape(PixelCornerRectangle(cornerRadius: cornerRadius))
             .overlay(
-                Rectangle()
+                PixelCornerRectangle(cornerRadius: cornerRadius)
                     .stroke(border, lineWidth: borderWidth)
             )
             .background(
-                Rectangle()
+                PixelCornerRectangle(cornerRadius: cornerRadius)
                     .fill(border.opacity(0.35))
                     .offset(x: shadowOffset, y: shadowOffset)
             )
@@ -184,9 +274,10 @@ extension View {
         fill: SwiftUI.Color = DesignSystem.Color.surface,
         border: SwiftUI.Color = DesignSystem.Color.primary,
         borderWidth: CGFloat = 3,
-        shadowOffset: CGFloat = 4
+        shadowOffset: CGFloat = 4,
+        cornerRadius: CGFloat = 10
     ) -> some View {
-        modifier(PixelSquareCardModifier(fill: fill, border: border, borderWidth: borderWidth, shadowOffset: shadowOffset))
+        modifier(PixelSquareCardModifier(fill: fill, border: border, borderWidth: borderWidth, shadowOffset: shadowOffset, cornerRadius: cornerRadius))
     }
 }
 
@@ -197,18 +288,21 @@ struct PixelButtonStyle: ButtonStyle {
     var border: SwiftUI.Color = DesignSystem.Color.primaryDark
     var borderWidth: CGFloat = 3
     var shadowOffset: CGFloat = 4
+    var cornerRadius: CGFloat = 10
 
     func makeBody(configuration: Configuration) -> some View {
-        ZStack {
-            Rectangle()
+        let shape = PixelCornerRectangle(cornerRadius: cornerRadius)
+        return ZStack {
+            shape
                 .fill(border)
                 .offset(x: configuration.isPressed ? 0 : shadowOffset,
                         y: configuration.isPressed ? 0 : shadowOffset)
 
-            Rectangle()
+            shape
                 .fill(fill)
-                .overlay(Rectangle().stroke(border, lineWidth: borderWidth))
+                .overlay(shape.stroke(border, lineWidth: borderWidth))
                 .overlay(configuration.label.foregroundColor(foreground))
+                .clipShape(shape)
                 .offset(x: configuration.isPressed ? shadowOffset : 0,
                         y: configuration.isPressed ? shadowOffset : 0)
         }
@@ -304,14 +398,16 @@ extension View {
         Text("ブルーピクセルカード")
             .padding()
             .modifier(BluePixelCardModifier())
-        
-        Rectangle()
-            .fill(DesignSystem.Color.surface)
-            .frame(width: 100, height: 60)
-            .overlay(
-                PixelBorderShape()
-                    .stroke(DesignSystem.Color.primary, lineWidth: 2)
-            )
+
+        Button("チェックイン！") {}
+            .font(DesignSystem.Font.body)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .buttonStyle(PixelButtonStyle(fill: DesignSystem.Color.primary))
+
+        Text("ギザギザカード")
+            .padding()
+            .pixelSquareCard(fill: DesignSystem.Color.surface, border: DesignSystem.Color.primaryDark)
     }
     .padding()
     .background(DesignSystem.Color.background)

@@ -144,7 +144,7 @@ struct TutorialView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: 320)
-                    .cornerRadius(16)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 16))
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -226,7 +226,7 @@ struct TutorialView: View {
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
                     .background(DesignSystem.Color.primary)
-                    .cornerRadius(12)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 64)

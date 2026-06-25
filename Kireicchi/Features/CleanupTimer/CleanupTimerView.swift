@@ -173,7 +173,7 @@ struct CleanupTimerView: View {
                 .padding(.horizontal, 40)
                 .padding(.vertical, 20)
                 .background(DesignSystem.Color.primary)
-                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .clipShape(PixelCornerRectangle(cornerRadius: 18))
         }
     }
 

@@ -25,8 +25,9 @@ struct RetryBanner: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(DesignSystem.Color.surface)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 6))
                     .overlay(
-                        Rectangle().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+                        PixelCornerRectangle(cornerRadius: 6).stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
                     )
             }
             .buttonStyle(.plain)
@@ -35,8 +36,9 @@ struct RetryBanner: View {
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .background(DesignSystem.Color.accentWarm)
+        .clipShape(PixelCornerRectangle(cornerRadius: 8))
         .overlay(
-            Rectangle().stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
+            PixelCornerRectangle(cornerRadius: 8).stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
         )
     }
 }

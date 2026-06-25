@@ -198,11 +198,11 @@ struct HomeView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
         .padding(.horizontal, 20)
@@ -288,9 +288,9 @@ struct HomeView: View {
             .aspectRatio(1, contentMode: .fit)
         }
         .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(PixelCornerRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .strokeBorder(DesignSystem.Color.primary, lineWidth: 5)
         )
         .padding(.horizontal, 20)
@@ -304,11 +304,11 @@ struct HomeView: View {
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 6)
+                    PixelCornerRectangle(cornerRadius: 6)
                         .fill(DesignSystem.Color.surface)
                         .frame(width: 32, height: 32)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
+                            PixelCornerRectangle(cornerRadius: 6)
                                 .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
                         )
                     PixelStar(size: 22)
@@ -327,10 +327,10 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
+                PixelCornerRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
             )
         }
@@ -353,11 +353,11 @@ struct HomeView: View {
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 6)
+                    PixelCornerRectangle(cornerRadius: 6)
                         .fill(DesignSystem.Color.surface)
                         .frame(width: 32, height: 32)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
+                            PixelCornerRectangle(cornerRadius: 6)
                                 .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
                         )
                     Image(systemName: "chart.line.uptrend.xyaxis")
@@ -375,11 +375,11 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
             )
         }

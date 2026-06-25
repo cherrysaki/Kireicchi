@@ -84,7 +84,7 @@ struct CaptureView: View {
                     .mask {
                         Rectangle()
                             .overlay(
-                                RoundedRectangle(cornerRadius: 12)
+                                PixelCornerRectangle(cornerRadius: 12)
                                     .frame(width: side, height: side)
                                     .blendMode(.destinationOut)
                             )
@@ -93,7 +93,7 @@ struct CaptureView: View {
                     .allowsHitTesting(false)
 
                 // 正方形の境界にスカイ枠 (HomeView と同じ太さ・角丸)
-                RoundedRectangle(cornerRadius: 12)
+                PixelCornerRectangle(cornerRadius: 12)
                     .stroke(DesignSystem.Color.primary, lineWidth: 5)
                     .frame(width: side, height: side)
                     .allowsHitTesting(false)

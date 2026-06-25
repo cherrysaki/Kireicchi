@@ -81,10 +81,10 @@ struct RecordDetailView: View {
         .padding(16)
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
+            PixelCornerRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            PixelCornerRectangle(cornerRadius: 16)
                 .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
     }
@@ -104,7 +104,7 @@ struct RecordDetailView: View {
                         .interpolation(.none)
                         .aspectRatio(1, contentMode: .fit)
                 } else {
-                    RoundedRectangle(cornerRadius: 12)
+                    PixelCornerRectangle(cornerRadius: 12)
                         .fill(DesignSystem.Color.secondary.opacity(0.25))
                         .aspectRatio(1, contentMode: .fit)
                         .overlay(
@@ -115,9 +115,9 @@ struct RecordDetailView: View {
                 }
             }
             .background(DesignSystem.Color.secondary.opacity(0.2))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(PixelCornerRectangle(cornerRadius: 12))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                PixelCornerRectangle(cornerRadius: 12)
                     .stroke(DesignSystem.Color.primary, lineWidth: 5)
             )
         }
