@@ -17,8 +17,12 @@ struct AnalysisResultView: View {
         UIImage(data: imageData)
     }
 
+    private var allMissions: [MissionPersisted] {
+        records.first?.missions ?? []
+    }
+
     private var pendingMissions: [MissionPersisted] {
-        (records.first?.missions ?? []).filter { !$0.isDone }
+        allMissions.filter { !$0.isDone }
     }
 
     var body: some View {
@@ -172,10 +176,10 @@ struct AnalysisResultView: View {
         VStack(spacing: 12) {
             CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
                 .frame(width: 120, height: 120)
-            Text("全部終わった！")
+            Text(allMissions.isEmpty ? "きれいなお部屋だね！" : "全部終わった！")
                 .font(DesignSystem.Font.title2)
                 .foregroundColor(DesignSystem.Color.textPrimary)
-            Text("お疲れさま✨")
+            Text(allMissions.isEmpty ? "片付けるところはなかったよ✨" : "お疲れさま✨")
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
         }

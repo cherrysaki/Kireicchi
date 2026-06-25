@@ -17,7 +17,7 @@ struct AnalyzingView: View {
             // デフォルトの依存性を設定（AppDependenciesのフラグに基づく）
             let openAIClient = AppDependencies.shared.currentOpenAIClient()
             let analyzeRoomUseCase = AnalyzeRoomUseCase(openAIClient: openAIClient)
-            let generatePixelArtUseCase = GeneratePixelArtUseCase(openAIClient: openAIClient)
+            let generatePixelArtUseCase = GeneratePixelArtUseCase()
             
             self._viewModel = StateObject(wrappedValue: AnalyzingViewModel(
                 analyzeRoomUseCase: analyzeRoomUseCase,
@@ -81,7 +81,7 @@ struct AnalyzingView: View {
                     )
                     .padding(.bottom, 60)
                 } else {
-                    stepList
+                    stepProgress
                     Spacer().frame(height: 60)
                 }
             }
@@ -102,30 +102,15 @@ struct AnalyzingView: View {
         }
     }
 
-    private var stepList: some View {
-        VStack(spacing: 12) {
-            ForEach(Array(viewModel.steps.enumerated()), id: \.offset) { index, step in
-                HStack(spacing: 12) {
-                    Image(systemName: index <= viewModel.currentStep ? "checkmark.square.fill" : "square")
-                        .foregroundColor(index <= viewModel.currentStep ? DesignSystem.Color.primary : DesignSystem.Color.textPrimary.opacity(0.3))
-                        .font(DesignSystem.Font.title3)
-
-                    Text(step)
-                        .font(DesignSystem.Font.subheadline)
-                        .foregroundColor(index <= viewModel.currentStep ? DesignSystem.Color.textPrimary : DesignSystem.Color.textPrimary.opacity(0.5))
-
-                    Spacer()
-
-                    if index == viewModel.currentStep && viewModel.isAnalyzing {
-                        ProgressView()
-                            .tint(DesignSystem.Color.primary)
-                            .scaleEffect(0.8)
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-        }
-        .padding(.vertical, 18)
+    private var stepProgress: some View {
+        HorizontalStepProgressView(
+            steps: viewModel.steps,
+            currentStep: viewModel.currentStep,
+            progress: viewModel.progress,
+            isAnimating: viewModel.isAnalyzing
+        )
+        .padding(.horizontal, 20)
+        .padding(.vertical, 22)
         .pixelSquareCard(
             fill: DesignSystem.Color.surface,
             border: DesignSystem.Color.primary,
@@ -134,6 +119,7 @@ struct AnalyzingView: View {
         )
         .padding(.horizontal)
         .padding(.trailing, 3)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.progress)
     }
     
     private func setupViewModel() {
@@ -144,8 +130,7 @@ struct AnalyzingView: View {
 
 #Preview {
     let dummyImageData = (UIImage(systemName: "photo") ?? UIImage()).pngData() ?? Data()
-    let mockViewModel = MockAnalyzingViewModel(shouldSucceed: true, delay: 0.5)
-    
+
     NavigationStack {
         AnalyzingView(imageData: dummyImageData)
             .environmentObject(NavigationRouter())
