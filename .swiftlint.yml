@@ -1,0 +1,62 @@
+# SwiftLint 初期導入用の設定（きれいっち）
+# 方針: まず CI を --strict でグリーンにできる現実的な初期状態にし、
+#       チームで段階的にルールを厳格化していく。
+# 一時的に無効化したルールは `swiftlint --fix` で自動修正できるものが多い。
+
+# 解析対象から除外するパス
+excluded:
+  - .build
+  - DerivedData
+  - Kireicchi.xcodeproj
+  - "**/.build"
+
+# 既存コードに多数あり、まずは無効化（多くは `swiftlint --fix` で自動修正可能）
+disabled_rules:
+  - trailing_whitespace                     # 行末空白（自動修正可）
+  - trailing_newline                        # ファイル末尾改行（自動修正可）
+  - vertical_whitespace                     # 連続空行（自動修正可）
+  - multiple_closures_with_trailing_closure # SwiftUI で頻出
+  - redundant_string_enum_value             # rawValue 明示は許容
+  - implicit_optional_initialization        # `var x: T? = nil` を許容
+  - static_over_final_class
+
+# 閾値はいったん緩め（将来引き締める前提）
+line_length:
+  warning: 200
+  error: 300
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  min_length: 0
+  max_length:
+    warning: 80
+    error: 100
+  allowed_symbols: ["_"]
+  validates_start_with_lowercase: false
+
+type_body_length:
+  warning: 600
+  error: 900
+
+function_body_length:
+  warning: 150
+  error: 250
+
+file_length:
+  warning: 1200
+  error: 1600
+  ignore_comment_only_lines: true
+
+cyclomatic_complexity:
+  warning: 30
+  error: 45
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+nesting:
+  type_level: 3
+# 注: CI では `--reporter github-actions-logging` を CLI で指定し PR にインライン注釈する。
+# ローカルでは既定（xcode）レポーターのままにしておく。

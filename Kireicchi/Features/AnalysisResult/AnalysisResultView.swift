@@ -302,6 +302,8 @@ private struct MissionListRow: View {
     }
     let dummyImageData = dummyImage.pngData() ?? Data()
 
+    // Preview 専用のインメモリコンテナ。失敗時はクラッシュで良い
+    // swiftlint:disable:next force_try
     let container = try! ModelContainer(
         for: LatestRoomRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
