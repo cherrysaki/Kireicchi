@@ -5,11 +5,12 @@ import Combine
 @MainActor
 final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     @Published var currentStep = 0
+    @Published var progress: Double = 0
     @Published var isAnalyzing = true
     @Published var errorMessage: String?
     @Published var errorDetails: (rawResponse: String?, apiKeyPrefix: String?)?
-    
-    let steps = ["準備中", "AI解析中", "ドット絵変換中", "完了"]
+
+    let steps = ["準備", "解析", "変換", "完了"]
     
     private let analyzeRoomUseCase: AnalyzeRoomUseCaseProtocol
     private let generatePixelArtUseCase: GeneratePixelArtUseCaseProtocol
@@ -44,21 +45,23 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     
     func startAnalysis(imageData: Data) async {
         currentStep = 0
+        progress = 0
         errorMessage = nil
         errorDetails = nil
         isAnalyzing = true
-        
+
         await performAnalysis(imageData: imageData)
     }
-    
+
     func retry(imageData: Data) async {
         currentStep = 0
+        progress = 0
         errorMessage = nil
         errorDetails = nil
         isAnalyzing = true
         roomAnalysis = nil
         pixelArtData = nil
-        
+
         await performAnalysis(imageData: imageData)
     }
     
@@ -67,19 +70,37 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
             // ステップ1: 準備
             currentStep = 0
             try await Task.sleep(nanoseconds: 300_000_000)
-            
-            // ステップ2: AI解析
+            progress = 0.15
+
+            // ステップ2: AI解析とドット絵変換を並列実行
             currentStep = 1
-            let analysis = try await analyzeRoomUseCase.execute(imageData: imageData)
+            // 正確な進捗は取れないため、待機中は上限0.9へ漸近的にクリープさせる
+            let ticker = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 80_000_000)
+                    guard let self else { return }
+                    if self.progress < 0.9 {
+                        self.progress += (0.9 - self.progress) * 0.06
+                    }
+                }
+            }
+            defer { ticker.cancel() }
+
+            async let analysisResult = analyzeRoomUseCase.execute(imageData: imageData)
+            async let pixelArtResult = generatePixelArtUseCase.execute(imageData: imageData)
+            let analysis = try await analysisResult
+            let pixelData = try await pixelArtResult
+            ticker.cancel()
             self.roomAnalysis = analysis
-            
-            // ステップ3: ドット絵変換
-            currentStep = 2
-            let pixelData = try await generatePixelArtUseCase.execute(imageData: imageData)
             self.pixelArtData = pixelData
-            
+
+            // ステップ3: ドット絵変換（ローカル処理のため即時完了）
+            currentStep = 2
+            progress = 0.97
+
             // ステップ4: 完了
             currentStep = 3
+            progress = 1.0
             isAnalyzing = false
             
             // データ保存

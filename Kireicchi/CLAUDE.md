@@ -23,7 +23,7 @@
 |------|------|
 | 撮影 | カメラで部屋を撮影する |
 | AI解析 | OpenAI APIで散らかり度スコア（0〜100）・ランク（A〜E）・片付け優先箇所を返す |
-| ドット絵生成 | OpenAI APIで撮影画像をドット絵に変換 |
+| ドット絵生成 | 撮影画像を端末内（Core Graphics）でドット絵に変換 |
 | キャラクター表示 | ドット絵の部屋の中でキャラクターが生活する |
 | キャラクター状態変化 | 部屋スコアに応じてキャラクターが「元気／普通／不調」の3段階で変化 |
 | 撮影リマインダー通知 | ユーザーが設定した時刻にローカル通知を送る |
@@ -200,7 +200,8 @@ SettingsView
 | UI | SwiftUI |
 | アーキテクチャ | MVVM + UseCases |
 | データ永続化 | SwiftData |
-| AI解析・ドット絵生成 | OpenAI API（GPT-4o / DALL-E 3） |
+| AI解析 | OpenAI API（GPT-4o Vision） |
+| ドット絵生成 | 端末内ローカル処理（Core Graphics：縮小＋減色） |
 | 通知 | UserNotifications（ローカル通知のみ） |
 | カメラ | AVFoundation |
 | 最小OS | iOS 26 |
@@ -237,11 +238,12 @@ SettingsView
   }
   ```
 
-### ドット絵生成エンドポイント（Images）
+### ドット絵生成（端末内ローカル処理）
 
-- モデル: `dall-e-3`
-- 入力: 撮影画像の説明 or 画像URL
-- 出力: ドット絵スタイルの部屋画像
+- OpenAI APIは使わない。`UIImage+PixelArt.swift` の `pixelated(gridSize:levels:)` で実行
+- 処理: Core Graphics で縮小（ブロック化）→ 各色チャンネルを階調量子化（減色）
+- 表示側は `.interpolation(.none)` でニアレスト拡大し、くっきりしたドット絵にする
+- パラメータ（`gridSize` / `levels`）は `GeneratePixelArtUseCase` でチューニング可能
 
 ---
 
