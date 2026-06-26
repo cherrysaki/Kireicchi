@@ -1,10 +1,12 @@
 import SwiftUI
+import UIKit
 
 struct HomeTabBar: View {
     let onHome: () -> Void
     let onCapture: () -> Void
     let onFriends: () -> Void
     var canCapture: Bool = true
+    var cameraButtonProxy: Binding<UIView?>? = nil
 
     var body: some View {
         ZStack {
@@ -50,9 +52,13 @@ struct HomeTabBar: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(canCapture ? DesignSystem.Color.primaryDark : Color.white.opacity(0.8))
                 }
-                .anchorPreference(key: CoachAnchorKey.self, value: .bounds) {
-                    CoachAnchors(settings: nil, camera: $0)
-                }
+                .background(
+                    Group {
+                        if let proxy = cameraButtonProxy {
+                            ViewAnchor(id: "camera", uiView: proxy)
+                        }
+                    }
+                )
             }
             .offset(y: -18)
         }

@@ -10,6 +10,7 @@
 		E429E1122F9898A00093C195 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1112F9898A00093C195 /* FirebaseAnalytics */; };
 		E429E1142F9898A00093C195 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1132F9898A00093C195 /* FirebaseAuth */; };
 		E429E1162F9898A00093C195 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1152F9898A00093C195 /* FirebaseFirestore */; };
+		E429E1192F9898A00093C195 /* Instructions in Frameworks */ = {isa = PBXBuildFile; productRef = E429E11A2F9898A00093C195 /* Instructions */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 				E429E1122F9898A00093C195 /* FirebaseAnalytics in Frameworks */,
 				E429E1142F9898A00093C195 /* FirebaseAuth in Frameworks */,
 				E429E1162F9898A00093C195 /* FirebaseFirestore in Frameworks */,
+				E429E1192F9898A00093C195 /* Instructions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +94,7 @@
 				E429E1112F9898A00093C195 /* FirebaseAnalytics */,
 				E429E1132F9898A00093C195 /* FirebaseAuth */,
 				E429E1152F9898A00093C195 /* FirebaseFirestore */,
+				E429E11A2F9898A00093C195 /* Instructions */,
 			);
 			productName = Kireicchi;
 			productReference = E429E1002F988F140093C195 /* Kireicchi.app */;
@@ -123,6 +126,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E429E1102F9898A00093C195 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				E429E11B2F9898A00093C195 /* XCRemoteSwiftPackageReference "Instructions" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E429E1012F988F140093C195 /* Products */;
@@ -376,6 +380,14 @@
 				minimumVersion = 12.12.1;
 			};
 		};
+		E429E11B2F9898A00093C195 /* XCRemoteSwiftPackageReference "Instructions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ephread/Instructions";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -393,6 +405,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E429E1102F9898A00093C195 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		E429E11A2F9898A00093C195 /* Instructions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E429E11B2F9898A00093C195 /* XCRemoteSwiftPackageReference "Instructions" */;
+			productName = Instructions;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

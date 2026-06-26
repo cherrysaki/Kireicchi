@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
@@ -14,8 +15,9 @@ struct HomeView: View {
     @State private var showCaptureAlert: Bool = false
 
     @AppStorage("hasShownCoachMark") private var hasShownCoachMark: Bool = false
-    @State private var coachStep: Int = 0
-    @State private var showCoachMark: Bool = false
+    @StateObject private var coachMarkManager = CoachMarkManager()
+    @State private var settingsButtonView: UIView? = nil
+    @State private var cameraButtonView: UIView? = nil
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -98,10 +100,6 @@ struct HomeView: View {
                 HomeTabBar(
                     onHome: { navigationRouter.popToRoot() },
                     onCapture: {
-                        if showCoachMark {
-                            withAnimation { showCoachMark = false }
-                            hasShownCoachMark = true
-                        }
                         if canCapture {
                             navigationRouter.navigate(to: .capture)
                         } else {
@@ -109,7 +107,8 @@ struct HomeView: View {
                         }
                     },
                     onFriends: { navigationRouter.navigate(to: .friendVisit) },
-                    canCapture: canCapture
+                    canCapture: canCapture,
+                    cameraButtonProxy: $cameraButtonView
                 )
                 .padding(.bottom, 12)
             }
@@ -130,56 +129,36 @@ struct HomeView: View {
                 }
             )
         }
-        .overlayPreferenceValue(CoachAnchorKey.self) { anchors in
-            GeometryReader { geo in
-                if showCoachMark {
-                    let settingsFrame = anchors.settings.map { geo[$0] } ?? .zero
-                    let cameraFrame = anchors.camera.map { geo[$0] } ?? .zero
-                    let targetFrame = coachStep == 0 ? settingsFrame : cameraFrame
-
-                    ZStack {
-                        Color.black.opacity(0.5)
-                            .reversedMask {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .frame(
-                                        width: targetFrame.width + 20,
-                                        height: targetFrame.height + 20
-                                    )
-                                    .position(x: targetFrame.midX, y: targetFrame.midY)
-                            }
-                            .allowsHitTesting(false)
-                            .ignoresSafeArea()
-
-                        if coachStep == 0 {
-                            CoachBubble(
-                                text: "まずはここから\n撮影する時間を決めよう！",
-                                arrowDirection: .up
-                            )
-                            .position(x: settingsFrame.midX + 60, y: settingsFrame.maxY + 60)
-                            .allowsHitTesting(false)
-                        } else if coachStep == 1 {
-                            CoachBubble(
-                                text: "つぎはお部屋を\n撮影してみよう！",
-                                arrowDirection: .down
-                            )
-                            .position(x: cameraFrame.midX, y: cameraFrame.minY - 60)
-                            .allowsHitTesting(false)
-                        }
-                    }
-                }
-            }
-        }
         .onAppear {
             guard !hasShownCoachMark else { return }
-            if !showCoachMark && coachStep == 0 {
-                // 初回表示
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation { showCoachMark = true }
-                }
-            } else if showCoachMark && coachStep == 0 {
-                // 設定画面から戻ってきた → ステップ2へ
-                withAnimation { coachStep = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                startCoachMark()
             }
+        }
+    }
+
+    // MARK: - Coach Mark
+
+    private func startCoachMark() {
+        guard let settingsView = settingsButtonView,
+              let cameraView = cameraButtonView,
+              let viewController = settingsView.findViewController() else { return }
+
+        let items: [CoachMarkItem] = [
+            CoachMarkItem(
+                view: settingsView,
+                hint: "まずはここから\n撮影する時間を決めよう！",
+                position: .bottom
+            ),
+            CoachMarkItem(
+                view: cameraView,
+                hint: "つぎはお部屋を\n撮影してみよう！",
+                position: .top
+            )
+        ]
+
+        coachMarkManager.start(in: viewController, items: items) {
+            hasShownCoachMark = true
         }
     }
 
@@ -198,9 +177,7 @@ struct HomeView: View {
                         .font(DesignSystem.Font.title3)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                 }
-                .anchorPreference(key: CoachAnchorKey.self, value: .bounds) {
-                    CoachAnchors(settings: $0, camera: nil)
-                }
+                .background(ViewAnchor(id: "settings", uiView: $settingsButtonView))
                 Spacer()
             }
         }

@@ -16,9 +16,6 @@ struct SettingsView: View {
     @State private var showTimePicker = false
     @State private var isSaving = false
 
-    @AppStorage("hasShownCoachMark") private var hasShownCoachMark: Bool = false
-    @State private var showSettingsCoachMark: Bool = false
-
     private let usernameMaxLength = 12
 
     var body: some View {
@@ -41,7 +38,6 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         usernameSection
                         captureTimeSection
-                            .anchorPreference(key: TimerSettingAnchorKey.self, value: .bounds) { $0 }
                         notificationToggleSection
                         commentSection
                         AppleLoginSection()
@@ -72,43 +68,6 @@ struct SettingsView: View {
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
-        .onAppear {
-            guard !hasShownCoachMark else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation { showSettingsCoachMark = true }
-            }
-        }
-        .onChange(of: showTimePicker) { _, isOpen in
-            if isOpen { withAnimation { showSettingsCoachMark = false } }
-        }
-        .overlayPreferenceValue(TimerSettingAnchorKey.self) { anchor in
-            GeometryReader { geo in
-                if let anchor = anchor, showSettingsCoachMark {
-                    let frame = geo[anchor]
-
-                    ZStack {
-                        Color.black.opacity(0.5)
-                            .reversedMask {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .frame(
-                                        width: frame.width + 20,
-                                        height: frame.height + 20
-                                    )
-                                    .position(x: frame.midX, y: frame.midY)
-                            }
-                            .allowsHitTesting(false)
-                            .ignoresSafeArea()
-
-                        CoachBubble(
-                            text: "撮影する時間を\n設定しよう！",
-                            arrowDirection: .up
-                        )
-                        .position(x: frame.midX, y: frame.maxY + 60)
-                        .allowsHitTesting(false)
-                    }
-                }
-            }
-        }
     }
 
     private var usernameSection: some View {
