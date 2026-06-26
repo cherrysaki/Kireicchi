@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct WorldviewOnboardingView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
@@ -21,50 +20,61 @@ struct WorldviewOnboardingView: View {
                 decoratorSeparator
                     .padding(.horizontal, 32)
 
-                Image("onboarding_egg")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80)
-                    .padding(.bottom, 24)
-
-                Text("目を覚ますと、\n窓辺に見慣れない卵が\n置かれていました。")
-                    .font(.system(size: 13))
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-
-                Image("onboarding_kireicchi")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100)
-                    .padding(.top, 32)
-                    .padding(.bottom, 24)
-
-                Text("その卵の中には、\nきれいっちという\n小さな妖精が\n眠っています。")
-                    .font(.system(size: 13))
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-
-                HStack(spacing: 32) {
-                    StaticGIFView(gifName: "character01_happy")
-                        .frame(width: 100, height: 100)
-                    StaticGIFView(gifName: "character01_sad")
-                        .frame(width: 100, height: 100)
-                }
-                .padding(.top, 32)
-
+                // セクション1: 卵
                 VStack(spacing: 12) {
-                    Text("きれいっちは、\nお部屋を見守る妖精です。")
-                    Text("お部屋が片付くと元気に。")
-                    Text("散らかるとしょんぼり。")
-                    Text("そして、さみしい日が続くと、\n旅に出てしまうことも。")
+                    Image("onboarding_egg")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80)
+
+                    Text("目を覚ますと、\n窓辺に見慣れない卵が\n置かれていました。")
+                        .font(.system(size: 13))
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .multilineTextAlignment(.center)
                 }
-                .font(.system(size: 13))
-                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
-                .multilineTextAlignment(.center)
-                .padding(.top, 32)
                 .padding(.horizontal, 32)
+
+                // セクション2: ノーマルきれいっち
+                VStack(spacing: 12) {
+                    Image("onboarding_kireicchi")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100)
+
+                    Text("その卵の中には、\nきれいっちという\n小さな妖精が\n眠っています。")
+                        .font(.system(size: 13))
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, 32)
+                .padding(.top, 40)
+
+                // セクション3: happy/sadと特徴説明
+                VStack(spacing: 12) {
+                    HStack(spacing: 32) {
+                        Image("character01_happy_static")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+
+                        Image("character01_sad_static")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                    }
+
+                    VStack(spacing: 8) {
+                        Text("きれいっちは、\nお部屋を見守る妖精です。")
+                        Text("お部屋が片付くと元気に。")
+                        Text("散らかるとしょんぼり。")
+                        Text("そして、さみしい日が続くと、\n旅に出てしまうことも。")
+                    }
+                    .font(.system(size: 13))
+                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, 32)
+                .padding(.top, 40)
 
                 decoratorSeparator
                     .padding(.horizontal, 32)
@@ -79,11 +89,19 @@ struct WorldviewOnboardingView: View {
                     hasShownWorldviewOnboarding = true
                 } label: {
                     Text("きれいっちをお迎えする")
-                        .font(DesignSystem.Font.headline)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(DesignSystem.Color.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(DesignSystem.Color.secondary.opacity(0.8))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(DesignSystem.Color.textPrimary, lineWidth: 1)
+                        )
                 }
-                .buttonStyle(PixelButtonStyle())
                 .padding(.horizontal, 40)
                 .padding(.top, 24)
                 .padding(.bottom, 50)
@@ -117,34 +135,6 @@ private struct DashedLine: Shape {
         path.move(to: CGPoint(x: rect.minX, y: rect.midY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
         return path
-    }
-}
-
-private struct StaticGIFView: UIViewRepresentable {
-    let gifName: String
-
-    func makeUIView(context: Context) -> UIImageView {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        imageView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        imageView.setContentHuggingPriority(.defaultLow, for: .vertical)
-        imageView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        imageView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-        return imageView
-    }
-
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIImageView, context: Context) -> CGSize? {
-        proposal.replacingUnspecifiedDimensions()
-    }
-
-    func updateUIView(_ uiView: UIImageView, context: Context) {
-        guard let gifData = NSDataAsset(name: gifName)?.data,
-              let source = CGImageSourceCreateWithData(gifData as CFData, nil),
-              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            return
-        }
-        uiView.image = UIImage(cgImage: cgImage)
     }
 }
 
