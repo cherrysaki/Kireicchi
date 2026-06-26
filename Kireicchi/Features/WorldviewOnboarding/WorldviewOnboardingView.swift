@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct WorldviewOnboardingView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
@@ -11,10 +12,10 @@ struct WorldviewOnboardingView: View {
                     .scaledToFit()
 
                 Text("ある朝、\nふしぎな出来事が\nありました。")
-                    .font(DesignSystem.Font.title3)
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(DesignSystem.Color.textPrimary)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 32)
+                    .padding(.top, 40)
                     .padding(.horizontal, 32)
 
                 decoratorSeparator
@@ -24,10 +25,10 @@ struct WorldviewOnboardingView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 24)
 
                 Text("目を覚ますと、\n窓辺に見慣れない卵が\n置かれていました。")
-                    .font(DesignSystem.Font.body)
+                    .font(.system(size: 13))
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -36,22 +37,22 @@ struct WorldviewOnboardingView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100)
-                    .padding(.top, 24)
-                    .padding(.bottom, 16)
+                    .padding(.top, 32)
+                    .padding(.bottom, 24)
 
                 Text("その卵の中には、\nきれいっちという\n小さな妖精が\n眠っています。")
-                    .font(DesignSystem.Font.body)
+                    .font(.system(size: 13))
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
 
                 HStack(spacing: 32) {
-                    CharacterView(characterType: .character01, characterState: .happy)
+                    StaticGIFView(gifName: "character01_happy")
                         .frame(width: 100, height: 100)
-                    CharacterView(characterType: .character01, characterState: .sad)
+                    StaticGIFView(gifName: "character01_sad")
                         .frame(width: 100, height: 100)
                 }
-                .padding(.top, 24)
+                .padding(.top, 32)
 
                 VStack(spacing: 12) {
                     Text("きれいっちは、\nお部屋を見守る妖精です。")
@@ -59,17 +60,17 @@ struct WorldviewOnboardingView: View {
                     Text("散らかるとしょんぼり。")
                     Text("そして、さみしい日が続くと、\n旅に出てしまうことも。")
                 }
-                .font(DesignSystem.Font.body)
+                .font(.system(size: 13))
                 .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                 .multilineTextAlignment(.center)
-                .padding(.top, 24)
+                .padding(.top, 32)
                 .padding(.horizontal, 32)
 
                 decoratorSeparator
                     .padding(.horizontal, 32)
 
                 Text("きれいっちと一緒に、\n\n心地よいお部屋を\nつくりませんか？")
-                    .font(DesignSystem.Font.body)
+                    .font(.system(size: 13))
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -80,7 +81,7 @@ struct WorldviewOnboardingView: View {
                     Text("きれいっちをお迎えする")
                         .font(DesignSystem.Font.headline)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, 20)
                 }
                 .buttonStyle(PixelButtonStyle())
                 .padding(.horizontal, 40)
@@ -88,6 +89,7 @@ struct WorldviewOnboardingView: View {
                 .padding(.bottom, 50)
             }
         }
+        .ignoresSafeArea(edges: .top)
         .background(DesignSystem.Color.background.ignoresSafeArea())
     }
 
@@ -99,7 +101,7 @@ struct WorldviewOnboardingView: View {
                 .foregroundColor(DesignSystem.Color.primary.opacity(0.6))
             dashedLine
         }
-        .padding(.vertical, 24)
+        .padding(.vertical, 40)
     }
 
     private var dashedLine: some View {
@@ -115,6 +117,34 @@ private struct DashedLine: Shape {
         path.move(to: CGPoint(x: rect.minX, y: rect.midY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
         return path
+    }
+}
+
+private struct StaticGIFView: UIViewRepresentable {
+    let gifName: String
+
+    func makeUIView(context: Context) -> UIImageView {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        imageView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        imageView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        imageView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        return imageView
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIImageView, context: Context) -> CGSize? {
+        proposal.replacingUnspecifiedDimensions()
+    }
+
+    func updateUIView(_ uiView: UIImageView, context: Context) {
+        guard let gifData = NSDataAsset(name: gifName)?.data,
+              let source = CGImageSourceCreateWithData(gifData as CFData, nil),
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return
+        }
+        uiView.image = UIImage(cgImage: cgImage)
     }
 }
 
