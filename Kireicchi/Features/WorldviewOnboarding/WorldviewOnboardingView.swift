@@ -3,7 +3,62 @@ import SwiftUI
 struct WorldviewOnboardingView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
 
+    @State private var logoPhase: LogoPhase = .showing
+    @State private var logoScale: CGFloat = 1.0
+    @State private var logoOpacity: Double = 1.0
+
+    private enum LogoPhase {
+        case showing    // ロゴ表示中（2秒間）
+        case expanding  // ロゴ拡大中
+        case done       // 演出完了、スクロール可能
+    }
+
     var body: some View {
+        ZStack {
+            DesignSystem.Color.background.ignoresSafeArea()
+
+            if logoPhase == .done {
+                scrollContent
+                    .transition(.opacity)
+            }
+
+            if logoPhase != .done {
+                DesignSystem.Color.background
+                    .ignoresSafeArea()
+
+                Image("logo_Kireicchi")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200)
+                    .scaleEffect(logoScale)
+                    .opacity(logoOpacity)
+            }
+        }
+        .onAppear {
+            startLogoAnimation()
+        }
+    }
+
+    private func startLogoAnimation() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            logoPhase = .expanding
+
+            withAnimation(.easeInOut(duration: 1.2)) {
+                logoScale = 10.0
+                logoOpacity = 0.0
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    logoPhase = .done
+                }
+            }
+        }
+    }
+
+    // MARK: - Scroll Content
+
+    private var scrollContent: some View {
         ScrollView {
             VStack(spacing: 0) {
                 Image("onboarding_morning_room")
@@ -20,7 +75,6 @@ struct WorldviewOnboardingView: View {
                 decoratorSeparator
                     .padding(.horizontal, 32)
 
-                // セクション1: 卵
                 VStack(spacing: 12) {
                     Image("onboarding_egg")
                         .resizable()
@@ -34,7 +88,6 @@ struct WorldviewOnboardingView: View {
                 }
                 .padding(.horizontal, 32)
 
-                // セクション2: ノーマルきれいっち
                 VStack(spacing: 12) {
                     Image("onboarding_kireicchi")
                         .resizable()
@@ -49,7 +102,6 @@ struct WorldviewOnboardingView: View {
                 .padding(.horizontal, 32)
                 .padding(.top, 40)
 
-                // セクション3: happy/sadと特徴説明
                 VStack(spacing: 12) {
                     HStack(spacing: 32) {
                         Image("character01_happy_static")
@@ -108,8 +160,9 @@ struct WorldviewOnboardingView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .background(DesignSystem.Color.background.ignoresSafeArea())
     }
+
+    // MARK: - Decorator
 
     private var decoratorSeparator: some View {
         HStack(spacing: 8) {

@@ -10,9 +10,7 @@ struct RootView: View {
     @AppStorage("hasCompletedOwnerRegistration") private var hasCompletedOwnerRegistration: Bool = false
 
     var body: some View {
-        if !hasShownLogoSplash {
-            LogoSplashView()
-        } else if !hasShownWorldviewOnboarding {
+        if !hasShownWorldviewOnboarding {
             WorldviewOnboardingView()
         } else if !hasCompletedOwnerRegistration {
             OwnerRegistrationView()
