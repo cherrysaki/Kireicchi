@@ -4,6 +4,7 @@ import SwiftData
 struct SettingsView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @EnvironmentObject var deps: AppDependencies
+    @EnvironmentObject var coachMarkState: CoachMarkState
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
     @Query private var historyRecords: [RoomHistoryRecord]
@@ -68,6 +69,23 @@ struct SettingsView: View {
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
+        // ステップ9: 撮影時間設定セクション
+        .overlayPreferenceValue(CaptureTimeSectionAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 9), let anchor {
+                    CoachMarkOverlay(
+                        message: "片付けたい時間に通知を設定しておこう！",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.navigateBack()
+                        }
+                    )
+                }
+            }
+        }
     }
 
     private var usernameSection: some View {
@@ -176,6 +194,7 @@ struct SettingsView: View {
                 .padding(.trailing, 3)
             }
         }
+        .anchorPreference(key: CaptureTimeSectionAnchorKey.self, value: .bounds) { $0 }
     }
 
     private func sectionLabel(_ text: String) -> some View {
@@ -250,6 +269,20 @@ struct SettingsView: View {
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("🎬 デバッグ用")
+
+            // コーチマークリセット
+            HStack(spacing: 12) {
+                Button(action: { coachMarkState.reset() }) {
+                    Text("コーチマークリセット")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textOnPrimary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(PixelButtonStyle())
+                Spacer()
+            }
+            .padding(.horizontal)
 
             // Mock 通信トグル
             HStack {

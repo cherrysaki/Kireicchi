@@ -6,6 +6,7 @@ struct AnalysisResultView: View {
     let pixelArtData: Data
     let analysis: RoomAnalysis
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var coachMarkState: CoachMarkState
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
 
@@ -42,6 +43,79 @@ struct AnalysisResultView: View {
             }
         }
         .navigationBarHidden(true)
+        // ステップ1・5: スコアカード
+        .overlayPreferenceValue(ScoreImageAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if let anchor {
+                    let frame = proxy[anchor]
+                    if coachMarkState.shouldShow(step: 1) {
+                        CoachMarkOverlay(
+                            message: "結果を見てみよう！",
+                            buttonText: "つぎへ",
+                            highlightFrame: frame,
+                            proxySize: proxy.size,
+                            onAction: { coachMarkState.advance() }
+                        )
+                    } else if coachMarkState.shouldShow(step: 5) {
+                        CoachMarkOverlay(
+                            message: "お部屋がどれくらい変わったか見比べてみよう！",
+                            buttonText: "つぎへ",
+                            highlightFrame: frame,
+                            proxySize: proxy.size,
+                            onAction: { coachMarkState.advance() }
+                        )
+                    }
+                }
+            }
+        }
+        // ステップ2: ミッションリスト
+        .overlayPreferenceValue(MissionListAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 2), let anchor {
+                    CoachMarkOverlay(
+                        message: "まずはこのミッションをやってみよう！",
+                        buttonText: "つぎへ",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: { coachMarkState.advance() }
+                    )
+                }
+            }
+        }
+        // ステップ3: タイマーボタン
+        .overlayPreferenceValue(TimerButtonAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 3), let anchor {
+                    CoachMarkOverlay(
+                        message: "お片付けタイマーを設定して、お部屋を片付けよう！",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.navigate(to: .cleanupTimer)
+                        }
+                    )
+                }
+            }
+        }
+        // ステップ6: ホームボタン
+        .overlayPreferenceValue(HomeButtonAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 6), let anchor {
+                    CoachMarkOverlay(
+                        message: "ホームに戻って、きれいっちの様子を見てみよう！",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.popToRoot()
+                        }
+                    )
+                }
+            }
+        }
     }
 
     // MARK: - Rank & Score
@@ -84,6 +158,7 @@ struct AnalysisResultView: View {
         )
         .padding(.horizontal)
         .padding(.trailing, 4)
+        .anchorPreference(key: ScoreImageAnchorKey.self, value: .bounds) { $0 }
     }
 
     // MARK: - Character Comment
@@ -170,6 +245,7 @@ struct AnalysisResultView: View {
                 .padding(.trailing, 4)
             }
         }
+        .anchorPreference(key: MissionListAnchorKey.self, value: .bounds) { $0 }
     }
 
     private var missionEmptyState: some View {
@@ -205,6 +281,7 @@ struct AnalysisResultView: View {
             .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
+            .anchorPreference(key: TimerButtonAnchorKey.self, value: .bounds) { $0 }
 
             Button(action: {
                 navigationRouter.popToRoot()
@@ -227,6 +304,7 @@ struct AnalysisResultView: View {
             .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
+            .anchorPreference(key: HomeButtonAnchorKey.self, value: .bounds) { $0 }
         }
     }
 

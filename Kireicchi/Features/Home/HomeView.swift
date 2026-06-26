@@ -1,10 +1,10 @@
 import SwiftUI
 import SwiftData
-import UIKit
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @EnvironmentObject var deps: AppDependencies
+    @EnvironmentObject var coachMarkState: CoachMarkState
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
     @Query private var historyRecords: [RoomHistoryRecord]
@@ -13,11 +13,6 @@ struct HomeView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
-
-    @AppStorage("hasShownCoachMark") private var hasShownCoachMark: Bool = false
-    @StateObject private var coachMarkManager = CoachMarkManager()
-    @State private var settingsButtonView: UIView? = nil
-    @State private var cameraButtonView: UIView? = nil
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -107,8 +102,7 @@ struct HomeView: View {
                         }
                     },
                     onFriends: { navigationRouter.navigate(to: .friendVisit) },
-                    canCapture: canCapture,
-                    cameraButtonProxy: $cameraButtonView
+                    canCapture: canCapture
                 )
                 .padding(.bottom, 12)
             }
@@ -129,36 +123,67 @@ struct HomeView: View {
                 }
             )
         }
-        .onAppear {
-            guard !hasShownCoachMark else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                startCoachMark()
+        // ステップ0: カメラボタン（HomeTabBar 内の CaptureButtonAnchorKey から伝播）
+        .overlayPreferenceValue(CaptureButtonAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 0), let anchor {
+                    CoachMarkOverlay(
+                        message: "まずはお部屋を撮影してみよう！",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.navigate(to: .capture)
+                        }
+                    )
+                }
             }
         }
-    }
-
-    // MARK: - Coach Mark
-
-    private func startCoachMark() {
-        guard let settingsView = settingsButtonView,
-              let cameraView = cameraButtonView,
-              let viewController = settingsView.findViewController() else { return }
-
-        let items: [CoachMarkItem] = [
-            CoachMarkItem(
-                view: settingsView,
-                hint: "まずはここから\n撮影する時間を決めよう！",
-                position: .bottom
-            ),
-            CoachMarkItem(
-                view: cameraView,
-                hint: "つぎはお部屋を\n撮影してみよう！",
-                position: .top
-            )
-        ]
-
-        coachMarkManager.start(in: viewController, items: items) {
-            hasShownCoachMark = true
+        // ステップ7: キャラクターフィールド
+        .overlayPreferenceValue(CharacterFieldAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 7), let anchor {
+                    CoachMarkOverlay(
+                        message: "お部屋の状態によって、きれいっちの元気さが変わるよ！",
+                        buttonText: "つぎへ",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: { coachMarkState.advance() }
+                    )
+                }
+            }
+        }
+        // ステップ8: 設定ボタン
+        .overlayPreferenceValue(SettingsButtonAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 8), let anchor {
+                    CoachMarkOverlay(
+                        message: "次に、設定画面を開こう",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.navigate(to: .settings)
+                        }
+                    )
+                }
+            }
+        }
+        // ステップ10: 完了メッセージ（ハイライトなし）
+        .overlay {
+            if coachMarkState.shouldShow(step: 10) {
+                GeometryReader { proxy in
+                    CoachMarkOverlay(
+                        message: "お部屋をきれいにして、きれいっちを元気に育ててあげてね！",
+                        buttonText: "はじめる！",
+                        highlightFrame: nil,
+                        proxySize: proxy.size,
+                        onAction: { coachMarkState.advance() }
+                    )
+                }
+            }
         }
     }
 
@@ -177,7 +202,7 @@ struct HomeView: View {
                         .font(DesignSystem.Font.title3)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                 }
-                .background(ViewAnchor(id: "settings", uiView: $settingsButtonView))
+                .anchorPreference(key: SettingsButtonAnchorKey.self, value: .bounds) { $0 }
                 Spacer()
             }
         }
@@ -333,6 +358,7 @@ struct HomeView: View {
                 .strokeBorder(DesignSystem.Color.primary, lineWidth: 5)
         )
         .padding(.horizontal, 20)
+        .anchorPreference(key: CharacterFieldAnchorKey.self, value: .bounds) { $0 }
     }
 
     // MARK: - Mission Banner

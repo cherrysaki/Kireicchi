@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
+    @StateObject private var coachMarkState = CoachMarkState()
     @EnvironmentObject private var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @AppStorage("hasShownLogoSplash") private var hasShownLogoSplash: Bool = false
@@ -62,6 +63,7 @@ struct RootView: View {
                 }
         }
         .environmentObject(navigationRouter)
+        .environmentObject(coachMarkState)
         .safeAreaInset(edge: .top) {
             if let message = deps.bootstrapError {
                 RetryBanner(message: message) {

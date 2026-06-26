@@ -3,6 +3,7 @@ import SwiftUI
 struct CleanupTimerView: View {
     @StateObject private var viewModel: CleanupTimerViewModel
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var coachMarkState: CoachMarkState
 
     init(viewModel: CleanupTimerViewModel? = nil) {
         if let viewModel = viewModel {
@@ -70,6 +71,24 @@ struct CleanupTimerView: View {
             .padding(16)
         }
         .navigationBarHidden(true)
+        // ステップ4: 「もう一度撮影」ボタンのハイライト
+        .overlayPreferenceValue(RecaptureButtonAnchorKey.self) { anchor in
+            GeometryReader { proxy in
+                if coachMarkState.shouldShow(step: 4), let anchor {
+                    CoachMarkOverlay(
+                        message: "もう一度撮影しよう！",
+                        buttonText: "OK",
+                        highlightFrame: proxy[anchor],
+                        proxySize: proxy.size,
+                        onAction: {
+                            coachMarkState.advance()
+                            navigationRouter.popToRoot()
+                            navigationRouter.navigate(to: .capture)
+                        }
+                    )
+                }
+            }
+        }
         .alert("お片付け完了！", isPresented: $viewModel.isFinished) {
             Button("もう一度撮影") {
                 viewModel.isFinished = false
@@ -187,6 +206,7 @@ struct CleanupTimerView: View {
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
             }
+            .anchorPreference(key: RecaptureButtonAnchorKey.self, value: .bounds) { $0 }
             .padding(.bottom, 40)
         }
     }
