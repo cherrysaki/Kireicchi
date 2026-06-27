@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var username = ""
     @State private var showTimePicker = false
     @State private var isSaving = false
+    @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
 
@@ -468,6 +469,9 @@ struct SettingsView: View {
     
     private func updateLatestRecordCapturedAt(isRunaway: Bool) {
         print("🔧 Debug: 家出状態変更ボタンが押されました。家出状態: \(isRunaway)")
+
+        // AppStorageの家出フラグを更新
+        isInRunawayState = isRunaway
         
         if records.isEmpty {
             print("🔧 Debug: レコードが存在しません。ダミーレコードを作成します。")
