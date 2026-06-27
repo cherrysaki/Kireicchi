@@ -12,8 +12,8 @@ final class GeneratePixelArtUseCase: GeneratePixelArtUseCaseProtocol {
     /// 全体の色かぶりを穏やかに中立化する。
     private let neutralize: Bool
 
-    init(gridSize: Int = 128, paletteSize: Int = 18,
-         grayLevels: Int = 6, satThreshold: Double = 0.12,
+    init(gridSize: Int = 64, paletteSize: Int = 18,
+         grayLevels: Int = 6, satThreshold: Double = 0.07,
          neutralize: Bool = false) {
         self.gridSize = gridSize
         self.paletteSize = paletteSize
