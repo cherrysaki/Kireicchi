@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 家出復帰フロー: 卵画面 → 孵化 → 誕生
 struct RunawayEggView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Binding var isPresented: Bool
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
@@ -202,7 +202,7 @@ struct RunawayEggView: View {
                 Button {
                     // 家出状態を解除してホームに戻る
                     isInRunawayState = false
-                    dismiss()
+                    isPresented = false
                 } label: {
                     Text("ホームに戻る")
                         .font(.system(size: 16, weight: .medium))
@@ -248,6 +248,6 @@ struct RunawayEggView: View {
 
 #Preview {
     NavigationStack {
-        RunawayEggView()
+        RunawayEggView(isPresented: .constant(true))
     }
 }

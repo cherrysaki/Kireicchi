@@ -3,8 +3,8 @@ import SwiftUI
 /// 家出復帰フロー: 手紙画面
 struct RunawayLetterView: View {
     @Environment(\.dismiss) private var dismiss
+    @Binding var isPresented: Bool
     @State private var showButton = false
-    @State private var appeared: Bool = false
 
     var body: some View {
         ZStack {
@@ -21,7 +21,7 @@ struct RunawayLetterView: View {
                 Spacer()
 
                 if showButton {
-                    NavigationLink(destination: RunawayEggView()) {
+                    NavigationLink(destination: RunawayEggView(isPresented: $isPresented)) {
                         Text("もう一度きれいっちを迎える")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(DesignSystem.Color.textPrimary)
@@ -42,7 +42,6 @@ struct RunawayLetterView: View {
 
                 Spacer().frame(height: 60)
             }
-            .offset(y: appeared ? 0 : UIScreen.main.bounds.height)
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -56,10 +55,7 @@ struct RunawayLetterView: View {
             }
         }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                appeared = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation(.easeOut(duration: 0.5)) {
                     showButton = true
                 }
@@ -70,6 +66,6 @@ struct RunawayLetterView: View {
 
 #Preview {
     NavigationStack {
-        RunawayLetterView()
+        RunawayLetterView(isPresented: .constant(true))
     }
 }

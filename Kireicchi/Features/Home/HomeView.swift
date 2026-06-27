@@ -140,7 +140,7 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showRecoveryFlow) {
             NavigationStack {
-                RunawayLetterView()
+                RunawayLetterView(isPresented: $showRecoveryFlow)
             }
         }
     }
