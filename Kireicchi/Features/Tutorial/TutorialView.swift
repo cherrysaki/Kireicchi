@@ -10,7 +10,7 @@ struct TutorialView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FFF8E1").ignoresSafeArea()
+            DesignSystem.Color.background.ignoresSafeArea()
 
             Group {
                 switch currentPage {

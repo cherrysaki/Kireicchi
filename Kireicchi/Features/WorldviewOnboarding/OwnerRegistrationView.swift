@@ -59,10 +59,10 @@ struct OwnerRegistrationView: View {
                 Spacer()
 
                 Button(action: register) {
-                    Text(isSaving ? "保存中..." : "登録する")
+                    Text(isSaving ? "保存中..." : "登録")
                         .font(DesignSystem.Font.pixelMedium)
                         .frame(width: 240)
-                        .padding(.vertical, 14)
+                        .padding(.vertical, 10)
                 }
                 .buttonStyle(PixelButtonStyle())
                 .disabled(trimmedName.isEmpty || isSaving)
