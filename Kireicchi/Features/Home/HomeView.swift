@@ -12,6 +12,8 @@ struct HomeView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
+    @State private var okitegamiScale: CGFloat = 1.0
+    @State private var okitegamiOpacity: Double = 1.0
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -49,10 +51,20 @@ struct HomeView: View {
         return CharacterState.fromHappiness(happiness)
     }
 
-    private var isRunaway: Bool {
-        guard let capturedAt = latestRecord?.capturedAt else { return false }
+    @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
+
+    /// 家出条件の検出（7日以上未撮影で家出フラグをON）
+    private func detectRunaway() {
+        guard !isInRunawayState else { return }
+        guard let capturedAt = latestRecord?.capturedAt else { return }
         let daysSince = Calendar.current.dateComponents([.day], from: capturedAt, to: Date()).day ?? 0
-        return daysSince >= 7
+        if daysSince >= 7 {
+            isInRunawayState = true
+        }
+    }
+
+    private var isRunaway: Bool {
+        isInRunawayState
     }
 
     private var pendingMissions: [MissionPersisted] {
@@ -82,12 +94,17 @@ struct HomeView: View {
                         roomFrame(now: context.date)
                     }
                 }
-                missionBanner
+                if !isRunaway {
+                    missionBanner
+                }
                 historyBanner
                 Spacer(minLength: 0)
             }
             .padding(.top, 8)
             .padding(.bottom, 88)
+            .onAppear {
+                detectRunaway()
+            }
 
             VStack {
                 Spacer()
@@ -266,6 +283,21 @@ struct HomeView: View {
                         .scaledToFit()
                         .padding(16)
                         .frame(width: geo.size.width, height: geo.size.width)
+                        .scaleEffect(okitegamiScale)
+                        .opacity(okitegamiOpacity)
+                        .onTapGesture {
+                            withAnimation(.easeIn(duration: 0.5)) {
+                                okitegamiScale = 10.0
+                                okitegamiOpacity = 0
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                navigationRouter.navigate(to: .runawayRecovery(.letter))
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                                okitegamiScale = 1.0
+                                okitegamiOpacity = 1.0
+                            }
+                        }
                 } else {
                     VStack {
                         Spacer()
