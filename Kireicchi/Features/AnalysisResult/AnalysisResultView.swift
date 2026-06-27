@@ -30,12 +30,16 @@ struct AnalysisResultView: View {
             DesignSystem.Color.background.ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 12) {
+                VStack(spacing: 4) {
                     rankScoreCard
                     characterCommentRow
+                        .padding(.top, -16)
                     pixelArtSection
+                        .padding(.top, -20)
                     priorityListSection
+                        .padding(.top, 20)
                     actionButtons
+                        .padding(.top, 16)
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 20)
@@ -45,56 +49,11 @@ struct AnalysisResultView: View {
     }
     
     // MARK: - Rank & Score
-    //    private var rankScoreCard: some View {
-    //        HStack(spacing: 16) {
-    //            VStack(spacing: 4) {
-    //                Text("ランク")
-    //                    .font(DesignSystem.Font.caption)
-    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-    //                Text(analysis.rank.rawValue)
-    //                    .font(DesignSystem.Font.custom(size: 64))
-    //                    .foregroundColor(colorForScore(analysis.score))
-    //            }
-    //
-    //            VStack(alignment: .leading, spacing: 4) {
-    //                Text("スコア")
-    //                    .font(DesignSystem.Font.caption)
-    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-    //                Text("\(analysis.score)/100")
-    //                    .font(DesignSystem.Font.title)
-    //                    .foregroundColor(DesignSystem.Color.primaryDark)
-    //                Text("一言コメント")
-    //                    .font(DesignSystem.Font.caption)
-    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-    //                    .padding(.top, 6)
-    //                Text(analysis.characterComment)
-    //                    .font(DesignSystem.Font.subheadline)
-    //                    .foregroundColor(DesignSystem.Color.textPrimary)
-    //                    .lineLimit(2)
-    //            }
-    //
-    //            Spacer()
-    //        }
-    //        .padding(14)
-    //        .pixelSquareCard(
-    //            fill: DesignSystem.Color.surface,
-    //            border: DesignSystem.Color.primary,
-    //            borderWidth: 3,
-    //            shadowOffset: 4
-    //        )
-    //        .padding(.horizontal)
-    //        .padding(.trailing, 4)
-    //    }
     private var rankScoreCard: some View {
         HStack(spacing: 24) {
-//            VStack(spacing: 4) {
-//                Text("ランク")
-//                    .font(DesignSystem.Font.caption)
-//                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 Text(analysis.rank.rawValue)
                     .font(DesignSystem.Font.custom(size: 64))
                     .foregroundColor(colorForScore(analysis.score))
-//            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("スコア")
@@ -115,21 +74,22 @@ struct AnalysisResultView: View {
             shadowOffset: 4
         )
         .padding(.horizontal)
-//        .padding(.trailing, 4)
     }
     // MARK: - Character Comment
     private var characterCommentRow: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: -12) {
             CharacterView(
                 characterType: .character01,
                 characterState: nil,
                 forceGif: .cheer
             )
             .frame(width: 160, height: 160)
+            .padding(.leading, -24)
             
             Text(analysis.characterComment)
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .pixelSquareCard(
@@ -142,7 +102,6 @@ struct AnalysisResultView: View {
             Spacer()
         }
         .padding(.horizontal)
-//        .padding(.trailing, 3)
     }
     
     // MARK: - Pixel Art Section
@@ -313,13 +272,39 @@ private struct MissionListRow: View {
 }
 
 #Preview {
-    NavigationStack {
-        AnalysisResultView(
-            imageData: AnalysisResultPreviewData.dummyImageData,
-            pixelArtData: AnalysisResultPreviewData.dummyImageData,
-            analysis: AnalysisResultPreviewData.analysis
-        )
-        .environmentObject(NavigationRouter())
-        .modelContainer(AnalysisResultPreviewData.makeContainer())
+    let analysis = RoomAnalysis(
+        score: 72,
+        rank: .b,
+        messyPoints: [
+            MessyPoint(label: "床の衣類",     priority: 5, bbox: NormalizedRect(x: 0.05, y: 0.55, w: 0.40, h: 0.35)),
+            MessyPoint(label: "机の上の書類", priority: 4, bbox: nil),
+            MessyPoint(label: "本棚の整理",   priority: 2, bbox: nil),
+        ],
+        characterComment: "まあまあきれいだけど、もう少し頑張れそう！床の衣類が気になるな〜"
+    )
+    let imageData = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 300)).image { ctx in
+        UIColor(red: 0.88, green: 0.82, blue: 0.74, alpha: 1).setFill()
+        ctx.fill(CGRect(x: 0, y: 0, width: 300, height: 300))
+        UIColor(red: 0.73, green: 0.60, blue: 0.46, alpha: 1).setFill()
+        ctx.fill(CGRect(x: 0, y: 190, width: 300, height: 110))
+        UIColor(red: 0.35, green: 0.55, blue: 0.80, alpha: 0.85).setFill()
+        ctx.fill(CGRect(x: 20, y: 210, width: 70, height: 30))
+    }.pngData() ?? Data()
+    let container = try! ModelContainer(
+        for: LatestRoomRecord.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    let missions = analysis.messyPoints.map { MissionPersisted(from: $0) }
+    container.mainContext.insert(LatestRoomRecord(
+        pixelArtImageData: imageData,
+        capturedAt: Date(),
+        score: analysis.score,
+        comment: analysis.characterComment,
+        missionsData: try? JSONEncoder().encode(missions)
+    ))
+    return NavigationStack {
+        AnalysisResultView(imageData: imageData, pixelArtData: imageData, analysis: analysis)
+            .environmentObject(NavigationRouter())
+            .modelContainer(container)
     }
 }
