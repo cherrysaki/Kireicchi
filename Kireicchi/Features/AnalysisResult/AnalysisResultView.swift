@@ -8,27 +8,27 @@ struct AnalysisResultView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
-
+    
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
-
+    
     private var originalImage: UIImage? {
         UIImage(data: imageData)
     }
-
+    
     private var allMissions: [MissionPersisted] {
         records.first?.missions ?? []
     }
-
+    
     private var pendingMissions: [MissionPersisted] {
         allMissions.filter { !$0.isDone }
     }
-
+    
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
-
+            
             ScrollView {
                 VStack(spacing: 20) {
                     rankScoreCard
@@ -43,36 +43,68 @@ struct AnalysisResultView: View {
         }
         .navigationBarHidden(true)
     }
-
+    
     // MARK: - Rank & Score
+    //    private var rankScoreCard: some View {
+    //        HStack(spacing: 16) {
+    //            VStack(spacing: 4) {
+    //                Text("ランク")
+    //                    .font(DesignSystem.Font.caption)
+    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+    //                Text(analysis.rank.rawValue)
+    //                    .font(DesignSystem.Font.custom(size: 64))
+    //                    .foregroundColor(colorForScore(analysis.score))
+    //            }
+    //
+    //            VStack(alignment: .leading, spacing: 4) {
+    //                Text("スコア")
+    //                    .font(DesignSystem.Font.caption)
+    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+    //                Text("\(analysis.score)/100")
+    //                    .font(DesignSystem.Font.title)
+    //                    .foregroundColor(DesignSystem.Color.primaryDark)
+    //                Text("一言コメント")
+    //                    .font(DesignSystem.Font.caption)
+    //                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+    //                    .padding(.top, 6)
+    //                Text(analysis.characterComment)
+    //                    .font(DesignSystem.Font.subheadline)
+    //                    .foregroundColor(DesignSystem.Color.textPrimary)
+    //                    .lineLimit(2)
+    //            }
+    //
+    //            Spacer()
+    //        }
+    //        .padding(14)
+    //        .pixelSquareCard(
+    //            fill: DesignSystem.Color.surface,
+    //            border: DesignSystem.Color.primary,
+    //            borderWidth: 3,
+    //            shadowOffset: 4
+    //        )
+    //        .padding(.horizontal)
+    //        .padding(.trailing, 4)
+    //    }
     private var rankScoreCard: some View {
-        HStack(spacing: 16) {
-            VStack(spacing: 4) {
-                Text("ランク")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+        HStack(spacing: 24) {
+//            VStack(spacing: 4) {
+//                Text("ランク")
+//                    .font(DesignSystem.Font.caption)
+//                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 Text(analysis.rank.rawValue)
                     .font(DesignSystem.Font.custom(size: 64))
                     .foregroundColor(colorForScore(analysis.score))
-            }
-
+//            }
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text("スコア")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 Text("\(analysis.score)/100")
-                    .font(DesignSystem.Font.title)
+                    .font(DesignSystem.Font.largeTitle)
                     .foregroundColor(DesignSystem.Color.primaryDark)
-                Text("一言コメント")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-                    .padding(.top, 6)
-                Text(analysis.characterComment)
-                    .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                    .lineLimit(2)
             }
-
+            
             Spacer()
         }
         .padding(14)
@@ -83,19 +115,18 @@ struct AnalysisResultView: View {
             shadowOffset: 4
         )
         .padding(.horizontal)
-        .padding(.trailing, 4)
+//        .padding(.trailing, 4)
     }
-
     // MARK: - Character Comment
     private var characterCommentRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             CharacterView(
                 characterType: .character01,
                 characterState: nil,
                 forceGif: .cheer
             )
-            .frame(width: 120, height: 120)
-
+            .frame(width: 160, height: 160)
+            
             Text(analysis.characterComment)
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
@@ -107,13 +138,13 @@ struct AnalysisResultView: View {
                     borderWidth: 2,
                     shadowOffset: 3
                 )
-
+            
             Spacer()
         }
         .padding(.horizontal)
-        .padding(.trailing, 3)
+//        .padding(.trailing, 3)
     }
-
+    
     // MARK: - Pixel Art Section
     private var pixelArtSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -121,7 +152,7 @@ struct AnalysisResultView: View {
                 .font(DesignSystem.Font.headline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .padding(.horizontal)
-
+            
             Image(uiImage: pixelArtImage)
                 .resizable()
                 .interpolation(.none)
@@ -136,7 +167,7 @@ struct AnalysisResultView: View {
                 .padding(.trailing, 4)
         }
     }
-
+    
     // MARK: - Mission List Section
     private var priorityListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -152,7 +183,7 @@ struct AnalysisResultView: View {
                 }
             }
             .padding(.horizontal)
-
+            
             if pendingMissions.isEmpty {
                 missionEmptyState
                     .padding(.horizontal)
@@ -171,7 +202,7 @@ struct AnalysisResultView: View {
             }
         }
     }
-
+    
     private var missionEmptyState: some View {
         VStack(spacing: 12) {
             CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
@@ -186,7 +217,7 @@ struct AnalysisResultView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
     }
-
+    
     // MARK: - Action Buttons
     private var actionButtons: some View {
         VStack(spacing: 14) {
@@ -205,7 +236,7 @@ struct AnalysisResultView: View {
             .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
-
+            
             Button(action: {
                 navigationRouter.popToRoot()
             }) {
@@ -229,7 +260,7 @@ struct AnalysisResultView: View {
             .padding(.trailing, 4)
         }
     }
-
+    
     private func colorForScore(_ score: Int) -> Color {
         switch score {
         case 85...100: return DesignSystem.Color.primary
@@ -239,15 +270,15 @@ struct AnalysisResultView: View {
         default:       return Color.red
         }
     }
-
+    
 }
 
 private struct MissionListRow: View {
     let mission: MissionPersisted
     let onComplete: () -> Void
-
+    
     private var starCount: Int { min(max(mission.priority, 1), 5) }
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Button(action: onComplete) {
@@ -256,14 +287,14 @@ private struct MissionListRow: View {
                     .foregroundColor(DesignSystem.Color.primary)
             }
             .buttonStyle(.plain)
-
+            
             Text(mission.label)
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .multilineTextAlignment(.leading)
                 .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             HStack(spacing: 2) {
                 ForEach(0..<starCount, id: \.self) { _ in
                     PixelStar(size: 14)
@@ -301,7 +332,7 @@ private struct MissionListRow: View {
         ctx.fill(CGRect(x: 60, y: 330, width: 270, height: 210))
     }
     let dummyImageData = dummyImage.pngData() ?? Data()
-
+    
     let container = try! ModelContainer(
         for: LatestRoomRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
@@ -317,7 +348,7 @@ private struct MissionListRow: View {
         originalImageData: dummyImageData,
         missionsData: missionsData
     ))
-
+    
     return NavigationStack {
         AnalysisResultView(
             imageData: dummyImageData,
