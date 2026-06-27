@@ -313,49 +313,13 @@ private struct MissionListRow: View {
 }
 
 #Preview {
-    let mockAnalysis = RoomAnalysis(
-        score: 75,
-        rank: .b,
-        messyPoints: [
-            MessyPoint(label: "床の服", priority: 3,
-                       bbox: NormalizedRect(x: 0.1, y: 0.55, w: 0.45, h: 0.35)),
-            MessyPoint(label: "机の上の紙", priority: 2,
-                       bbox: NormalizedRect(x: 0.2, y: 0.15, w: 0.4, h: 0.25)),
-            MessyPoint(label: "本棚の整理", priority: 1, bbox: nil)
-        ],
-        characterComment: "もう少し片付けるといいかも！"
-    )
-    let dummyImage = UIGraphicsImageRenderer(size: CGSize(width: 600, height: 600)).image { ctx in
-        UIColor.systemTeal.setFill()
-        ctx.fill(CGRect(x: 0, y: 0, width: 600, height: 600))
-        UIColor.systemOrange.setFill()
-        ctx.fill(CGRect(x: 60, y: 330, width: 270, height: 210))
-    }
-    let dummyImageData = dummyImage.pngData() ?? Data()
-    
-    let container = try! ModelContainer(
-        for: LatestRoomRecord.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    let missions = mockAnalysis.messyPoints.map { MissionPersisted(from: $0) }
-    let missionsData = try? JSONEncoder().encode(missions)
-    container.mainContext.insert(LatestRoomRecord(
-        pixelArtImageData: dummyImageData,
-        capturedAt: Date(),
-        score: mockAnalysis.score,
-        comment: mockAnalysis.characterComment,
-        messyPointLabels: missions.map { "\($0.label):\($0.priority)" },
-        originalImageData: dummyImageData,
-        missionsData: missionsData
-    ))
-    
-    return NavigationStack {
+    NavigationStack {
         AnalysisResultView(
-            imageData: dummyImageData,
-            pixelArtData: dummyImageData,
-            analysis: mockAnalysis
+            imageData: AnalysisResultPreviewData.dummyImageData,
+            pixelArtData: AnalysisResultPreviewData.dummyImageData,
+            analysis: AnalysisResultPreviewData.analysis
         )
         .environmentObject(NavigationRouter())
-        .modelContainer(container)
+        .modelContainer(AnalysisResultPreviewData.makeContainer())
     }
 }
