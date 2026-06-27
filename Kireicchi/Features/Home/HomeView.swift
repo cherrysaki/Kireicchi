@@ -12,8 +12,6 @@ struct HomeView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
-    @State private var okitegamiScale: CGFloat = 1.0
-    @State private var okitegamiOpacity: Double = 1.0
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -283,20 +281,8 @@ struct HomeView: View {
                         .scaledToFit()
                         .padding(16)
                         .frame(width: geo.size.width, height: geo.size.width)
-                        .scaleEffect(okitegamiScale)
-                        .opacity(okitegamiOpacity)
                         .onTapGesture {
-                            withAnimation(.easeIn(duration: 0.5)) {
-                                okitegamiScale = 10.0
-                                okitegamiOpacity = 0
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                navigationRouter.navigate(to: .runawayRecovery(.letter))
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                                okitegamiScale = 1.0
-                                okitegamiOpacity = 1.0
-                            }
+                            navigationRouter.navigate(to: .runawayRecovery(.letter))
                         }
                 } else {
                     VStack {

@@ -6,6 +6,7 @@ struct RunawayLetterView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
 
     @State private var showButton = false
+    @State private var appeared: Bool = false
 
     var body: some View {
         ZStack {
@@ -45,6 +46,7 @@ struct RunawayLetterView: View {
 
                 Spacer().frame(height: 60)
             }
+            .offset(y: appeared ? 0 : UIScreen.main.bounds.height)
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -58,7 +60,10 @@ struct RunawayLetterView: View {
             }
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.easeOut(duration: 0.5)) {
+                appeared = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeOut(duration: 0.5)) {
                     showButton = true
                 }
