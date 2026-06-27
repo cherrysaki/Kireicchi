@@ -12,7 +12,7 @@ struct HorizontalStepProgressView: View {
 
     private let nodeSize: CGFloat = 32
     private let trackHeight: CGFloat = 10
-    private let pixelSize: CGFloat = 3
+    private let pixelSize: CGFloat = 1.5
 
     private var fillColor: SwiftUI.Color { DesignSystem.Color.primary }
     private var borderColor: SwiftUI.Color { DesignSystem.Color.primaryDark }
