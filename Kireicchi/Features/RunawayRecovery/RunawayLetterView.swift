@@ -1,10 +1,8 @@
 import SwiftUI
 
 /// 家出復帰フロー: 手紙画面
-/// tegami画像を表示し、3秒後に「もう一度きれいっちを迎える」ボタンを表示する
 struct RunawayLetterView: View {
-    @EnvironmentObject var navigationRouter: NavigationRouter
-
+    @Environment(\.dismiss) private var dismiss
     @State private var showButton = false
     @State private var appeared: Bool = false
 
@@ -23,9 +21,7 @@ struct RunawayLetterView: View {
                 Spacer()
 
                 if showButton {
-                    Button {
-                        navigationRouter.navigate(to: .runawayRecovery(.egg))
-                    } label: {
+                    NavigationLink(destination: RunawayEggView()) {
                         Text("もう一度きれいっちを迎える")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(DesignSystem.Color.textPrimary)
@@ -52,7 +48,7 @@ struct RunawayLetterView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    navigationRouter.navigateBack()
+                    dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
                         .foregroundColor(DesignSystem.Color.textPrimary)
@@ -75,6 +71,5 @@ struct RunawayLetterView: View {
 #Preview {
     NavigationStack {
         RunawayLetterView()
-            .environmentObject(NavigationRouter())
     }
 }

@@ -12,6 +12,7 @@ struct HomeView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
+    @State private var showRecoveryFlow = false
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -136,6 +137,11 @@ struct HomeView: View {
                     try? store.updateMission(id: mission.id, isDone: true)
                 }
             )
+        }
+        .fullScreenCover(isPresented: $showRecoveryFlow) {
+            NavigationStack {
+                RunawayLetterView()
+            }
         }
     }
 
@@ -282,7 +288,7 @@ struct HomeView: View {
                         .padding(16)
                         .frame(width: geo.size.width, height: geo.size.width)
                         .onTapGesture {
-                            navigationRouter.navigate(to: .runawayRecovery(.letter))
+                            showRecoveryFlow = true
                         }
                 } else {
                     VStack {
