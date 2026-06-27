@@ -41,7 +41,6 @@ struct SettingsView: View {
                         captureTimeSection
                         notificationToggleSection
                         commentSection
-                        AppleLoginSection()
 
                         #if DEBUG
                         debugSection
