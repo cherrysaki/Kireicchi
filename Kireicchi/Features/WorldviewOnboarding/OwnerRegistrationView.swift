@@ -28,6 +28,8 @@ struct OwnerRegistrationView: View {
 
                 CharacterView(characterType: .character01, characterState: .happy)
                     .frame(width: 160, height: 160)
+                    .padding(.top,  -32)
+                    .padding(.bottom,  -32)
 
                 Text("あなたのなまえを教えてね！")
                     .font(DesignSystem.Font.body)
@@ -56,17 +58,15 @@ struct OwnerRegistrationView: View {
                     .padding(.horizontal, 40)
                     .padding(.trailing, 3)
 
-                Spacer()
-
                 Button(action: register) {
-                    Text(isSaving ? "保存中..." : "登録")
+                    Text("決定")
                         .font(DesignSystem.Font.pixelMedium)
-                        .frame(width: 240)
-                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+                .frame(width: 240, height: 52)   // ← 高さを固定
                 .buttonStyle(PixelButtonStyle())
-                .disabled(trimmedName.isEmpty || isSaving)
-                .opacity(trimmedName.isEmpty ? 0.5 : 1)
+                .disabled(trimmedName.isEmpty)
+                .opacity(trimmedName.isEmpty ? 0.45 : 1.0)
                 .padding(.bottom, 48)
             }
         }
