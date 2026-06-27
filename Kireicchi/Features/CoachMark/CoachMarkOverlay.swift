@@ -30,6 +30,13 @@ struct ScoreImageAnchorKey: PreferenceKey {
     }
 }
 
+struct ResultTopSectionAnchorKey: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
+    }
+}
+
 struct MissionListAnchorKey: PreferenceKey {
     static var defaultValue: Anchor<CGRect>? = nil
     static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
@@ -190,7 +197,7 @@ struct CoachMarkOverlay: View {
                 Color.black.opacity(0.5)
                     .reversedMask {
                         RoundedRectangle(cornerRadius: 12)
-                            .frame(width: frame.width + 20, height: frame.height + 20)
+                            .frame(width: frame.width + 24, height: frame.height + 24)
                             .position(x: frame.midX, y: frame.midY)
                     }
                     .ignoresSafeArea()

@@ -50,9 +50,9 @@ struct HomeTabBar: View {
                         .font(DesignSystem.Font.title2)
                         .foregroundColor(canCapture ? DesignSystem.Color.primaryDark : Color.white.opacity(0.8))
                 }
-                .anchorPreference(key: CaptureButtonAnchorKey.self, value: .bounds) { $0 }
             }
             .offset(y: -18)
+            .anchorPreference(key: CaptureButtonAnchorKey.self, value: .bounds) { $0 }
         }
     }
 }

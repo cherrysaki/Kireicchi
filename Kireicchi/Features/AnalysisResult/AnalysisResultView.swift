@@ -9,6 +9,7 @@ struct AnalysisResultView: View {
     @EnvironmentObject var coachMarkState: CoachMarkState
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
+    @State private var isCoachScrolling = false
 
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
@@ -30,25 +31,60 @@ struct AnalysisResultView: View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 20) {
-                    rankScoreCard
-                    characterCommentRow
-                    pixelArtSection
-                    priorityListSection
-                    actionButtons
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        VStack(spacing: 20) {
+                            rankScoreCard
+                            characterCommentRow
+                            pixelArtSection
+                        }
+                        .anchorPreference(key: ResultTopSectionAnchorKey.self, value: .bounds) { $0 }
+                        .id("resultTop")
+
+                        priorityListSection
+                            .id("missionSection")
+
+                        actionButtons
+                            .id("bottomButtons")
+                    }
+                    .padding(.top, 12)
+                    .padding(.bottom, 20)
                 }
-                .padding(.top, 12)
-                .padding(.bottom, 20)
+                .onChange(of: coachMarkState.currentStep) { _, step in
+                    let target: String
+                    switch step {
+                    case 1, 5: target = "resultTop"
+                    case 2: target = "missionSection"
+                    case 3, 6: target = "bottomButtons"
+                    default: return
+                    }
+                    isCoachScrolling = true
+                    withAnimation { scrollProxy.scrollTo(target, anchor: .top) }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { isCoachScrolling = false }
+                }
+                .onAppear {
+                    let step = coachMarkState.currentStep
+                    let target: String
+                    switch step {
+                    case 1, 5: target = "resultTop"
+                    case 2: target = "missionSection"
+                    case 3, 6: target = "bottomButtons"
+                    default: return
+                    }
+                    isCoachScrolling = true
+                    withAnimation { scrollProxy.scrollTo(target, anchor: .top) }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { isCoachScrolling = false }
+                }
             }
         }
         .navigationBarHidden(true)
-        // ステップ1・5: スコアカード
-        .overlayPreferenceValue(ScoreImageAnchorKey.self) { anchor in
+        // ステップ1・5: トップセクション
+        .overlayPreferenceValue(ResultTopSectionAnchorKey.self) { anchor in
             GeometryReader { proxy in
                 if let anchor {
                     let frame = proxy[anchor]
-                    if coachMarkState.shouldShow(step: 1) {
+                    if coachMarkState.shouldShow(step: 1) && !isCoachScrolling {
                         CoachMarkOverlay(
                             message: "結果を見てみよう！",
                             buttonText: "つぎへ",
@@ -56,7 +92,7 @@ struct AnalysisResultView: View {
                             proxySize: proxy.size,
                             onAction: { coachMarkState.advance() }
                         )
-                    } else if coachMarkState.shouldShow(step: 5) {
+                    } else if coachMarkState.shouldShow(step: 5) && !isCoachScrolling {
                         CoachMarkOverlay(
                             message: "お部屋がどれくらい変わったか見比べてみよう！",
                             buttonText: "つぎへ",
@@ -71,7 +107,7 @@ struct AnalysisResultView: View {
         // ステップ2: ミッションリスト
         .overlayPreferenceValue(MissionListAnchorKey.self) { anchor in
             GeometryReader { proxy in
-                if coachMarkState.shouldShow(step: 2), let anchor {
+                if coachMarkState.shouldShow(step: 2) && !isCoachScrolling, let anchor {
                     CoachMarkOverlay(
                         message: "まずはこのミッションをやってみよう！",
                         buttonText: "つぎへ",
@@ -85,7 +121,7 @@ struct AnalysisResultView: View {
         // ステップ3: タイマーボタン
         .overlayPreferenceValue(TimerButtonAnchorKey.self) { anchor in
             GeometryReader { proxy in
-                if coachMarkState.shouldShow(step: 3), let anchor {
+                if coachMarkState.shouldShow(step: 3) && !isCoachScrolling, let anchor {
                     CoachMarkOverlay(
                         message: "お片付けタイマーを設定して、お部屋を片付けよう！",
                         buttonText: "OK",
@@ -102,7 +138,7 @@ struct AnalysisResultView: View {
         // ステップ6: ホームボタン
         .overlayPreferenceValue(HomeButtonAnchorKey.self) { anchor in
             GeometryReader { proxy in
-                if coachMarkState.shouldShow(step: 6), let anchor {
+                if coachMarkState.shouldShow(step: 6) && !isCoachScrolling, let anchor {
                     CoachMarkOverlay(
                         message: "ホームに戻って、きれいっちの様子を見てみよう！",
                         buttonText: "OK",
@@ -158,7 +194,6 @@ struct AnalysisResultView: View {
         )
         .padding(.horizontal)
         .padding(.trailing, 4)
-        .anchorPreference(key: ScoreImageAnchorKey.self, value: .bounds) { $0 }
     }
 
     // MARK: - Character Comment
