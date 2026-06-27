@@ -10,15 +10,14 @@ struct TutorialView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FFF8E1").ignoresSafeArea()
+            DesignSystem.Color.background.ignoresSafeArea()
 
             Group {
                 switch currentPage {
-                case 0: logoPage
-                case 1: welcomePage
-                case 2: cameraPage
-                case 3: scorePage
-                case 4: healthPage
+                case 0: welcomePage
+                case 1: cameraPage
+                case 2: scorePage
+                case 3: healthPage
                 default: startPage
                 }
             }
@@ -52,34 +51,22 @@ struct TutorialView: View {
                 }
             }
         }
-        .onAppear(perform: scheduleLogoTransition)
     }
 
     private var showsSkipButton: Bool {
-        currentPage >= 1 && currentPage <= 4
+        currentPage <= 3
     }
 
     private var showsPageIndicator: Bool {
-        currentPage >= 1
+        true
     }
 
     private var pageIndicator: some View {
         HStack(spacing: 10) {
-            ForEach(1...totalContentPages, id: \.self) { i in
+            ForEach(0..<totalContentPages, id: \.self) { i in
                 Circle()
                     .fill(i == currentPage ? DesignSystem.Color.primary : DesignSystem.Color.textPrimary.opacity(0.2))
                     .frame(width: 10, height: 10)
-            }
-        }
-    }
-
-    private func scheduleLogoTransition() {
-        guard currentPage == 0 else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            withAnimation(.easeInOut(duration: 0.4)) {
-                if currentPage == 0 {
-                    currentPage = 1
-                }
             }
         }
     }
@@ -94,16 +81,7 @@ struct TutorialView: View {
         hasShownTutorial = true
     }
 
-    // MARK: - Page 0: Logo
-    private var logoPage: some View {
-        Image("logo_Kireicchi")
-            .resizable()
-            .scaledToFit()
-            .frame(maxWidth: 320)
-            .transition(.opacity)
-    }
-
-    // MARK: - Page 1: Welcome
+    // MARK: - Page 0: Welcome
     private var welcomePage: some View {
         contentPage(
             title: "きれいっちへようこそ！",
@@ -144,7 +122,7 @@ struct TutorialView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: 320)
-                    .cornerRadius(16)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 16))
             ),
             buttonTitle: "次へ",
             action: goNext
@@ -226,7 +204,7 @@ struct TutorialView: View {
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
                     .background(DesignSystem.Color.primary)
-                    .cornerRadius(12)
+                    .clipShape(PixelCornerRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 64)

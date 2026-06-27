@@ -90,10 +90,10 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
         .padding(14)
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
+            PixelCornerRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            PixelCornerRectangle(cornerRadius: 16)
                 .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
     }
@@ -134,10 +134,10 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
+            PixelCornerRectangle(cornerRadius: 16).fill(DesignSystem.Color.surface)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            PixelCornerRectangle(cornerRadius: 16)
                 .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
     }
@@ -164,7 +164,7 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    PixelCornerRectangle(cornerRadius: 8)
                         .fill(selected ? DesignSystem.Color.primary : DesignSystem.Color.primary.opacity(0.12))
                 )
         }
@@ -387,9 +387,9 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
                         .resizable()
                         .interpolation(.none)
                         .frame(width: 36, height: 36)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .clipShape(PixelCornerRectangle(cornerRadius: 6))
                 } else {
-                    RoundedRectangle(cornerRadius: 6)
+                    PixelCornerRectangle(cornerRadius: 6)
                         .fill(DesignSystem.Color.secondary.opacity(0.3))
                         .frame(width: 36, height: 36)
                 }
@@ -421,8 +421,8 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
                     .foregroundColor(DesignSystem.Color.primary)
             }
             .padding(8)
-            .background(RoundedRectangle(cornerRadius: 10).fill(DesignSystem.Color.surface))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5))
+            .background(PixelCornerRectangle(cornerRadius: 10).fill(DesignSystem.Color.surface))
+            .overlay(PixelCornerRectangle(cornerRadius: 10).stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -636,9 +636,9 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
                         .resizable()
                         .interpolation(.none)
                         .frame(width: 48, height: 48)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .clipShape(PixelCornerRectangle(cornerRadius: 8))
                 } else {
-                    RoundedRectangle(cornerRadius: 8)
+                    PixelCornerRectangle(cornerRadius: 8)
                         .fill(DesignSystem.Color.secondary.opacity(0.25))
                         .frame(width: 48, height: 48)
                 }
@@ -664,10 +664,10 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
             }
             .padding(12)
             .background(
-                RoundedRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
+                PixelCornerRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                PixelCornerRectangle(cornerRadius: 12)
                     .stroke(DesignSystem.Color.primary, lineWidth: 1.5)
             )
         }
@@ -694,10 +694,10 @@ struct HistoryView<ViewModel: HistoryViewModelProtocol>: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
+            PixelCornerRectangle(cornerRadius: 12).fill(DesignSystem.Color.surface)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 1.5)
         )
     }

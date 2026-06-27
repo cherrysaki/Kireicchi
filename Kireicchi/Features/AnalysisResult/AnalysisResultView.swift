@@ -8,71 +8,62 @@ struct AnalysisResultView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
-
+    
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
-
+    
     private var originalImage: UIImage? {
         UIImage(data: imageData)
     }
-
+    
     private var allMissions: [MissionPersisted] {
         records.first?.missions ?? []
     }
-
+    
     private var pendingMissions: [MissionPersisted] {
         allMissions.filter { !$0.isDone }
     }
-
+    
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
-
+            
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 4) {
                     rankScoreCard
                     characterCommentRow
+                        .padding(.top, -16)
                     pixelArtSection
+                        .padding(.top, -20)
                     priorityListSection
+                        .padding(.top, 20)
                     actionButtons
+                        .padding(.top, 16)
                 }
-                .padding(.top, 12)
+                .padding(.top, 8)
                 .padding(.bottom, 20)
             }
         }
         .navigationBarHidden(true)
     }
-
+    
     // MARK: - Rank & Score
     private var rankScoreCard: some View {
-        HStack(spacing: 16) {
-            VStack(spacing: 4) {
-                Text("ランク")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+        HStack(spacing: 24) {
                 Text(analysis.rank.rawValue)
                     .font(DesignSystem.Font.custom(size: 64))
                     .foregroundColor(colorForScore(analysis.score))
-            }
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text("スコア")
                     .font(DesignSystem.Font.caption)
                     .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 Text("\(analysis.score)/100")
-                    .font(DesignSystem.Font.title)
+                    .font(DesignSystem.Font.largeTitle)
                     .foregroundColor(DesignSystem.Color.primaryDark)
-                Text("一言コメント")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-                    .padding(.top, 6)
-                Text(analysis.characterComment)
-                    .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                    .lineLimit(2)
             }
-
+            
             Spacer()
         }
         .padding(14)
@@ -83,22 +74,22 @@ struct AnalysisResultView: View {
             shadowOffset: 4
         )
         .padding(.horizontal)
-        .padding(.trailing, 4)
     }
-
     // MARK: - Character Comment
     private var characterCommentRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: -12) {
             CharacterView(
                 characterType: .character01,
                 characterState: nil,
                 forceGif: .cheer
             )
-            .frame(width: 120, height: 120)
-
+            .frame(width: 160, height: 160)
+            .padding(.leading, -24)
+            
             Text(analysis.characterComment)
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .pixelSquareCard(
@@ -107,13 +98,12 @@ struct AnalysisResultView: View {
                     borderWidth: 2,
                     shadowOffset: 3
                 )
-
+            
             Spacer()
         }
         .padding(.horizontal)
-        .padding(.trailing, 3)
     }
-
+    
     // MARK: - Pixel Art Section
     private var pixelArtSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -121,22 +111,22 @@ struct AnalysisResultView: View {
                 .font(DesignSystem.Font.headline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .padding(.horizontal)
-
+            
             Image(uiImage: pixelArtImage)
                 .resizable()
                 .interpolation(.none)
                 .aspectRatio(1, contentMode: .fit)
                 .background(DesignSystem.Color.secondary.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(PixelCornerRectangle(cornerRadius: 12))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    PixelCornerRectangle(cornerRadius: 12)
                         .stroke(DesignSystem.Color.primary, lineWidth: 5)
                 )
                 .padding(.horizontal)
                 .padding(.trailing, 4)
         }
     }
-
+    
     // MARK: - Mission List Section
     private var priorityListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -152,7 +142,7 @@ struct AnalysisResultView: View {
                 }
             }
             .padding(.horizontal)
-
+            
             if pendingMissions.isEmpty {
                 missionEmptyState
                     .padding(.horizontal)
@@ -171,7 +161,7 @@ struct AnalysisResultView: View {
             }
         }
     }
-
+    
     private var missionEmptyState: some View {
         VStack(spacing: 12) {
             CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
@@ -186,7 +176,7 @@ struct AnalysisResultView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
     }
-
+    
     // MARK: - Action Buttons
     private var actionButtons: some View {
         VStack(spacing: 14) {
@@ -205,7 +195,7 @@ struct AnalysisResultView: View {
             .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
-
+            
             Button(action: {
                 navigationRouter.popToRoot()
             }) {
@@ -229,7 +219,7 @@ struct AnalysisResultView: View {
             .padding(.trailing, 4)
         }
     }
-
+    
     private func colorForScore(_ score: Int) -> Color {
         switch score {
         case 85...100: return DesignSystem.Color.primary
@@ -239,15 +229,15 @@ struct AnalysisResultView: View {
         default:       return Color.red
         }
     }
-
+    
 }
 
 private struct MissionListRow: View {
     let mission: MissionPersisted
     let onComplete: () -> Void
-
+    
     private var starCount: Int { min(max(mission.priority, 1), 5) }
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Button(action: onComplete) {
@@ -256,14 +246,14 @@ private struct MissionListRow: View {
                     .foregroundColor(DesignSystem.Color.primary)
             }
             .buttonStyle(.plain)
-
+            
             Text(mission.label)
                 .font(DesignSystem.Font.subheadline)
                 .foregroundColor(DesignSystem.Color.textPrimary)
                 .multilineTextAlignment(.leading)
                 .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             HStack(spacing: 2) {
                 ForEach(0..<starCount, id: \.self) { _ in
                     PixelStar(size: 14)
@@ -282,49 +272,39 @@ private struct MissionListRow: View {
 }
 
 #Preview {
-    let mockAnalysis = RoomAnalysis(
-        score: 75,
+    let analysis = RoomAnalysis(
+        score: 72,
         rank: .b,
         messyPoints: [
-            MessyPoint(label: "床の服", priority: 3,
-                       bbox: NormalizedRect(x: 0.1, y: 0.55, w: 0.45, h: 0.35)),
-            MessyPoint(label: "机の上の紙", priority: 2,
-                       bbox: NormalizedRect(x: 0.2, y: 0.15, w: 0.4, h: 0.25)),
-            MessyPoint(label: "本棚の整理", priority: 1, bbox: nil)
+            MessyPoint(label: "床の衣類",     priority: 5, bbox: NormalizedRect(x: 0.05, y: 0.55, w: 0.40, h: 0.35)),
+            MessyPoint(label: "机の上の書類", priority: 4, bbox: nil),
+            MessyPoint(label: "本棚の整理",   priority: 2, bbox: nil),
         ],
-        characterComment: "もう少し片付けるといいかも！"
+        characterComment: "まあまあきれいだけど、もう少し頑張れそう！床の衣類が気になるな〜"
     )
-    let dummyImage = UIGraphicsImageRenderer(size: CGSize(width: 600, height: 600)).image { ctx in
-        UIColor.systemTeal.setFill()
-        ctx.fill(CGRect(x: 0, y: 0, width: 600, height: 600))
-        UIColor.systemOrange.setFill()
-        ctx.fill(CGRect(x: 60, y: 330, width: 270, height: 210))
-    }
-    let dummyImageData = dummyImage.pngData() ?? Data()
-
+    let imageData = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 300)).image { ctx in
+        UIColor(red: 0.88, green: 0.82, blue: 0.74, alpha: 1).setFill()
+        ctx.fill(CGRect(x: 0, y: 0, width: 300, height: 300))
+        UIColor(red: 0.73, green: 0.60, blue: 0.46, alpha: 1).setFill()
+        ctx.fill(CGRect(x: 0, y: 190, width: 300, height: 110))
+        UIColor(red: 0.35, green: 0.55, blue: 0.80, alpha: 0.85).setFill()
+        ctx.fill(CGRect(x: 20, y: 210, width: 70, height: 30))
+    }.pngData() ?? Data()
     let container = try! ModelContainer(
         for: LatestRoomRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    let missions = mockAnalysis.messyPoints.map { MissionPersisted(from: $0) }
-    let missionsData = try? JSONEncoder().encode(missions)
+    let missions = analysis.messyPoints.map { MissionPersisted(from: $0) }
     container.mainContext.insert(LatestRoomRecord(
-        pixelArtImageData: dummyImageData,
+        pixelArtImageData: imageData,
         capturedAt: Date(),
-        score: mockAnalysis.score,
-        comment: mockAnalysis.characterComment,
-        messyPointLabels: missions.map { "\($0.label):\($0.priority)" },
-        originalImageData: dummyImageData,
-        missionsData: missionsData
+        score: analysis.score,
+        comment: analysis.characterComment,
+        missionsData: try? JSONEncoder().encode(missions)
     ))
-
     return NavigationStack {
-        AnalysisResultView(
-            imageData: dummyImageData,
-            pixelArtData: dummyImageData,
-            analysis: mockAnalysis
-        )
-        .environmentObject(NavigationRouter())
-        .modelContainer(container)
+        AnalysisResultView(imageData: imageData, pixelArtData: imageData, analysis: analysis)
+            .environmentObject(NavigationRouter())
+            .modelContainer(container)
     }
 }

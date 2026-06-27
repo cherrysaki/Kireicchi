@@ -130,9 +130,9 @@ struct FriendVisitView: View {
             }
         }
         .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(PixelCornerRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 5)
         )
         .padding(.horizontal)

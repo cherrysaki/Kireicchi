@@ -12,6 +12,7 @@ struct HomeView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
+    @State private var showRecoveryFlow = false
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -49,10 +50,20 @@ struct HomeView: View {
         return CharacterState.fromHappiness(happiness)
     }
 
-    private var isRunaway: Bool {
-        guard let capturedAt = latestRecord?.capturedAt else { return false }
+    @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
+
+    /// 家出条件の検出（7日以上未撮影で家出フラグをON）
+    private func detectRunaway() {
+        guard !isInRunawayState else { return }
+        guard let capturedAt = latestRecord?.capturedAt else { return }
         let daysSince = Calendar.current.dateComponents([.day], from: capturedAt, to: Date()).day ?? 0
-        return daysSince >= 7
+        if daysSince >= 7 {
+            isInRunawayState = true
+        }
+    }
+
+    private var isRunaway: Bool {
+        isInRunawayState
     }
 
     private var pendingMissions: [MissionPersisted] {
@@ -82,12 +93,17 @@ struct HomeView: View {
                         roomFrame(now: context.date)
                     }
                 }
-                missionBanner
+                if !isRunaway {
+                    missionBanner
+                }
                 historyBanner
                 Spacer(minLength: 0)
             }
             .padding(.top, 8)
             .padding(.bottom, 88)
+            .onAppear {
+                detectRunaway()
+            }
 
             VStack {
                 Spacer()
@@ -121,6 +137,11 @@ struct HomeView: View {
                     try? store.updateMission(id: mission.id, isDone: true)
                 }
             )
+        }
+        .fullScreenCover(isPresented: $showRecoveryFlow) {
+            NavigationStack {
+                RunawayLetterView(isPresented: $showRecoveryFlow)
+            }
         }
     }
 
@@ -198,11 +219,11 @@ struct HomeView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .fill(DesignSystem.Color.primary.opacity(0.2))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .stroke(DesignSystem.Color.primary, lineWidth: 2)
         )
         .padding(.horizontal, 20)
@@ -266,6 +287,9 @@ struct HomeView: View {
                         .scaledToFit()
                         .padding(16)
                         .frame(width: geo.size.width, height: geo.size.width)
+                        .onTapGesture {
+                            showRecoveryFlow = true
+                        }
                 } else {
                     VStack {
                         Spacer()
@@ -288,9 +312,9 @@ struct HomeView: View {
             .aspectRatio(1, contentMode: .fit)
         }
         .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(PixelCornerRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            PixelCornerRectangle(cornerRadius: 12)
                 .strokeBorder(DesignSystem.Color.primary, lineWidth: 5)
         )
         .padding(.horizontal, 20)
@@ -304,11 +328,11 @@ struct HomeView: View {
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 6)
+                    PixelCornerRectangle(cornerRadius: 6)
                         .fill(DesignSystem.Color.surface)
                         .frame(width: 32, height: 32)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
+                            PixelCornerRectangle(cornerRadius: 6)
                                 .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
                         )
                     PixelStar(size: 22)
@@ -327,10 +351,10 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
+                PixelCornerRectangle(cornerRadius: 14).fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
             )
         }
@@ -353,11 +377,11 @@ struct HomeView: View {
         }) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 6)
+                    PixelCornerRectangle(cornerRadius: 6)
                         .fill(DesignSystem.Color.surface)
                         .frame(width: 32, height: 32)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
+                            PixelCornerRectangle(cornerRadius: 6)
                                 .stroke(DesignSystem.Color.primaryDark, lineWidth: 1.5)
                         )
                     Image(systemName: "chart.line.uptrend.xyaxis")
@@ -375,11 +399,11 @@ struct HomeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .fill(DesignSystem.Color.secondary.opacity(0.4))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                PixelCornerRectangle(cornerRadius: 14)
                     .stroke(DesignSystem.Color.primaryDark, lineWidth: 2)
             )
         }
