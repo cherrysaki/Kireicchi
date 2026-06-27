@@ -30,14 +30,14 @@ struct AnalysisResultView: View {
             DesignSystem.Color.background.ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 12) {
                     rankScoreCard
                     characterCommentRow
                     pixelArtSection
                     priorityListSection
                     actionButtons
                 }
-                .padding(.top, 12)
+                .padding(.top, 8)
                 .padding(.bottom, 20)
             }
         }
