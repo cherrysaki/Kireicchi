@@ -3,6 +3,10 @@ import SwiftUI
 struct WorldviewOnboardingView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
 
+    // CG課題として作った「きれいっち誕生」3Dアニメーション（KireicchiIntroAnimationView）を
+    // 最初に再生し、終わってから従来のロゴ演出・世界観スクロールへ進む
+    @State private var hasFinishedIntroAnimation: Bool = false
+
     @State private var logoPhase: LogoPhase = .showing
     @State private var logoScale: CGFloat = 1.0
     @State private var logoOpacity: Double = 1.0
@@ -14,6 +18,20 @@ struct WorldviewOnboardingView: View {
     }
 
     var body: some View {
+        if !hasFinishedIntroAnimation {
+            KireicchiIntroAnimationView {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    hasFinishedIntroAnimation = true
+                }
+            }
+            .transition(.opacity)
+        } else {
+            worldviewContent
+                .transition(.opacity)
+        }
+    }
+
+    private var worldviewContent: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
 
