@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// きれいっち Firestore セキュリティルール
+// 方針: 認証済みユーザーは「自分自身の uid のデータ」だけ読み書きできる。それ以外は全拒否。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users/{uid}: 本人のみ許可（未認証・他人は拒否）
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // users/{uid} 配下の全サブコレクション・ドキュメント（roomScores 等）も本人限定
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // TODO: 今後、親子連携用の parentLinks / inviteCodes コレクションのルールをここに追加予定。
+    //       （例）
+    //       match /inviteCodes/{code} { ... 招待コードの発行・引き換えルール ... }
+    //       match /parentLinks/{linkId} { ... 親子リンクの参照・作成ルール ... }
+
+    // 上記のいずれにもマッチしないパスはすべて拒否（デフォルト deny）。
+  }
+}
