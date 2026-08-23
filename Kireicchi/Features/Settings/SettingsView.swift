@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var inviteCode: InviteCode?
     @State private var isGeneratingInviteCode = false
     @State private var inviteCodeErrorMessage: String?
+    @State private var isInviteCodeCopied = false
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
@@ -229,10 +230,27 @@ struct SettingsView: View {
                         .font(DesignSystem.Font.caption)
                         .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
 
-                    Text(inviteCode.code)
-                        .font(DesignSystem.Font.custom(size: 32))
-                        .foregroundColor(DesignSystem.Color.primaryDark)
+                    Button(action: { copyInviteCode(inviteCode.code) }) {
+                        HStack(spacing: 8) {
+                            Text(inviteCode.code)
+                                .font(DesignSystem.Font.custom(size: 32))
+                                .foregroundColor(DesignSystem.Color.primaryDark)
+
+                            Image(systemName: isInviteCodeCopied ? "checkmark" : "doc.on.doc")
+                                .font(DesignSystem.Font.subheadline)
+                                .foregroundColor(isInviteCodeCopied ? DesignSystem.Color.primaryDark : DesignSystem.Color.primary)
+                        }
                         .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+
+                    if isInviteCodeCopied {
+                        Text("コピーしました")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.primaryDark)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .transition(.opacity)
+                    }
 
                     Text("有効期限: \(inviteCode.expiresAt.formatted(date: .omitted, time: .shortened))まで")
                         .font(DesignSystem.Font.caption)
@@ -270,6 +288,7 @@ struct SettingsView: View {
     private func generateInviteCode() {
         isGeneratingInviteCode = true
         inviteCodeErrorMessage = nil
+        isInviteCodeCopied = false
         Task {
             do {
                 inviteCode = try await deps.generateInviteCode()
@@ -277,6 +296,19 @@ struct SettingsView: View {
                 inviteCodeErrorMessage = error.localizedDescription
             }
             isGeneratingInviteCode = false
+        }
+    }
+
+    private func copyInviteCode(_ code: String) {
+        UIPasteboard.general.string = code
+        withAnimation {
+            isInviteCodeCopied = true
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            withAnimation {
+                isInviteCodeCopied = false
+            }
         }
     }
 
