@@ -10,6 +10,16 @@ class MockSignInWithAppleUseCase: SignInWithAppleUseCaseProtocol {
     }
 }
 
+enum InviteCodeError: LocalizedError {
+    case notSignedIn
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: return "InviteCode: サインインされていません"
+        }
+    }
+}
+
 @MainActor
 final class AppDependencies: ObservableObject {
     @Published var useMockConnectivity: Bool = false
@@ -20,6 +30,7 @@ final class AppDependencies: ObservableObject {
     let signInWithAppleUseCase: SignInWithAppleUseCaseProtocol
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
+    private let createInviteCodeUseCase: CreateInviteCodeUseCaseProtocol
 
     static let shared = AppDependencies()
 
@@ -31,6 +42,9 @@ final class AppDependencies: ObservableObject {
         self.signInWithAppleUseCase = SignInWithAppleUseCase(
             authService: authService,
             userRepository: userRepository
+        )
+        self.createInviteCodeUseCase = CreateInviteCodeUseCase(
+            repository: InviteCodeRepository()
         )
     }
 
@@ -91,6 +105,13 @@ final class AppDependencies: ObservableObject {
         } catch {
             print("[updateUsername] failed: \(error)")
         }
+    }
+
+    func generateInviteCode() async throws -> InviteCode {
+        guard let uid = authService.currentUid else {
+            throw InviteCodeError.notSignedIn
+        }
+        return try await createInviteCodeUseCase.execute(childId: uid)
     }
 
     func currentOpenAIClient() -> OpenAIClientProtocol {

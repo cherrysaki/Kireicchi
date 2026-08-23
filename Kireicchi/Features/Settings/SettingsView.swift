@@ -15,6 +15,9 @@ struct SettingsView: View {
     @State private var username = ""
     @State private var showTimePicker = false
     @State private var isSaving = false
+    @State private var inviteCode: InviteCode?
+    @State private var isGeneratingInviteCode = false
+    @State private var inviteCodeErrorMessage: String?
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
@@ -40,6 +43,7 @@ struct SettingsView: View {
                         usernameSection
                         captureTimeSection
                         notificationToggleSection
+                        parentLinkSection
                         commentSection
                         AppleLoginSection()
 
@@ -212,6 +216,67 @@ struct SettingsView: View {
             )
             .padding(.horizontal)
             .padding(.trailing, 3)
+        }
+    }
+
+    private var parentLinkSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("保護者連携")
+
+            VStack(alignment: .leading, spacing: 12) {
+                if let inviteCode {
+                    Text("このコードを保護者のLINEに送ってもらってください")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+
+                    Text(inviteCode.code)
+                        .font(DesignSystem.Font.custom(size: 32))
+                        .foregroundColor(DesignSystem.Color.primaryDark)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    Text("有効期限: \(inviteCode.expiresAt.formatted(date: .omitted, time: .shortened))まで")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                }
+
+                if let inviteCodeErrorMessage {
+                    Text(inviteCodeErrorMessage)
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.accentWarm)
+                }
+
+                Button(action: generateInviteCode) {
+                    Text(isGeneratingInviteCode ? "発行中..." : "連携コードを発行")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textOnPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(PixelButtonStyle())
+                .disabled(isGeneratingInviteCode)
+            }
+            .padding(14)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.surface,
+                border: DesignSystem.Color.primary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
+            .padding(.horizontal)
+            .padding(.trailing, 3)
+        }
+    }
+
+    private func generateInviteCode() {
+        isGeneratingInviteCode = true
+        inviteCodeErrorMessage = nil
+        Task {
+            do {
+                inviteCode = try await deps.generateInviteCode()
+            } catch {
+                inviteCodeErrorMessage = error.localizedDescription
+            }
+            isGeneratingInviteCode = false
         }
     }
 
