@@ -18,6 +18,7 @@ final class AppDependencies: ObservableObject {
     @Published var bootstrapError: String? = nil
 
     let signInWithAppleUseCase: SignInWithAppleUseCaseProtocol
+    let widgetDataStore: KireicchiWidgetDataStoreProtocol
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
 
@@ -32,6 +33,7 @@ final class AppDependencies: ObservableObject {
             authService: authService,
             userRepository: userRepository
         )
+        self.widgetDataStore = KireicchiWidgetDataStore()
     }
 
     func bootstrap() async {
