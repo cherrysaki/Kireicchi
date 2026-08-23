@@ -44,6 +44,11 @@ struct KireicchiIntroWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
+        // デフォルトのままだと UIScrollView がセーフエリア分の contentInset を自動で
+        // 追加してしまい、下部（ホームインジケーター領域）にこの View の背景色
+        // （Color.black、下記body参照）がその分だけ帯状に透けて見えてしまう。
+        // HTML側はすでに画面いっぱいに広がる作りなので、ここでも無効化しておく
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsLinkPreview = false
         webView.contentMode = .scaleAspectFit
 
