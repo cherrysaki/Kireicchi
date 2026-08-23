@@ -1,6 +1,7 @@
 const { logger } = require("firebase-functions");
 
 const LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply";
+const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 
 /**
  * LINE Messaging APIのReply APIでテキストメッセージを送る。
@@ -34,4 +35,27 @@ async function replyText(replyToken, text, channelAccessToken) {
   }
 }
 
-module.exports = { replyText };
+/**
+ * LINE Messaging APIのPush APIでテキストメッセージを送る。
+ * 失敗時は例外を投げる(呼び出し側で誰宛のpushが失敗したかをログに残せるようにするため)。
+ */
+async function pushText(to, text, channelAccessToken) {
+  const res = await fetch(LINE_PUSH_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${channelAccessToken}`,
+    },
+    body: JSON.stringify({
+      to,
+      messages: [{ type: "text", text }],
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`LINE push API failed: ${res.status} ${body}`);
+  }
+}
+
+module.exports = { replyText, pushText };

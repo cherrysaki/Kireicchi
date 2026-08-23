@@ -1,15 +1,21 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
 
 const { verifyLineSignature } = require("./lineSignature");
 const { dispatchLineEvent } = require("./lineEventHandlers");
+const { runDailyDigest } = require("./dailyDigest");
 
 admin.initializeApp();
 
 const LINE_CHANNEL_SECRET = defineSecret("LINE_CHANNEL_SECRET");
 const LINE_CHANNEL_ACCESS_TOKEN = defineSecret("LINE_CHANNEL_ACCESS_TOKEN");
+
+// 1日1回ダイジェスト通知のスケジュール。変更する場合はここを編集するだけでよい。
+const DAILY_DIGEST_SCHEDULE = "0 19 * * *"; // 毎日19:00
+const DAILY_DIGEST_TIME_ZONE = "Asia/Tokyo";
 
 /**
  * LINE Webhook 受信エンドポイント。
@@ -41,5 +47,20 @@ exports.lineWebhook = onRequest(
 
     // LINEプラットフォームへは常に200を返す(仕様上、非200はリトライの対象になる)
     res.status(200).send("OK");
+  }
+);
+
+/**
+ * 1日1回、保護者にその日の部屋スコアをLINE Pushで通知するダイジェストバッチ。
+ */
+exports.dailyScoreDigest = onSchedule(
+  {
+    schedule: DAILY_DIGEST_SCHEDULE,
+    timeZone: DAILY_DIGEST_TIME_ZONE,
+    region: "asia-northeast1",
+    secrets: [LINE_CHANNEL_ACCESS_TOKEN],
+  },
+  async () => {
+    await runDailyDigest(LINE_CHANNEL_ACCESS_TOKEN.value());
   }
 );
