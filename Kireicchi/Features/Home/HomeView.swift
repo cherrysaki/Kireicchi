@@ -382,7 +382,6 @@ struct HomeView: View {
         if let record = latestRecord {
             let happiness = Happiness.calculate(score: record.score, capturedAt: record.capturedAt, now: now)
             let state = CharacterState.fromHappiness(happiness)
-            let daysSince = Calendar.current.dateComponents([.day], from: record.capturedAt, to: now).day ?? 0
             let widgetImageData = UIImage(data: record.pixelArtImageData)?
                 .resized(maxDimension: KireicchiWidgetConstants.maxSharedImageDimension)
                 .pngData() ?? record.pixelArtImageData
@@ -391,10 +390,10 @@ struct HomeView: View {
                 characterState: state.rawValue,
                 latestPixelRoomImageData: widgetImageData,
                 lastCapturedAt: record.capturedAt,
-                isGone: daysSince >= 7,
+                isGone: isInRunawayState,
                 updatedAt: now
             )
-            Logger.widget.debug("[save:record] happiness=\(happiness) state=\(state.rawValue, privacy: .public) isGone=\(daysSince >= 7) imageNil=\(false) imageCount=\(widgetImageData.count)")
+            Logger.widget.debug("[save:record] happiness=\(happiness) state=\(state.rawValue, privacy: .public) isGone=\(isInRunawayState) imageNil=\(false) imageCount=\(widgetImageData.count)")
             deps.widgetDataStore.save(snapshot: snapshot)
         } else {
             // 記録がまだ無い場合、既存の良いスナップショット（部屋画像つき）を消さないよう温存する
