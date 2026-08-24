@@ -119,7 +119,6 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
             // データ保存
             let capturedAt = Date()
             let missions = analysis.messyPoints.map { MissionPersisted(from: $0) }
-            WidgetDebugLog.append("analyze:done score=\(analysis.score) pixelCount=\(pixelData.count) roomRecordStoreNil=\(roomRecordStore == nil) widgetStoreNil=\(widgetDataStore == nil)")
             if let roomRecordStore = roomRecordStore {
                 let messyPointLabels = analysis.messyPoints.map { "\($0.label):\($0.priority)" }
                 try roomRecordStore.save(
@@ -131,7 +130,6 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                     missions: missions,
                     messyPointLabels: messyPointLabels
                 )
-                WidgetDebugLog.append("roomRecordStore.save OK (LatestRoomRecord 永続化完了)")
             }
             if let historyStore = historyStore {
                 let rank = CleanlinessRank.fromScore(analysis.score).rawValue
@@ -161,7 +159,6 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                     updatedAt: Date()
                 )
                 Logger.widget.debug("[save:analyzing] happiness=\(happiness) state=\(state.rawValue, privacy: .public) imageCount=\(widgetImageData.count)")
-                WidgetDebugLog.append("save:analyzing happiness=\(happiness) state=\(state.rawValue) isGone=false imageNil=false imageCount=\(widgetImageData.count)")
                 widgetDataStore.save(snapshot: snapshot)
             }
 
@@ -175,7 +172,6 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
             ))
             
         } catch {
-            WidgetDebugLog.append("analyze:CATCH error=\(error.localizedDescription) — 以降の save/navigate はスキップされる")
             isAnalyzing = false
             errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             

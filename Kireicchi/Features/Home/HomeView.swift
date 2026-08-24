@@ -125,11 +125,9 @@ struct HomeView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            WidgetDebugLog.append("HomeView.onAppear → saveWidgetSnapshot (records.count=\(records.count))")
             saveWidgetSnapshot()
         }
         .onChange(of: records.first?.capturedAt) { _, _ in
-            WidgetDebugLog.append("HomeView.onChange(records) → saveWidgetSnapshot (records.count=\(records.count))")
             saveWidgetSnapshot()
         }
         .alert("本日の撮影は終了しました", isPresented: $showCaptureAlert) {
@@ -397,7 +395,6 @@ struct HomeView: View {
                 updatedAt: now
             )
             Logger.widget.debug("[save:record] happiness=\(happiness) state=\(state.rawValue, privacy: .public) isGone=\(daysSince >= 7) imageNil=\(false) imageCount=\(widgetImageData.count)")
-            WidgetDebugLog.append("save:home-record happiness=\(happiness) state=\(state.rawValue) isGone=\(daysSince >= 7) imageNil=false imageCount=\(widgetImageData.count)")
             deps.widgetDataStore.save(snapshot: snapshot)
         } else {
             // 記録がまだ無い場合、既存の良いスナップショット（部屋画像つき）を消さないよう温存する
@@ -411,7 +408,6 @@ struct HomeView: View {
                 updatedAt: now
             )
             Logger.widget.debug("[save:no-record] happiness=\(snapshot.happiness) state=\(snapshot.characterState, privacy: .public) isGone=\(snapshot.isGone) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
-            WidgetDebugLog.append("save:home-no-record(latestRecord==nil) existingNil=\(existing == nil) happiness=\(snapshot.happiness) state=\(snapshot.characterState) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
             deps.widgetDataStore.save(snapshot: snapshot)
         }
     }

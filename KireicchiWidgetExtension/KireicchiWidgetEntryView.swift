@@ -1,6 +1,5 @@
 import SwiftUI
 import WidgetKit
-import os
 
 private enum WidgetColor {
     static let primaryPink = Color(red: 0.76, green: 0.384, blue: 0.494)  // #C2627E secondaryDark
@@ -11,18 +10,6 @@ private enum WidgetColor {
 
 struct KireicchiWidgetEntryView: View {
     let entry: KireicchiWidgetEntry
-
-    // DEBUG: iOS のウィジェット描画モード（fullColor / accented / vibrant）を確認する用
-    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
-
-    private var renderingModeText: String {
-        switch widgetRenderingMode {
-        case .fullColor: return "fullColor"
-        case .accented:  return "accented"
-        case .vibrant:   return "vibrant"
-        default:         return "unknown"
-        }
-    }
 
     private var happiness: Int? { entry.snapshot?.happiness }
     private var isGone: Bool { entry.snapshot?.isGone ?? false }
@@ -44,20 +31,8 @@ struct KireicchiWidgetEntryView: View {
         entry.snapshot?.latestPixelRoomImageData.flatMap { UIImage(data: $0) }
     }
 
-    private func logRenderState() {
-        let assetName = characterAssetName ?? "<nil>"
-        let imageData = entry.snapshot?.latestPixelRoomImageData
-        let decoded = roomImage
-        let roomDecoded = decoded != nil
-        let decodedSize = decoded.map { "\(Int($0.size.width))x\(Int($0.size.height))@\($0.scale)" } ?? "<nil>"
-        let happinessText = happiness.map(String.init) ?? "<nil>"
-        Logger.widget.debug("[view] renderMode=\(renderingModeText, privacy: .public) snapshotNil=\(entry.snapshot == nil) happiness=\(happinessText, privacy: .public) characterState=\(characterState, privacy: .public) isGone=\(isGone) assetName=\(assetName, privacy: .public) roomDataNil=\(imageData == nil) roomDataCount=\(imageData?.count ?? -1) roomDecoded=\(roomDecoded) decodedSize=\(decodedSize, privacy: .public)")
-        WidgetDebugLog.append("view.RENDER renderMode=\(renderingModeText) snapshotNil=\(entry.snapshot == nil) happiness=\(happinessText) state=\(characterState) isGone=\(isGone) assetName=\(assetName) roomDataNil=\(imageData == nil) roomDataCount=\(imageData?.count ?? -1) roomDecoded=\(roomDecoded) decodedSize=\(decodedSize)")
-    }
-
     var body: some View {
-        let _ = logRenderState()
-        return ZStack {
+        ZStack {
             // 中面：キャラクター（家出時はお手紙）
             if isGone {
                 Image("okitegami")
@@ -104,13 +79,11 @@ struct KireicchiWidgetEntryView: View {
     @ViewBuilder
     private var roomBackground: some View {
         if let roomImage {
-            let _ = WidgetDebugLog.append("view.roomBackground=IMAGE size=\(Int(roomImage.size.width))x\(Int(roomImage.size.height))")
             Image(uiImage: roomImage)
                 .resizable()
                 .interpolation(.none)
                 .scaledToFill()
         } else {
-            let _ = WidgetDebugLog.append("view.roomBackground=CREAM(roomImage=nil)")
             WidgetColor.cream
         }
     }

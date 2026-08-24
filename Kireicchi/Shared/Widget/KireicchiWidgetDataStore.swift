@@ -27,7 +27,6 @@ final class KireicchiWidgetDataStore: KireicchiWidgetDataStoreProtocol {
         }
         userDefaults.set(data, forKey: KireicchiWidgetConstants.snapshotKey)
         Logger.widget.debug("[save:store] bytes=\(data.count) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
-        WidgetDebugLog.append("store.SAVE→UserDefaults bytes=\(data.count) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
         WidgetCenter.shared.reloadAllTimelines()
     }
 
@@ -45,7 +44,6 @@ final class KireicchiWidgetDataStore: KireicchiWidgetDataStoreProtocol {
             return nil
         }
         Logger.widget.debug("[load] happiness=\(snapshot.happiness) state=\(snapshot.characterState, privacy: .public) isGone=\(snapshot.isGone) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
-        WidgetDebugLog.append("store.LOAD←UserDefaults happiness=\(snapshot.happiness) state=\(snapshot.characterState) isGone=\(snapshot.isGone) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
         return snapshot
     }
 }
