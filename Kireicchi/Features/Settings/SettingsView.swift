@@ -325,7 +325,7 @@ struct SettingsView: View {
                 HStack(spacing: 8) {
                     debugStateButton(title: "元気", score: 90)
                     debugStateButton(title: "普通", score: 70)
-                    debugStateButton(title: "不調", score: 50)
+                    debugStateButton(title: "不調", score: 40)
                     debugStateButton(title: "病気", score: 20)
                 }
                 .padding(.horizontal)
@@ -457,6 +457,9 @@ struct SettingsView: View {
             let oldState = CharacterState.fromScore(record.score)
             print("🔧 Debug: 既存レコードのスコアを \(record.score)(\(oldState.rawValue)) から \(score)(\(newState.rawValue)) に更新します。")
             record.score = score
+            // Happiness.calculate は capturedAt からの経過時間で減衰するため、
+            // capturedAt を更新しないと score を変えても状態が意図通りプレビューできない
+            record.capturedAt = Date()
         }
         
         do {

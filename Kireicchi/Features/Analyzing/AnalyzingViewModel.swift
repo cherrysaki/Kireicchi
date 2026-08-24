@@ -1,6 +1,8 @@
 import Foundation
 import SwiftData
 import Combine
+import UIKit
+import os
 
 @MainActor
 final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
@@ -17,7 +19,8 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     private var roomRecordStore: LatestRoomRecordStore?
     private var historyStore: RoomHistoryStoreProtocol?
     private var navigationRouter: NavigationRouter?
-    
+    private var widgetDataStore: KireicchiWidgetDataStoreProtocol?
+
     // 解析結果を保持
     private var roomAnalysis: RoomAnalysis?
     private var pixelArtData: Data?
@@ -42,7 +45,17 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
         self.historyStore = historyStore
         self.navigationRouter = navigationRouter
     }
-    
+
+    func setup(roomRecordStore: LatestRoomRecordStore,
+               historyStore: RoomHistoryStoreProtocol,
+               navigationRouter: NavigationRouter,
+               widgetDataStore: KireicchiWidgetDataStoreProtocol) {
+        self.roomRecordStore = roomRecordStore
+        self.historyStore = historyStore
+        self.navigationRouter = navigationRouter
+        self.widgetDataStore = widgetDataStore
+    }
+
     func startAnalysis(imageData: Data) async {
         currentStep = 0
         progress = 0
@@ -130,7 +143,25 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                 )
                 try historyStore.save(historyRecord)
             }
-            
+
+            if let widgetDataStore = widgetDataStore {
+                let happiness = Happiness.calculate(score: analysis.score, capturedAt: capturedAt)
+                let state = CharacterState.fromHappiness(happiness)
+                let widgetImageData = UIImage(data: pixelData)?
+                    .resized(maxDimension: KireicchiWidgetConstants.maxSharedImageDimension)
+                    .pngData() ?? pixelData
+                let snapshot = KireicchiWidgetSnapshot(
+                    happiness: happiness,
+                    characterState: state.rawValue,
+                    latestPixelRoomImageData: widgetImageData,
+                    lastCapturedAt: capturedAt,
+                    isGone: false,
+                    updatedAt: Date()
+                )
+                Logger.widget.debug("[save:analyzing] happiness=\(happiness) state=\(state.rawValue, privacy: .public) imageCount=\(widgetImageData.count)")
+                widgetDataStore.save(snapshot: snapshot)
+            }
+
             // 少し待ってから結果画面に遷移
             try await Task.sleep(nanoseconds: 500_000_000)
             

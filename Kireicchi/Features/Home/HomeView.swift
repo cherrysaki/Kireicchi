@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import os
 
 struct HomeView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
@@ -123,6 +124,12 @@ struct HomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            saveWidgetSnapshot()
+        }
+        .onChange(of: records.first?.capturedAt) { _, _ in
+            saveWidgetSnapshot()
+        }
         .alert("本日の撮影は終了しました", isPresented: $showCaptureAlert) {
             Button("OK") {}
         } message: {
@@ -368,6 +375,40 @@ struct HomeView: View {
             return "ミッションが\(count)件残っています"
         }
         return "撮影してお部屋を分析しよう！"
+    }
+
+    private func saveWidgetSnapshot() {
+        let now = Date()
+        if let record = latestRecord {
+            let happiness = Happiness.calculate(score: record.score, capturedAt: record.capturedAt, now: now)
+            let state = CharacterState.fromHappiness(happiness)
+            let widgetImageData = UIImage(data: record.pixelArtImageData)?
+                .resized(maxDimension: KireicchiWidgetConstants.maxSharedImageDimension)
+                .pngData() ?? record.pixelArtImageData
+            let snapshot = KireicchiWidgetSnapshot(
+                happiness: happiness,
+                characterState: state.rawValue,
+                latestPixelRoomImageData: widgetImageData,
+                lastCapturedAt: record.capturedAt,
+                isGone: isInRunawayState,
+                updatedAt: now
+            )
+            Logger.widget.debug("[save:record] happiness=\(happiness) state=\(state.rawValue, privacy: .public) isGone=\(isInRunawayState) imageNil=\(false) imageCount=\(widgetImageData.count)")
+            deps.widgetDataStore.save(snapshot: snapshot)
+        } else {
+            // 記録がまだ無い場合、既存の良いスナップショット（部屋画像つき）を消さないよう温存する
+            let existing = deps.widgetDataStore.load()
+            let snapshot = KireicchiWidgetSnapshot(
+                happiness: existing?.happiness ?? Happiness.defaultWhenNoRecord,
+                characterState: existing?.characterState ?? CharacterState.happy.rawValue,
+                latestPixelRoomImageData: existing?.latestPixelRoomImageData,
+                lastCapturedAt: existing?.lastCapturedAt,
+                isGone: existing?.isGone ?? false,
+                updatedAt: now
+            )
+            Logger.widget.debug("[save:no-record] happiness=\(snapshot.happiness) state=\(snapshot.characterState, privacy: .public) isGone=\(snapshot.isGone) imageNil=\(snapshot.latestPixelRoomImageData == nil) imageCount=\(snapshot.latestPixelRoomImageData?.count ?? -1)")
+            deps.widgetDataStore.save(snapshot: snapshot)
+        }
     }
 
     // MARK: - History Banner
