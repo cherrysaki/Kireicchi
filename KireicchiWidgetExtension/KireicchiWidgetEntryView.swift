@@ -41,13 +41,14 @@ struct KireicchiWidgetEntryView: View {
                     .padding(.horizontal, 18)
                     .padding(.vertical, 12)
             } else if let assetName = characterAssetName {
-                VStack {
-                    Spacer()
+                VStack(spacing: 0) {
+                    Spacer(minLength: 52)
                     Image(assetName)
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
-                        .padding(.bottom, 28)
+                        .frame(width: 76, height: 76)
+                    Spacer(minLength: 8)
                 }
             }
 
@@ -60,16 +61,6 @@ struct KireicchiWidgetEntryView: View {
                 Spacer()
             }
             .padding(8)
-
-            // 最前面：スコア
-            VStack {
-                Spacer()
-                Text(happiness.map(String.init) ?? "--")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(WidgetColor.primaryPink)
-                    .shadow(color: .white.opacity(0.85), radius: 2, x: 0, y: 0)
-                    .padding(.bottom, 4)
-            }
         }
         .containerBackground(for: .widget) {
             roomBackground

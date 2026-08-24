@@ -34,7 +34,7 @@ struct KireicchiWidget: Widget {
             KireicchiWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("きれいっち")
-        .description("お部屋を覗き見るウィジェット")
+        .description("きれいっちの様子を確認しよう！")
         .supportedFamilies([.systemSmall])
         .contentMarginsDisabled()
     }
