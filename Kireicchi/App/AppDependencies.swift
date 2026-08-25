@@ -21,6 +21,8 @@ final class AppDependencies: ObservableObject {
     let widgetDataStore: KireicchiWidgetDataStoreProtocol
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
+    private let fetchNotificationsUseCase: FetchNotificationsUseCaseProtocol
+    private let markNotificationAsReadUseCase: MarkNotificationAsReadUseCaseProtocol
 
     static let shared = AppDependencies()
 
@@ -34,6 +36,14 @@ final class AppDependencies: ObservableObject {
             userRepository: userRepository
         )
         self.widgetDataStore = KireicchiWidgetDataStore()
+
+        // NotificationRepository は fetch/markAsRead で状態を共有する必要があるため、
+        // 同一インスタンスを両UseCaseに渡す。実データ接続時は MockNotificationRepository を
+        // 差し替えるだけでよい（LINE連携・低スコア継続判定・フレンド機能連携、いずれも
+        // NotificationRepositoryProtocol に準拠した実装への差し替えのみで対応可能）。
+        let notificationRepository = MockNotificationRepository()
+        self.fetchNotificationsUseCase = FetchNotificationsUseCase(repository: notificationRepository)
+        self.markNotificationAsReadUseCase = MarkNotificationAsReadUseCase(repository: notificationRepository)
     }
 
     func bootstrap() async {
@@ -124,5 +134,13 @@ final class AppDependencies: ObservableObject {
 
     func toggleMockConnectivity() {
         useMockConnectivity.toggle()
+    }
+
+    func fetchNotifications() async throws -> [AppNotification] {
+        try await fetchNotificationsUseCase.execute()
+    }
+
+    func markNotificationAsRead(id: String) async throws {
+        try await markNotificationAsReadUseCase.execute(id: id)
     }
 }

@@ -14,6 +14,8 @@ struct HomeView: View {
     @State private var isMissionSheetPresented = false
     @State private var showCaptureAlert: Bool = false
     @State private var showRecoveryFlow = false
+    @State private var isNotificationsPresented = false
+    @State private var unreadNotificationCount = 0
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -126,6 +128,7 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .onAppear {
             saveWidgetSnapshot()
+            Task { await refreshNotificationBadge() }
         }
         .onChange(of: records.first?.capturedAt) { _, _ in
             saveWidgetSnapshot()
@@ -168,9 +171,49 @@ struct HomeView: View {
                         .foregroundColor(DesignSystem.Color.textPrimary)
                 }
                 Spacer()
+                notificationButton
             }
         }
         .padding(.horizontal, 20)
+    }
+
+    private var notificationButton: some View {
+        Button(action: {
+            isNotificationsPresented = true
+        }) {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: unreadNotificationCount > 0 ? "bell.fill" : "bell")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+
+                if unreadNotificationCount > 0 {
+                    Text("\(min(unreadNotificationCount, 99))")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Circle().fill(Color.red))
+                        .offset(x: 10, y: -8)
+                }
+            }
+        }
+        .sheet(isPresented: $isNotificationsPresented) {
+            NotificationsView()
+                .environmentObject(deps)
+        }
+        .onChange(of: isNotificationsPresented) { _, presented in
+            if !presented {
+                Task { await refreshNotificationBadge() }
+            }
+        }
+    }
+
+    private func refreshNotificationBadge() async {
+        do {
+            let notifications = try await deps.fetchNotifications()
+            unreadNotificationCount = notifications.filter { !$0.isRead }.count
+        } catch {
+            print("[refreshNotificationBadge] failed: \(error)")
+        }
     }
 
     private func nextCaptureText(capturedAt: Date?, now: Date) -> String {
