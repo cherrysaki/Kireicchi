@@ -19,6 +19,11 @@ struct SettingsView: View {
     @State private var isGeneratingInviteCode = false
     @State private var inviteCodeErrorMessage: String?
     @State private var isInviteCodeCopied = false
+    #if DEBUG
+    @State private var showUnlinkConfirmation = false
+    @State private var isUnlinkingParent = false
+    @State private var unlinkResultMessage: String?
+    #endif
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
@@ -272,6 +277,26 @@ struct SettingsView: View {
                 }
                 .buttonStyle(PixelButtonStyle())
                 .disabled(isGeneratingInviteCode)
+
+                #if DEBUG
+                // 保護者側からのLINE経由の連携解除が未実装のため、暫定的にデバッグビルドのみ
+                // アプリ側からも解除できるようにしている。正式な解除導線が実装され次第削除する。
+                if let unlinkResultMessage {
+                    Text(unlinkResultMessage)
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.accentWarm)
+                }
+
+                Button(role: .destructive, action: { showUnlinkConfirmation = true }) {
+                    Text(isUnlinkingParent ? "解除中..." : "連携を解除(デバッグ用)")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textOnPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(PixelButtonStyle())
+                .disabled(isUnlinkingParent)
+                #endif
             }
             .padding(14)
             .pixelSquareCard(
@@ -283,6 +308,18 @@ struct SettingsView: View {
             .padding(.horizontal)
             .padding(.trailing, 3)
         }
+        #if DEBUG
+        .confirmationDialog(
+            "連携を解除しますか?",
+            isPresented: $showUnlinkConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("解除する", role: .destructive, action: unlinkParent)
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("保護者のLINEとの連携が解除されます。もう一度連携するには、新しい連携コードを発行してください。")
+        }
+        #endif
     }
 
     private func generateInviteCode() {
@@ -298,6 +335,22 @@ struct SettingsView: View {
             isGeneratingInviteCode = false
         }
     }
+
+    #if DEBUG
+    private func unlinkParent() {
+        isUnlinkingParent = true
+        unlinkResultMessage = nil
+        Task {
+            do {
+                try await deps.unlinkParent()
+                unlinkResultMessage = "連携を解除しました"
+            } catch {
+                unlinkResultMessage = error.localizedDescription
+            }
+            isUnlinkingParent = false
+        }
+    }
+    #endif
 
     private func copyInviteCode(_ code: String) {
         UIPasteboard.general.string = code

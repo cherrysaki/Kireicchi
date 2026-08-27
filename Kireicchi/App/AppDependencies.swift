@@ -20,6 +20,16 @@ enum InviteCodeError: LocalizedError {
     }
 }
 
+enum ParentLinkError: LocalizedError {
+    case notSignedIn
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: return "ParentLink: サインインされていません"
+        }
+    }
+}
+
 @MainActor
 final class AppDependencies: ObservableObject {
     @Published var useMockConnectivity: Bool = false
@@ -31,6 +41,7 @@ final class AppDependencies: ObservableObject {
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
     private let createInviteCodeUseCase: CreateInviteCodeUseCaseProtocol
+    private let unlinkParentUseCase: UnlinkParentUseCaseProtocol
 
     static let shared = AppDependencies()
 
@@ -45,6 +56,9 @@ final class AppDependencies: ObservableObject {
         )
         self.createInviteCodeUseCase = CreateInviteCodeUseCase(
             repository: InviteCodeRepository()
+        )
+        self.unlinkParentUseCase = UnlinkParentUseCase(
+            repository: ParentLinkRepository()
         )
     }
 
@@ -112,6 +126,13 @@ final class AppDependencies: ObservableObject {
             throw InviteCodeError.notSignedIn
         }
         return try await createInviteCodeUseCase.execute(childId: uid)
+    }
+
+    func unlinkParent() async throws {
+        guard authService.currentUid != nil else {
+            throw ParentLinkError.notSignedIn
+        }
+        try await unlinkParentUseCase.execute()
     }
 
     func currentOpenAIClient() -> OpenAIClientProtocol {

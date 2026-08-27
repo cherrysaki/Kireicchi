@@ -10,6 +10,7 @@
 		E429E1122F9898A00093C195 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1112F9898A00093C195 /* FirebaseAnalytics */; };
 		E429E1142F9898A00093C195 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1132F9898A00093C195 /* FirebaseAuth */; };
 		E429E1162F9898A00093C195 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1152F9898A00093C195 /* FirebaseFirestore */; };
+		E429E1182F9898A00093C195 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = E429E1172F9898A00093C195 /* FirebaseFunctions */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 				E429E1122F9898A00093C195 /* FirebaseAnalytics in Frameworks */,
 				E429E1142F9898A00093C195 /* FirebaseAuth in Frameworks */,
 				E429E1162F9898A00093C195 /* FirebaseFirestore in Frameworks */,
+				E429E1182F9898A00093C195 /* FirebaseFunctions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +95,7 @@
 				E429E1112F9898A00093C195 /* FirebaseAnalytics */,
 				E429E1132F9898A00093C195 /* FirebaseAuth */,
 				E429E1152F9898A00093C195 /* FirebaseFirestore */,
+				E429E1172F9898A00093C195 /* FirebaseFunctions */,
 			);
 			productName = Kireicchi;
 			productReference = E429E1002F988F140093C195 /* Kireicchi.app */;
@@ -513,6 +516,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E429E1102F9898A00093C195 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		E429E1172F9898A00093C195 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E429E1102F9898A00093C195 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
