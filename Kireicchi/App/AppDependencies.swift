@@ -10,6 +10,26 @@ class MockSignInWithAppleUseCase: SignInWithAppleUseCaseProtocol {
     }
 }
 
+enum InviteCodeError: LocalizedError {
+    case notSignedIn
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: return "InviteCode: サインインされていません"
+        }
+    }
+}
+
+enum ParentLinkError: LocalizedError {
+    case notSignedIn
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: return "ParentLink: サインインされていません"
+        }
+    }
+}
+
 @MainActor
 final class AppDependencies: ObservableObject {
     @Published var useMockConnectivity: Bool = false
@@ -21,6 +41,8 @@ final class AppDependencies: ObservableObject {
     let widgetDataStore: KireicchiWidgetDataStoreProtocol
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
+    private let createInviteCodeUseCase: CreateInviteCodeUseCaseProtocol
+    private let unlinkParentUseCase: UnlinkParentUseCaseProtocol
 
     static let shared = AppDependencies()
 
@@ -34,6 +56,12 @@ final class AppDependencies: ObservableObject {
             userRepository: userRepository
         )
         self.widgetDataStore = KireicchiWidgetDataStore()
+        self.createInviteCodeUseCase = CreateInviteCodeUseCase(
+            repository: InviteCodeRepository()
+        )
+        self.unlinkParentUseCase = UnlinkParentUseCase(
+            repository: ParentLinkRepository()
+        )
     }
 
     func bootstrap() async {
@@ -93,6 +121,20 @@ final class AppDependencies: ObservableObject {
         } catch {
             print("[updateUsername] failed: \(error)")
         }
+    }
+
+    func generateInviteCode() async throws -> InviteCode {
+        guard let uid = authService.currentUid else {
+            throw InviteCodeError.notSignedIn
+        }
+        return try await createInviteCodeUseCase.execute(childId: uid)
+    }
+
+    func unlinkParent() async throws {
+        guard authService.currentUid != nil else {
+            throw ParentLinkError.notSignedIn
+        }
+        try await unlinkParentUseCase.execute()
     }
 
     func currentOpenAIClient() -> OpenAIClientProtocol {

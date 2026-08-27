@@ -8,3 +8,11 @@ xcschememanagement.plist
 
 # API Keys
 Secrets.xcconfig
+
+# Firebase Functions
+functions/node_modules/
+functions/.secret.local
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/

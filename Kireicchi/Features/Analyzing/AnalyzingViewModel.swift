@@ -16,6 +16,8 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     
     private let analyzeRoomUseCase: AnalyzeRoomUseCaseProtocol
     private let generatePixelArtUseCase: GeneratePixelArtUseCaseProtocol
+    private let roomScoreRepository: RoomScoreRepositoryProtocol
+    private let authService: AuthServiceProtocol
     private var roomRecordStore: LatestRoomRecordStore?
     private var historyStore: RoomHistoryStoreProtocol?
     private var navigationRouter: NavigationRouter?
@@ -24,13 +26,17 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
     // 解析結果を保持
     private var roomAnalysis: RoomAnalysis?
     private var pixelArtData: Data?
-    
+
     init(
         analyzeRoomUseCase: AnalyzeRoomUseCaseProtocol,
-        generatePixelArtUseCase: GeneratePixelArtUseCaseProtocol
+        generatePixelArtUseCase: GeneratePixelArtUseCaseProtocol,
+        roomScoreRepository: RoomScoreRepositoryProtocol = RoomScoreRepository(),
+        authService: AuthServiceProtocol = AuthService()
     ) {
         self.analyzeRoomUseCase = analyzeRoomUseCase
         self.generatePixelArtUseCase = generatePixelArtUseCase
+        self.roomScoreRepository = roomScoreRepository
+        self.authService = authService
     }
     
     func setup(roomRecordStore: LatestRoomRecordStore, navigationRouter: NavigationRouter) {
@@ -160,6 +166,22 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                 )
                 Logger.widget.debug("[save:analyzing] happiness=\(happiness) state=\(state.rawValue, privacy: .public) imageCount=\(widgetImageData.count)")
                 widgetDataStore.save(snapshot: snapshot)
+            }
+
+            // Firestore へのスコア書き込み（fire-and-forget）
+            // ローカル保存・UI遷移をブロックせず、失敗しても握りつぶす。
+            // 接続先はアクティブな FirebaseApp（Dev構成なら kireicchiparent-dev）に従う。
+            if let uid = authService.currentUid {
+                let score = analysis.score
+                let rank = CleanlinessRank.fromScore(analysis.score).rawValue
+                let repository = roomScoreRepository
+                Task {
+                    do {
+                        try await repository.save(uid: uid, score: score, rank: rank)
+                    } catch {
+                        print("[roomScore] Firestore への書き込みに失敗: \(error)")
+                    }
+                }
             }
 
             // 少し待ってから結果画面に遷移

@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// きれいっち Firestore セキュリティルール
+// 方針: 認証済みユーザーは「自分自身の uid のデータ」だけ読み書きできる。それ以外は全拒否。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users/{uid}: 本人のみ許可（未認証・他人は拒否）
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // users/{uid} 配下の全サブコレクション・ドキュメント（roomScores 等）も本人限定
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // parentLinks/{linkId}: 親子連携情報。クライアントからの直接読み書きは一切禁止。
+    // Cloud Functions（Admin SDK。セキュリティルールを経由しない）からのみ作成・更新する。
+    match /parentLinks/{linkId} {
+      allow read, write: if false;
+    }
+
+    // inviteCodes/{code}: 子供側アプリが発行する一度限りの連携コード。
+    // クライアントからは「create」のみ許可。update/delete/get（読み取り）はすべて禁止し、
+    // used への更新（コード引き換え）は Functions（Admin SDK）経由でのみ行う。
+    match /inviteCodes/{code} {
+      allow create: if request.auth != null
+        && request.resource.data.childId == request.auth.uid
+        && request.resource.data.used == false
+        && request.resource.data.expiresAt is timestamp
+        // 作成時刻からおおむね15分以内の有効期限のみ許可（過大な期限での発行を防ぐ）
+        && request.resource.data.expiresAt <= request.time + duration.value(15, 'm')
+        && request.resource.data.expiresAt > request.time;
+      allow update, delete, get, list: if false;
+    }
+
+    // 上記のいずれにもマッチしないパスはすべて拒否（デフォルト deny）。
+  }
+}

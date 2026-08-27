@@ -15,6 +15,15 @@ struct SettingsView: View {
     @State private var username = ""
     @State private var showTimePicker = false
     @State private var isSaving = false
+    @State private var inviteCode: InviteCode?
+    @State private var isGeneratingInviteCode = false
+    @State private var inviteCodeErrorMessage: String?
+    @State private var isInviteCodeCopied = false
+    #if DEBUG
+    @State private var showUnlinkConfirmation = false
+    @State private var isUnlinkingParent = false
+    @State private var unlinkResultMessage: String?
+    #endif
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
@@ -40,6 +49,7 @@ struct SettingsView: View {
                         usernameSection
                         captureTimeSection
                         notificationToggleSection
+                        parentLinkSection
                         commentSection
                         AppleLoginSection()
 
@@ -212,6 +222,146 @@ struct SettingsView: View {
             )
             .padding(.horizontal)
             .padding(.trailing, 3)
+        }
+    }
+
+    private var parentLinkSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("保護者連携")
+
+            VStack(alignment: .leading, spacing: 12) {
+                if let inviteCode {
+                    Text("このコードを保護者のLINEに送ってもらってください")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+
+                    Button(action: { copyInviteCode(inviteCode.code) }) {
+                        HStack(spacing: 8) {
+                            Text(inviteCode.code)
+                                .font(DesignSystem.Font.custom(size: 32))
+                                .foregroundColor(DesignSystem.Color.primaryDark)
+
+                            Image(systemName: isInviteCodeCopied ? "checkmark" : "doc.on.doc")
+                                .font(DesignSystem.Font.subheadline)
+                                .foregroundColor(isInviteCodeCopied ? DesignSystem.Color.primaryDark : DesignSystem.Color.primary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+
+                    if isInviteCodeCopied {
+                        Text("コピーしました")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.primaryDark)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .transition(.opacity)
+                    }
+
+                    Text("有効期限: \(inviteCode.expiresAt.formatted(date: .omitted, time: .shortened))まで")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                }
+
+                if let inviteCodeErrorMessage {
+                    Text(inviteCodeErrorMessage)
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.accentWarm)
+                }
+
+                Button(action: generateInviteCode) {
+                    Text(isGeneratingInviteCode ? "発行中..." : "連携コードを発行")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textOnPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(PixelButtonStyle())
+                .disabled(isGeneratingInviteCode)
+
+                #if DEBUG
+                // 保護者側からのLINE経由の連携解除が未実装のため、暫定的にデバッグビルドのみ
+                // アプリ側からも解除できるようにしている。正式な解除導線が実装され次第削除する。
+                if let unlinkResultMessage {
+                    Text(unlinkResultMessage)
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.accentWarm)
+                }
+
+                Button(role: .destructive, action: { showUnlinkConfirmation = true }) {
+                    Text(isUnlinkingParent ? "解除中..." : "連携を解除(デバッグ用)")
+                        .font(DesignSystem.Font.subheadline)
+                        .foregroundColor(DesignSystem.Color.textOnPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(PixelButtonStyle())
+                .disabled(isUnlinkingParent)
+                #endif
+            }
+            .padding(14)
+            .pixelSquareCard(
+                fill: DesignSystem.Color.surface,
+                border: DesignSystem.Color.primary,
+                borderWidth: 2,
+                shadowOffset: 3
+            )
+            .padding(.horizontal)
+            .padding(.trailing, 3)
+        }
+        #if DEBUG
+        .confirmationDialog(
+            "連携を解除しますか?",
+            isPresented: $showUnlinkConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("解除する", role: .destructive, action: unlinkParent)
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("保護者のLINEとの連携が解除されます。もう一度連携するには、新しい連携コードを発行してください。")
+        }
+        #endif
+    }
+
+    private func generateInviteCode() {
+        isGeneratingInviteCode = true
+        inviteCodeErrorMessage = nil
+        isInviteCodeCopied = false
+        Task {
+            do {
+                inviteCode = try await deps.generateInviteCode()
+            } catch {
+                inviteCodeErrorMessage = error.localizedDescription
+            }
+            isGeneratingInviteCode = false
+        }
+    }
+
+    #if DEBUG
+    private func unlinkParent() {
+        isUnlinkingParent = true
+        unlinkResultMessage = nil
+        Task {
+            do {
+                try await deps.unlinkParent()
+                unlinkResultMessage = "連携を解除しました"
+            } catch {
+                unlinkResultMessage = error.localizedDescription
+            }
+            isUnlinkingParent = false
+        }
+    }
+    #endif
+
+    private func copyInviteCode(_ code: String) {
+        UIPasteboard.general.string = code
+        withAnimation {
+            isInviteCodeCopied = true
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            withAnimation {
+                isInviteCodeCopied = false
+            }
         }
     }
 
