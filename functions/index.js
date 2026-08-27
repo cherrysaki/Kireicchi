@@ -1,4 +1,4 @@
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const { logger } = require("firebase-functions");
@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 const { verifyLineSignature } = require("./lineSignature");
 const { dispatchLineEvent } = require("./lineEventHandlers");
 const { runDailyDigest } = require("./dailyDigest");
+const { unlinkParentLinks } = require("./parentLinking");
 
 admin.initializeApp();
 
@@ -62,5 +63,31 @@ exports.dailyScoreDigest = onSchedule(
   },
   async () => {
     await runDailyDigest(LINE_CHANNEL_ACCESS_TOKEN.value());
+  }
+);
+
+/**
+ * 子ども側アプリから呼び出す、親子連携の解除。
+ * 認証済みユーザー自身(context.auth.uid)がchildIdであるparentLinksのみを対象にする。
+ */
+exports.unlinkParent = onCall(
+  { region: "asia-northeast1" },
+  async (request) => {
+    const uid = request.auth?.uid;
+    if (!uid) {
+      throw new HttpsError("unauthenticated", "サインインが必要です");
+    }
+
+    const result = await unlinkParentLinks(uid);
+    if (!result.ok) {
+      throw new HttpsError("not-found", "有効な連携が見つかりませんでした");
+    }
+
+    logger.info("[unlinkParent] parentLinks unlinked", {
+      childId: uid,
+      unlinkedCount: result.unlinkedCount,
+    });
+
+    return { unlinkedCount: result.unlinkedCount };
   }
 );
