@@ -66,10 +66,12 @@ final class AppDependencies: ObservableObject {
         )
 
         // NotificationRepository は fetch/markAsRead で状態を共有する必要があるため、
-        // 同一インスタンスを両UseCaseに渡す。実データ接続時は MockNotificationRepository を
-        // 差し替えるだけでよい（LINE連携・低スコア継続判定・フレンド機能連携、いずれも
-        // NotificationRepositoryProtocol に準拠した実装への差し替えのみで対応可能）。
-        let notificationRepository = MockNotificationRepository()
+        // 同一インスタンスを両UseCaseに渡す。.lowScoreWarning は Firestore
+        // （dailyCrisisNotifications Cloud Functionが書き込む users/{uid}/appNotifications）
+        // に接続済み。.parentMessage/.friendRequest はまだダミーのまま
+        // （NotificationRepository内部で保持）。それぞれの実データソースが揃ったら
+        // NotificationRepositoryProtocol に準拠した実装への差し替えで個別に対応できる。
+        let notificationRepository = NotificationRepository()
         self.fetchNotificationsUseCase = FetchNotificationsUseCase(repository: notificationRepository)
         self.markNotificationAsReadUseCase = MarkNotificationAsReadUseCase(repository: notificationRepository)
     }
