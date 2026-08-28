@@ -14,7 +14,7 @@ const APP_NOTIFICATION_TEMPLATES = {
   },
   warningLowScore: {
     title: "きれいっちが弱ってるよ！",
-    body: "このままだときれいっちが死んじゃう！片付けよう",
+    body: "このままだときれいっちが家出しちゃう！少しだけでもお片付けしよう",
   },
   runaway: {
     title: "きれいっちが家出しちゃったかも",
