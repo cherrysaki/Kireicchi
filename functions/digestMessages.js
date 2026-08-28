@@ -6,7 +6,7 @@
 const DIGEST_MESSAGE_TEMPLATES = {
   normal: (name, score) => `${name}のお部屋、今日のスコアは${score}点でした`,
   warningNoCapture: (name) =>
-    `${name}のお部屋、しばらく片づけの記録がないようです。声をかけてあげてください`,
+    `${name}のお部屋、しばらく片づけの記録がないようです。最近どうしてるか、ちょっと聞いてみませんか？`,
   warningLowScore: (name) =>
     `${name}のお部屋、最近スコアが低めな日が続いています。一緒に片づけてみてはいかがでしょうか`,
   runaway: (name) =>
