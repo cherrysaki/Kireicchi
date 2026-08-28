@@ -25,13 +25,13 @@ const CRISIS_THRESHOLDS = {
  *
  * @param {{score: number, createdAt: {toDate: () => Date}}[]} scores createdAt降順のroomScoresドキュメント配列
  * @param {Date} now 判定基準時刻（テスト時に固定できるよう引数化）
- * @returns {{level: "normal"|"warning"|"runaway", reasons: ("noCapture"|"lowScore")[], daysSinceLastCapture: number|null}}
+ * @returns {{level: "normal"|"warning"|"runaway", reasons: ("noCapture"|"lowScore")[], daysSinceLastCapture: number|null, latestScore: {score: number, createdAt: {toDate: () => Date}}|null}}
  */
 function computeCrisisLevel(scores, now = new Date()) {
   if (!scores || scores.length === 0) {
     // 撮影記録が一度も無い場合は判定材料が無いため「通常」として扱う（既存のdailyDigestが
     // 何も送らずスキップしていた挙動と同様、危機通知も送らない）。
-    return { level: "normal", reasons: [], daysSinceLastCapture: null };
+    return { level: "normal", reasons: [], daysSinceLastCapture: null, latestScore: null };
   }
 
   const latest = scores[0];
@@ -40,7 +40,7 @@ function computeCrisisLevel(scores, now = new Date()) {
   );
 
   if (daysSinceLastCapture >= CRISIS_THRESHOLDS.RUNAWAY_DAYS) {
-    return { level: "runaway", reasons: ["noCapture"], daysSinceLastCapture };
+    return { level: "runaway", reasons: ["noCapture"], daysSinceLastCapture, latestScore: latest };
   }
 
   const reasons = [];
@@ -57,10 +57,10 @@ function computeCrisisLevel(scores, now = new Date()) {
   }
 
   if (reasons.length > 0) {
-    return { level: "warning", reasons, daysSinceLastCapture };
+    return { level: "warning", reasons, daysSinceLastCapture, latestScore: latest };
   }
 
-  return { level: "normal", reasons: [], daysSinceLastCapture };
+  return { level: "normal", reasons: [], daysSinceLastCapture, latestScore: latest };
 }
 
 /**
