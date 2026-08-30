@@ -8,6 +8,7 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
     @Query private var historyRecords: [RoomHistoryRecord]
+    @Query private var postcardRecords: [PostcardRecord]
 
     @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw: String = CharacterType.character01.rawValue
 
@@ -16,6 +17,8 @@ struct HomeView: View {
     @State private var showRecoveryFlow = false
     @State private var isNotificationsPresented = false
     @State private var unreadNotificationCount = 0
+    @State private var isFriendsPresented = false
+    @State private var incomingFriendRequestCount = 0
 
     private var todayCaptureCount: Int {
         let calendar = Calendar.current
@@ -119,7 +122,7 @@ struct HomeView: View {
                             showCaptureAlert = true
                         }
                     },
-                    onFriends: { navigationRouter.navigate(to: .friendVisit) },
+                    onPostcards: { navigationRouter.navigate(to: .postcards) },
                     canCapture: canCapture
                 )
                 .padding(.bottom, 12)
@@ -129,6 +132,7 @@ struct HomeView: View {
         .onAppear {
             saveWidgetSnapshot()
             Task { await refreshNotificationBadge() }
+            Task { await refreshFriendBadge() }
         }
         .onChange(of: records.first?.capturedAt) { _, _ in
             saveWidgetSnapshot()
@@ -171,10 +175,50 @@ struct HomeView: View {
                         .foregroundColor(DesignSystem.Color.textPrimary)
                 }
                 Spacer()
-                notificationButton
+                HStack(spacing: 16) {
+                    friendsButton
+                    notificationButton
+                }
             }
         }
         .padding(.horizontal, 20)
+    }
+
+    private var friendsButton: some View {
+        Button(action: {
+            isFriendsPresented = true
+        }) {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: "person.2.fill")
+                    .font(DesignSystem.Font.title3)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+
+                if incomingFriendRequestCount > 0 {
+                    Text("\(min(incomingFriendRequestCount, 99))")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Circle().fill(Color.red))
+                        .offset(x: 10, y: -8)
+                }
+            }
+        }
+        .sheet(isPresented: $isFriendsPresented) {
+            FriendsView(viewModel: deps.makeFriendsViewModel())
+        }
+        .onChange(of: isFriendsPresented) { _, presented in
+            if !presented {
+                Task { await refreshFriendBadge() }
+            }
+        }
+    }
+
+    private func refreshFriendBadge() async {
+        do {
+            incomingFriendRequestCount = try await deps.fetchIncomingFriendRequestCount()
+        } catch {
+            print("[refreshFriendBadge] failed: \(error)")
+        }
     }
 
     private var notificationButton: some View {
@@ -197,8 +241,21 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $isNotificationsPresented) {
-            NotificationsView()
-                .environmentObject(deps)
+            NotificationsView(
+                onOpenFriends: {
+                    isNotificationsPresented = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        isFriendsPresented = true
+                    }
+                },
+                onOpenPostcards: {
+                    isNotificationsPresented = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        navigationRouter.navigate(to: .postcards)
+                    }
+                }
+            )
+            .environmentObject(deps)
         }
         .onChange(of: isNotificationsPresented) { _, presented in
             if !presented {
@@ -209,7 +266,12 @@ struct HomeView: View {
 
     private func refreshNotificationBadge() async {
         do {
-            let notifications = try await deps.fetchNotifications()
+            let input = NotificationInput.make(
+                user: deps.currentUser,
+                latestRecord: latestRecord,
+                postcards: postcardRecords
+            )
+            let notifications = try await deps.fetchNotifications(input: input)
             unreadNotificationCount = notifications.filter { !$0.isRead }.count
         } catch {
             print("[refreshNotificationBadge] failed: \(error)")
@@ -394,9 +456,11 @@ struct HomeView: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
+                if pendingMissionCount > 0 {
+                    Image(systemName: "chevron.right")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -409,6 +473,7 @@ struct HomeView: View {
             )
         }
         .buttonStyle(.plain)
+        .disabled(pendingMissionCount == 0)
         .padding(.horizontal, 20)
     }
 

@@ -6,9 +6,11 @@ struct AnalysisResultView: View {
     let pixelArtData: Data
     let analysis: RoomAnalysis
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
-    
+    @State private var isSendPostcardPresented = false
+
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
     }
@@ -195,7 +197,28 @@ struct AnalysisResultView: View {
             .frame(height: 40)
             .padding(.horizontal)
             .padding(.trailing, 4)
-            
+
+            Button(action: {
+                isSendPostcardPresented = true
+            }) {
+                HStack {
+                    Image(systemName: "envelope.fill")
+                    Text("ポストカードを送る")
+                }
+                .font(DesignSystem.Font.subheadline)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+            }
+            .buttonStyle(PixelButtonStyle())
+            .frame(height: 40)
+            .padding(.horizontal)
+            .padding(.trailing, 4)
+            .sheet(isPresented: $isSendPostcardPresented) {
+                SendPostcardView(
+                    viewModel: deps.makeSendPostcardViewModel(pixelArtData: pixelArtData, analysis: analysis)
+                )
+            }
+
             Button(action: {
                 navigationRouter.popToRoot()
             }) {
@@ -305,6 +328,7 @@ private struct MissionListRow: View {
     return NavigationStack {
         AnalysisResultView(imageData: imageData, pixelArtData: imageData, analysis: analysis)
             .environmentObject(NavigationRouter())
+            .environmentObject(AppDependencies())
             .modelContainer(container)
     }
 }

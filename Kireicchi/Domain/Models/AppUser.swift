@@ -8,6 +8,8 @@ struct AppUser: Codable, Equatable {
     var authProvider: String
     var displayName: String?
     var username: String?
+    /// ともだち検索用の英数字ID（userIds/{userId} で一意性を担保）
+    var userId: String?
     var selectedCharacterId: String
     var notificationSettings: NotificationSettingsData
 
@@ -19,6 +21,7 @@ struct AppUser: Codable, Equatable {
             authProvider: authProvider,
             displayName: nil,
             username: nil,
+            userId: nil,
             selectedCharacterId: "cat",
             notificationSettings: .default
         )

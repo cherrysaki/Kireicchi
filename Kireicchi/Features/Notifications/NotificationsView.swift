@@ -1,10 +1,16 @@
 import SwiftUI
+import SwiftData
 
 struct NotificationsView: View {
     @EnvironmentObject var deps: AppDependencies
     @Environment(\.dismiss) private var dismiss
+    @Query private var latestRecords: [LatestRoomRecord]
+    @Query private var postcardRecords: [PostcardRecord]
     @State private var notifications: [AppNotification] = []
     @State private var isLoading = true
+
+    var onOpenFriends: () -> Void = {}
+    var onOpenPostcards: () -> Void = {}
 
     var body: some View {
         NavigationStack {
@@ -20,7 +26,7 @@ struct NotificationsView: View {
                             NotificationRow(notification: notification)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    markAsRead(notification)
+                                    handleTap(notification)
                                 }
                         }
                     }
@@ -56,11 +62,28 @@ struct NotificationsView: View {
     private func loadNotifications() async {
         isLoading = true
         do {
-            notifications = try await deps.fetchNotifications()
+            let input = NotificationInput.make(
+                user: deps.currentUser,
+                latestRecord: latestRecords.first,
+                postcards: postcardRecords
+            )
+            notifications = try await deps.fetchNotifications(input: input)
         } catch {
             print("[NotificationsView] loadNotifications failed: \(error)")
         }
         isLoading = false
+    }
+
+    private func handleTap(_ notification: AppNotification) {
+        markAsRead(notification)
+        switch notification.kind {
+        case .friendRequest:
+            onOpenFriends()
+        case .postcardReceived:
+            onOpenPostcards()
+        case .parentMessage, .lowScoreWarning, .captureReminder:
+            break
+        }
     }
 
     private func markAsRead(_ notification: AppNotification) {
@@ -118,6 +141,8 @@ private struct NotificationRow: View {
         case .parentMessage: return "message.fill"
         case .lowScoreWarning: return "exclamationmark.triangle.fill"
         case .friendRequest: return "person.crop.circle.badge.plus"
+        case .postcardReceived: return "envelope.fill"
+        case .captureReminder: return "camera.fill"
         }
     }
 
@@ -126,6 +151,8 @@ private struct NotificationRow: View {
         case .parentMessage: return DesignSystem.Color.secondary
         case .lowScoreWarning: return .red
         case .friendRequest: return DesignSystem.Color.primary
+        case .postcardReceived: return DesignSystem.Color.accentWarm
+        case .captureReminder: return DesignSystem.Color.primaryDark
         }
     }
 }
@@ -133,4 +160,5 @@ private struct NotificationRow: View {
 #Preview {
     NotificationsView()
         .environmentObject(AppDependencies())
+        .modelContainer(for: [LatestRoomRecord.self, PostcardRecord.self], inMemory: true)
 }

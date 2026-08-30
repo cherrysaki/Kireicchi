@@ -2,17 +2,17 @@ import Foundation
 
 /// お知らせの種別。
 ///
-/// 実データ接続方針（将来差し替え予定、今回は未実装）:
-/// - parentMessage: LINE公式アカウントのQuick Reply経由でFirestoreに配信された
-///   保護者からのメッセージを想定
-/// - lowScoreWarning: roomScoresの低スコア継続日数を判定するロジックと連動する
-///   想定
-/// - friendRequest: 別メンバーが実装するフレンド機能のデータソースへ接続する
-///   想定（インターフェースは実装後に調整の可能性あり）
+/// - friendRequest: Firestore friendRequests（自分宛て・pending）
+/// - postcardReceived: 受信したポストカード（コレクション保存済み＋未取り込み分）
+/// - captureReminder: 設定した撮影時刻を過ぎて今日まだ撮影していないとき
+/// - lowScoreWarning: 直近スコアが不調（39以下）または最終撮影から2日以上経過
+/// - parentMessage: 保護者からのメッセージ。LINE→アプリの経路が未実装のため現状データ源なし
 enum AppNotificationKind {
     case parentMessage
     case lowScoreWarning
     case friendRequest
+    case postcardReceived
+    case captureReminder
 }
 
 struct AppNotification: Identifiable, Equatable {

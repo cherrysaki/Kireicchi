@@ -13,8 +13,10 @@ struct SettingsView: View {
     @State private var notificationsEnabled = true
     @State private var selectedCharacterId = "cat"
     @State private var username = ""
+    @State private var userId = ""
     @State private var showTimePicker = false
     @State private var isSaving = false
+    @State private var saveErrorMessage: String?
     @State private var inviteCode: InviteCode?
     @State private var isGeneratingInviteCode = false
     @State private var inviteCodeErrorMessage: String?
@@ -27,6 +29,7 @@ struct SettingsView: View {
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
 
     private let usernameMaxLength = 12
+    private let userIdMaxLength = 16
 
     var body: some View {
         ZStack {
@@ -47,6 +50,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         usernameSection
+                        userIdSection
                         captureTimeSection
                         notificationToggleSection
                         parentLinkSection
@@ -79,6 +83,14 @@ struct SettingsView: View {
         .navigationBarHidden(true)
         .onAppear(perform: loadSettings)
         .onChange(of: deps.currentUser) { _, _ in loadSettings() }
+        .alert("保存できませんでした", isPresented: Binding(
+            get: { saveErrorMessage != nil },
+            set: { if !$0 { saveErrorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(saveErrorMessage ?? "")
+        }
     }
 
     private var usernameSection: some View {
@@ -103,6 +115,38 @@ struct SettingsView: View {
                 )
                 .padding(.horizontal)
                 .padding(.trailing, 3)
+        }
+    }
+
+    private var userIdSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("ユーザーID")
+
+            TextField("ユーザーID（英数字）", text: $userId)
+                .font(DesignSystem.Font.custom(size: 20))
+                .foregroundColor(DesignSystem.Color.textPrimary)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+                .submitLabel(.done)
+                .onChange(of: userId) { _, newValue in
+                    let filtered = newValue.uppercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber) }
+                    let limited = String(filtered.prefix(userIdMaxLength))
+                    if limited != newValue { userId = limited }
+                }
+                .padding(14)
+                .pixelSquareCard(
+                    fill: DesignSystem.Color.surface,
+                    border: DesignSystem.Color.primary,
+                    borderWidth: 2,
+                    shadowOffset: 3
+                )
+                .padding(.horizontal)
+                .padding(.trailing, 3)
+
+            Text("ともだちがあなたを検索するときに使うIDです（英数字 \(UserIdRepository.minLength)〜\(userIdMaxLength)文字）")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
+                .padding(.horizontal)
         }
     }
 
@@ -402,20 +446,6 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("🎬 デバッグ用")
 
-            // Mock 通信トグル
-            HStack {
-                Text("Mock 通信 (シミュレータ用)")
-                    .font(DesignSystem.Font.subheadline)
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { deps.useMockConnectivity },
-                    set: { deps.useMockConnectivity = $0 }
-                ))
-                .labelsHidden()
-            }
-            .padding(.horizontal)
-
             // サインイン状態
             Text("uid: \(deps.currentUser?.uid ?? "未サインイン")")
                 .font(DesignSystem.Font.caption)
@@ -664,6 +694,7 @@ struct SettingsView: View {
         notificationsEnabled = user.notificationSettings.isEnabled
         selectedCharacterId = user.selectedCharacterId
         username = user.username ?? ""
+        userId = user.userId ?? ""
     }
 
     private func saveSettings() {
@@ -673,16 +704,24 @@ struct SettingsView: View {
         let isEnabled = notificationsEnabled
         let characterId = selectedCharacterId
         let name = username
+        let newUserId = userId
         Task {
-            await deps.updateSettings(
-                hour: hour,
-                minute: minute,
-                isEnabled: isEnabled,
-                characterId: characterId,
-                username: name
-            )
-            isSaving = false
-            navigationRouter.navigateBack()
+            do {
+                try await deps.updateSettings(
+                    hour: hour,
+                    minute: minute,
+                    isEnabled: isEnabled,
+                    characterId: characterId,
+                    username: name,
+                    userId: newUserId
+                )
+                isSaving = false
+                navigationRouter.navigateBack()
+            } catch {
+                isSaving = false
+                saveErrorMessage = error.localizedDescription
+                print("[saveSettings] failed: \(error)")
+            }
         }
     }
 }

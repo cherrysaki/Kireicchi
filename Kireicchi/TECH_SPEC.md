@@ -31,7 +31,7 @@
 | AI | **OpenAI API**（GPT-4o Vision / 画像編集 images/edits） | 採点（Vision）とドット絵生成（画像編集）を1つのプロバイダで完結 |
 | カメラ | **AVFoundation** | 正方形(1:1)ファインダーで撮影条件を揃え、AI解析の精度・一貫性を確保 |
 | 通知 | **UserNotifications**（ローカル通知のみ） | サーバプッシュ不要。設定時刻に毎日リマインド |
-| 近接連携 | **MultipeerConnectivity + NearbyInteraction** | サーバを介さず、近くの端末同士でキャラを行き来させる（ともだち訪問） |
+| ともだち・ポストカード | **Firestore + Cloud Storage** | ユーザーネームで友達申請／承認し、部屋のドット絵をポストカードとして送り合う |
 
 - 言語：**Swift 6** / 最小OS：iOS 18+（開発ターゲットは iOS 26 想定）
 - 外部DIライブラリなし。Protocol駆動の **手動DI** で軽量に保つ。
@@ -55,7 +55,6 @@ Infrastructure  … Camera / 通知 / Auth / Connectivity（OS連携の低レイ
 
 - **Protocol駆動 + 全サービスにMock実装**
   → APIキーや実機がなくても、Mockに差し替えて全画面をPreview・動作確認できる。
-  （`AppDependencies` のフラグ `useMockConnectivity` で近接連携もモック化可能）
 - **Fat ViewModel禁止**：API呼び出し・データ変換は UseCase が担当し、ViewModelはUI状態管理に専念。
 - 代表ファイル：`App/AppDependencies.swift`（DIコンテナ）、`Domain/UseCases/*`、`Data/API/OpenAIClient.swift`
 
@@ -143,20 +142,14 @@ Infrastructure  … Camera / 通知 / Auth / Connectivity（OS連携の低レイ
 
 ---
 
-## 7. 発展機能：ともだち訪問（語りどころ：先端API活用）
+## 7. 発展機能：ともだち・ポストカード
 
-サーバを介さず、近くの端末同士でキャラの部屋を見せ合う機能。
+ユーザーネームで友達を検索して申請→承認で友達になり、解析結果のドット絵をポストカードとして送り合う機能。
 
-- **MultipeerConnectivity**：近接端末をローカルP2Pで自動発見・接続し、`FriendVisitMessage`（hello / NIトークン / bye 等）を交換
-- **NearbyInteraction（UWB）**：端末間の距離をメートル単位で計測
-- **距離による状態遷移**（`Domain/UseCases/FriendVisitCoordinator.swift`）：
-
-  ```
-  tracking ──(0.5m未満に近づく)──▶ visiting（訪問中）
-  visiting ──(1.5m超に離れる)──▶ tracking
-  ```
-
-語れる工夫：**サーバもアカウント連携も不要**で、物理的に近づくだけでキャラが行き来する“その場の体験”を実現。
+- **Firestore**：`usernames`（ユーザーネームの一意性・検索）、`friendRequests`、`friendships`、`postcards`（メタ情報）
+- **Cloud Storage**：`postcards/{uid}/{id}.png` にドット絵（128×128 PNG）を保存
+- **受信側**：コレクション画面を開いたときに未取り込みの `postcards` を取得→画像をダウンロード→SwiftData `PostcardRecord` に保存し、Firestore 側は削除（コレクションの正は端末）
+- 主要ファイル：`Data/Firestore/FriendRepository.swift`, `Data/Firestore/PostcardRepository.swift`, `Domain/UseCases/SyncPostcardsUseCase.swift`, `Features/Friends/*`, `Features/SendPostcard/*`, `Features/Postcards/*`
 
 ---
 
@@ -190,5 +183,5 @@ A. キャラクターの複数種対応、ドット絵生成のオンデバイ�
 | ランク／キャラ状態 | `Domain/Models/CleanlinessRank.swift`, `CharacterState.swift` |
 | 永続化 | `Data/Persistence/Models/LatestRoomRecord.swift`, `RoomHistoryRecord.swift` |
 | 認証・ユーザー | `Infrastructure/Auth/AuthService.swift`, `Data/Firestore/UserRepository.swift` |
-| ともだち訪問 | `Domain/UseCases/FriendVisitCoordinator.swift`, `Infrastructure/Connectivity/*` |
+| ともだち・ポストカード | `Data/Firestore/FriendRepository.swift`, `Data/Firestore/PostcardRepository.swift`, `Features/Friends/*`, `Features/Postcards/*` |
 | ホーム画面ロジック | `Features/Home/HomeView.swift` |
