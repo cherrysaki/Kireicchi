@@ -40,6 +40,8 @@ final class AppDependencies: ObservableObject {
     let widgetDataStore: KireicchiWidgetDataStoreProtocol
     private let authService: AuthServiceProtocol
     private let userRepository: UserRepositoryProtocol
+    private let fcmTokenRepository: FCMTokenRepositoryProtocol
+    private var pendingFCMToken: String?
     private let createInviteCodeUseCase: CreateInviteCodeUseCaseProtocol
     private let unlinkParentUseCase: UnlinkParentUseCaseProtocol
     private let fetchNotificationsUseCase: FetchNotificationsUseCaseProtocol
@@ -61,6 +63,7 @@ final class AppDependencies: ObservableObject {
         let userRepository = UserRepository()
         self.authService = authService
         self.userRepository = userRepository
+        self.fcmTokenRepository = FCMTokenRepository()
         self.signInWithAppleUseCase = SignInWithAppleUseCase(
             authService: authService,
             userRepository: userRepository
@@ -113,9 +116,29 @@ final class AppDependencies: ObservableObject {
             self.currentUser = user
             self.authProvider = session.provider
             await ensureUserId(user)
+            if let pendingFCMToken {
+                self.pendingFCMToken = nil
+                registerFCMToken(pendingFCMToken)
+            }
         } catch {
             self.bootstrapError = "サーバーに接続できませんでした (\(error.localizedDescription))"
             print("[bootstrap] failed: \(error)")
+        }
+    }
+
+    /// FCMトークンを users/{uid}.fcmToken へ保存する。サインイン完了前にトークンを
+    /// 受け取った場合は保持しておき、bootstrap() 完了後に改めて呼び出す。
+    func registerFCMToken(_ token: String) {
+        guard let uid = currentUser?.uid else {
+            pendingFCMToken = token
+            return
+        }
+        Task {
+            do {
+                try await fcmTokenRepository.save(uid: uid, token: token)
+            } catch {
+                print("[registerFCMToken] failed: \(error)")
+            }
         }
     }
 

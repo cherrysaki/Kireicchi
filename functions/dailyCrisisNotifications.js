@@ -2,6 +2,7 @@ const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { logger } = require("firebase-functions");
 const { fetchCrisisLevel } = require("./crisisLevel");
 const { buildAppNotificationContent } = require("./appNotificationMessages");
+const { sendPushNotification } = require("./pushNotification");
 
 /**
  * 1人のユーザーについて危機レベルを判定し、「注意」または「家出」であれば
@@ -36,6 +37,18 @@ async function writeCrisisNotificationForUser(db, uid) {
     uid,
     level: crisis.level,
     reasons: crisis.reasons,
+  });
+
+  // アプリを開いていなくても気づけるよう、同じ内容をFCMでもプッシュする。
+  // トークン未登録・送信失敗は既存のFirestore書き込みを取り消さない（在宅の
+  // お知らせ一覧には残る）ため、ここでは結果をログするだけに留める。
+  const userSnap = await db.collection("users").doc(uid).get();
+  const fcmToken = userSnap.exists ? userSnap.data().fcmToken : undefined;
+  const pushed = await sendPushNotification(fcmToken, content.title, content.body);
+  logger.info("[dailyCrisisNotifications] push notification", {
+    uid,
+    hasToken: !!fcmToken,
+    pushed,
   });
 }
 

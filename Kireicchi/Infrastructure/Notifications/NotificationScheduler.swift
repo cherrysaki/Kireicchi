@@ -1,12 +1,19 @@
 import Foundation
 import UserNotifications
+import UIKit
 
 final class NotificationScheduler: NotificationSchedulerProtocol {
     private let center = UNUserNotificationCenter.current()
     private static let reminderID = "kireicchi.daily-photo-reminder"
 
     func requestAuthorization() async -> Bool {
-        (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        if granted {
+            // lowScoreWarning（家出予告等）のプッシュ通知を受け取れるよう、
+            // 許可と同時にAPNsへのリモート通知登録も行う。
+            await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
+        }
+        return granted
     }
 
     func scheduleDailyReminder(hour: Int, minute: Int) async throws {

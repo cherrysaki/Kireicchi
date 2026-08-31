@@ -156,8 +156,11 @@ struct TutorialView: View {
             action: {
                 Task {
                     await AVCaptureDevice.requestAccess(for: .video)
-                    try? await UNUserNotificationCenter.current()
-                        .requestAuthorization(options: [.alert, .sound, .badge])
+                    let granted = (try? await UNUserNotificationCenter.current()
+                        .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+                    if granted {
+                        await UIApplication.shared.registerForRemoteNotifications()
+                    }
                     hasShownTutorial = true
                 }
             }
