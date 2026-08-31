@@ -170,7 +170,7 @@ struct FriendsView<ViewModel: FriendsViewModelProtocol>: View {
                     smallButton("承認", fill: DesignSystem.Color.primary) {
                         Task { await viewModel.accept(request) }
                     }
-                    smallButton("拒否", fill: DesignSystem.Color.textPrimary.opacity(0.3)) {
+                    smallButton("拒否", fill: DesignSystem.Color.surface) {
                         Task { await viewModel.decline(request) }
                     }
                 }
@@ -188,7 +188,7 @@ struct FriendsView<ViewModel: FriendsViewModelProtocol>: View {
                         .font(DesignSystem.Font.subheadline)
                         .foregroundColor(DesignSystem.Color.textPrimary)
                     Spacer()
-                    smallButton("取り消し", fill: DesignSystem.Color.textPrimary.opacity(0.3)) {
+                    smallButton("取り消し", fill: DesignSystem.Color.surface) {
                         Task { await viewModel.cancel(request) }
                     }
                 }
@@ -243,12 +243,18 @@ struct FriendsView<ViewModel: FriendsViewModelProtocol>: View {
         Button(action: action) {
             Text(title)
                 .font(DesignSystem.Font.caption)
-                .foregroundColor(.white)
+                .foregroundColor(DesignSystem.Color.textOnPrimary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(fill))
+                .pixelSquareCard(
+                    fill: fill,
+                    border: DesignSystem.Color.primaryDark,
+                    borderWidth: 2,
+                    shadowOffset: 2
+                )
         }
         .buttonStyle(.plain)
+        .padding(.trailing, 2)
     }
 }
 
