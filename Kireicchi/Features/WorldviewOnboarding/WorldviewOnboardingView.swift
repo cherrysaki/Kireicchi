@@ -3,35 +3,38 @@ import SwiftUI
 struct WorldviewOnboardingView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
 
-    @State private var logoPhase: LogoPhase = .showing
+    // ロゴ演出（静止→拡大しながら3Dアニメーションへ繋がる、1回きり）→
+    // 「きれいっち誕生」3Dアニメーション（KireicchiIntroAnimationView）→ 世界観スクロール、
+    // という一本道の導入フロー。以前はロゴがLogoSplashView（RootView側）と
+    // このView内の2箇所に分かれて2回表示されていたが、1回に統合した
+    private enum Phase {
+        case logo           // ロゴ静止2秒 → 拡大しながらフェードアウト1.2秒
+        case introAnimation // CG課題として作った3Dアニメーション本編
+        case scroll         // 部屋・卵・きれいっち誕生を紹介するスクロールコンテンツ
+    }
+
+    @State private var phase: Phase = .logo
     @State private var logoScale: CGFloat = 1.0
     @State private var logoOpacity: Double = 1.0
-
-    private enum LogoPhase {
-        case showing    // ロゴ表示中（2秒間）
-        case expanding  // ロゴ拡大中
-        case done       // 演出完了、スクロール可能
-    }
 
     var body: some View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea()
 
-            if logoPhase == .done {
+            switch phase {
+            case .logo:
+                logoView
+                    .transition(.opacity)
+            case .introAnimation:
+                KireicchiIntroAnimationView {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        phase = .scroll
+                    }
+                }
+                .transition(.opacity)
+            case .scroll:
                 scrollContent
                     .transition(.opacity)
-            }
-
-            if logoPhase != .done {
-                DesignSystem.Color.background
-                    .ignoresSafeArea()
-
-                Image("logo_Kireicchi")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200)
-                    .scaleEffect(logoScale)
-                    .opacity(logoOpacity)
             }
         }
         .onAppear {
@@ -39,19 +42,24 @@ struct WorldviewOnboardingView: View {
         }
     }
 
+    private var logoView: some View {
+        Image("logo_Kireicchi")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 200)
+            .scaleEffect(logoScale)
+            .opacity(logoOpacity)
+    }
+
     private func startLogoAnimation() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            logoPhase = .expanding
-
             withAnimation(.easeInOut(duration: 1.2)) {
                 logoScale = 10.0
                 logoOpacity = 0.0
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    logoPhase = .done
-                }
+                phase = .introAnimation
             }
         }
     }

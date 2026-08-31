@@ -4,15 +4,12 @@ struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
     @EnvironmentObject private var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("hasShownLogoSplash") private var hasShownLogoSplash: Bool = false
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
     @AppStorage("hasCompletedOwnerRegistration") private var hasCompletedOwnerRegistration: Bool = false
 
     var body: some View {
-        if !hasShownLogoSplash {
-            LogoSplashView()
-        } else if !hasShownWorldviewOnboarding {
+        if !hasShownWorldviewOnboarding {
             WorldviewOnboardingView()
         } else if !hasCompletedOwnerRegistration {
             OwnerRegistrationView()
