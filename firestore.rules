@@ -51,8 +51,14 @@ service cloud.firestore {
     }
 
     // friendRequests/{fromUid}_{toUid}: ともだち申請。
+    // get は「存在チェック」（申請前の重複確認）で未存在ドキュメントにも走るため、
+    // resource == null（未存在）を許可しないと permission denied になる点に注意。
     match /friendRequests/{requestId} {
-      allow read: if request.auth != null
+      allow get: if request.auth != null
+        && (resource == null
+            || resource.data.fromUid == request.auth.uid
+            || resource.data.toUid == request.auth.uid);
+      allow list: if request.auth != null
         && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
       allow create: if request.auth != null
         && request.resource.data.fromUid == request.auth.uid
@@ -65,14 +71,20 @@ service cloud.firestore {
         && resource.data.status == "pending"
         && request.resource.data.status in ["accepted", "declined"]
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "updatedAt"]);
+      // ともだち削除時に「あれば消す」で未存在ドキュメントの delete も走るため resource == null を許可
       allow delete: if request.auth != null
-        && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+        && (resource == null
+            || resource.data.fromUid == request.auth.uid
+            || resource.data.toUid == request.auth.uid);
     }
 
     // friendships/{uidA}_{uidB}: 成立したともだち関係（members はソート済み2件）。
     // 作成は申請の受信者が、同一バッチで該当 friendRequest を accepted にした場合のみ。
     match /friendships/{friendshipId} {
-      allow read, delete: if request.auth != null
+      // get は申請前の「もう友達か」の存在チェックにも使うため未存在（resource == null）を許可
+      allow get: if request.auth != null
+        && (resource == null || request.auth.uid in resource.data.members);
+      allow list, delete: if request.auth != null
         && request.auth.uid in resource.data.members;
       allow create: if request.auth != null
         && request.auth.uid in request.resource.data.members
