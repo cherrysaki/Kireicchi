@@ -5,22 +5,13 @@ const { fetchCrisisLevel } = require("./crisisLevel");
 const { buildDigestMessage } = require("./digestMessages");
 
 /**
- * dateがJST(Asia/Tokyo)で「今日」かどうかを判定する。
- * サーバーのローカルタイムゾーンに依存しないよう、UTC時刻に+9時間して
- * 日付部分だけを文字列比較する(タイムゾーンライブラリを増やさないための簡易実装)。
- */
-function isTodayInJst(date) {
-  const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
-  const toJstDateString = (d) => new Date(d.getTime() + JST_OFFSET_MS).toISOString().slice(0, 10);
-  return toJstDateString(new Date()) === toJstDateString(date);
-}
-
-/**
  * 1人の保護者(parentLinks 1件)に対して、対象の子の危機レベル(crisisLevel.js)に
  * 応じたLINE Pushダイジェストメッセージを送る。
- * 「通常」の場合は従来通り、今日の撮影が無ければ何も送らない
- * （即時通知は今回のスコープ外のため、19:00時点で「今日はまだ通常運転」なら静か
- * にしておく）。「注意」「家出」の場合は、今日の撮影の有無に関わらず送る。
+ *
+ * 「通常」の場合、daysSinceLastCaptureに応じて文面を分ける（buildDigestMessage側で
+ * 判定）: 当日撮影あり(0)はスコア文面、1〜2日は軽い呼びかけ文面。一度も撮影記録が
+ * 無い(null)場合のみ送信自体をスキップする。「注意」「家出」の場合は、撮影の有無に
+ * 関わらず送る。
  */
 async function digestForLink(db, link, channelAccessToken) {
   const { childId, lineUserId } = link;
@@ -31,17 +22,20 @@ async function digestForLink(db, link, channelAccessToken) {
 
   const crisis = await fetchCrisisLevel(db, childId);
 
-  if (crisis.level === "normal") {
-    const createdAt = crisis.latestScore?.createdAt;
-    if (!createdAt || !isTodayInJst(createdAt.toDate())) {
-      logger.info("[dailyDigest] normal level and no capture today(JST), skip", { childId });
-      return;
-    }
+  if (crisis.level === "normal" && crisis.daysSinceLastCapture == null) {
+    logger.info("[dailyDigest] no roomScores yet, skip", { childId });
+    return;
   }
 
   const userSnap = await db.collection("users").doc(childId).get();
   const username = userSnap.exists ? userSnap.data().username : undefined;
-  const text = buildDigestMessage(crisis.level, crisis.reasons, crisis.latestScore?.score, username);
+  const text = buildDigestMessage(
+    crisis.level,
+    crisis.reasons,
+    crisis.latestScore?.score,
+    username,
+    crisis.daysSinceLastCapture
+  );
 
   try {
     await pushText(lineUserId, text, channelAccessToken);
@@ -50,6 +44,7 @@ async function digestForLink(db, link, channelAccessToken) {
       lineUserId,
       level: crisis.level,
       reasons: crisis.reasons,
+      daysSinceLastCapture: crisis.daysSinceLastCapture,
     });
   } catch (error) {
     logger.warn("[dailyDigest] push failed", {
@@ -77,4 +72,4 @@ async function runDailyDigest(channelAccessToken) {
   logger.info("[dailyDigest] finished");
 }
 
-module.exports = { runDailyDigest, digestForLink, isTodayInJst };
+module.exports = { runDailyDigest, digestForLink };
