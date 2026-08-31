@@ -20,18 +20,23 @@ import WebKit
 
 // MARK: - WKWebView ラッパー
 
-/// kireicchi_intro.html をロードし、アニメーションが最後まで進んだときの
-/// JS→Native通知（window.webkit.messageHandlers.kireicchiIntro.postMessage("done")）を
+/// kireicchi_intro.html をロードし、卵がタップされた瞬間のJS→Native通知
+/// （window.webkit.messageHandlers.kireicchiIntro.postMessage("eggTapped")）を
 /// 受け取ってSwiftUI側に橋渡しする。
+///
+/// JS側は変身演出が最後まで終わったタイミングでも別途"done"を送ってくるが、
+/// 変身演出の終了より早く届くケースが確認されたため、次画面への遷移判定には
+/// 使わない（"eggTapped"以外のメッセージ本文は無視する）
 struct KireicchiIntroWebView: UIViewRepresentable {
-    /// アニメーションが最後まで再生され、ネイティブ側に完了通知が届いたときに呼ばれる。
+    /// 卵がタップされ、ネイティブ側に"eggTapped"通知が届いたときに呼ばれる。
     /// メインスレッドで呼ばれる
-    var onFinished: () -> Void
+    var onEggTapped: () -> Void
 
     fileprivate static let messageName = "kireicchiIntro"
+    private static let eggTappedMessageBody = "eggTapped"
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onFinished: onFinished)
+        Coordinator(onEggTapped: onEggTapped)
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -71,17 +76,20 @@ struct KireicchiIntroWebView: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, WKScriptMessageHandler {
-        private let onFinished: () -> Void
-        private var didFinish = false
+        private let onEggTapped: () -> Void
+        private var didNotify = false
 
-        init(onFinished: @escaping () -> Void) {
-            self.onFinished = onFinished
+        init(onEggTapped: @escaping () -> Void) {
+            self.onEggTapped = onEggTapped
         }
 
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            guard message.name == KireicchiIntroWebView.messageName, !didFinish else { return }
-            didFinish = true
-            let callback = onFinished
+            guard message.name == KireicchiIntroWebView.messageName,
+                  !didNotify,
+                  message.body as? String == KireicchiIntroWebView.eggTappedMessageBody
+            else { return }
+            didNotify = true
+            let callback = onEggTapped
             DispatchQueue.main.async {
                 callback()
             }
@@ -92,13 +100,17 @@ struct KireicchiIntroWebView: UIViewRepresentable {
 // MARK: - オンボーディング用フルスクリーン画面
 
 /// オンボーディング冒頭で「きれいっち誕生」の3Dアニメーションをフルスクリーン再生する画面。
-/// - アニメーションが最後まで再生されるか、ユーザーが「スキップ」をタップすると onFinished を呼ぶ
-/// - WebView側からの完了通知が万一届かない場合に備え、タイムアウトで自動的に先へ進める
-///   フォールバックを用意している（アニメーション本編は卵タップの間も含めて約26秒）
+/// - 卵がタップされると、誕生〜変身〜秩序の波〜完了までの演出時間を見込んで
+///   `eggTapToFinishDelay` 秒後に自動的に onFinished を呼ぶ。ユーザーが「スキップ」を
+///   タップした場合は待たずに即座に onFinished を呼ぶ
+/// - 卵が万一タップされない場合に備え、タイムアウトで自動的に先へ進める
+///   フォールバックを用意している
 struct KireicchiIntroAnimationView: View {
     var onFinished: () -> Void
 
     private static let fallbackTimeout: TimeInterval = 40
+    /// 卵タップから次画面へ自動遷移するまでの時間（誕生〜変身〜秩序の波〜完了の演出時間の見込み）
+    private static let eggTapToFinishDelay: TimeInterval = 14
 
     @State private var didFinish = false
 
@@ -106,7 +118,7 @@ struct KireicchiIntroAnimationView: View {
         ZStack(alignment: .topTrailing) {
             Color.black.ignoresSafeArea()
 
-            KireicchiIntroWebView(onFinished: finish)
+            KireicchiIntroWebView(onEggTapped: handleEggTapped)
                 .ignoresSafeArea()
 
             Button(action: finish) {
@@ -122,6 +134,14 @@ struct KireicchiIntroAnimationView: View {
         }
         .task {
             try? await Task.sleep(nanoseconds: UInt64(Self.fallbackTimeout * 1_000_000_000))
+            finish()
+        }
+    }
+
+    /// WebView側の'eggTapped'通知を受けたときの窓口。タップの瞬間ではなく、
+    /// 演出が一通り終わる頃合いを見込んで `eggTapToFinishDelay` 秒待ってから finish() を呼ぶ
+    private func handleEggTapped() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.eggTapToFinishDelay) {
             finish()
         }
     }
