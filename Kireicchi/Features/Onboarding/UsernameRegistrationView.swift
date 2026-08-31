@@ -6,6 +6,7 @@ struct UsernameRegistrationView: View {
 
     @State private var username: String = ""
     @State private var isSaving = false
+    @State private var errorMessage: String?
     @FocusState private var isFocused: Bool
 
     private let maxLength = 12
@@ -87,6 +88,14 @@ struct UsernameRegistrationView: View {
             }
         }
         .onAppear { isFocused = true }
+        .alert("登録できませんでした", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     private func register() {
@@ -94,8 +103,14 @@ struct UsernameRegistrationView: View {
         guard !name.isEmpty, !isSaving else { return }
         isSaving = true
         Task {
-            await deps.updateUsername(name)
-            hasRegisteredUsername = true
+            do {
+                try await deps.updateUsername(name)
+                hasRegisteredUsername = true
+            } catch {
+                isSaving = false
+                errorMessage = error.localizedDescription
+                print("[UsernameRegistrationView] register failed: \(error)")
+            }
         }
     }
 

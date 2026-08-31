@@ -7,7 +7,7 @@ final class FetchNotificationsUseCase: FetchNotificationsUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute() async throws -> [AppNotification] {
-        try await repository.fetchAll()
+    func execute(input: NotificationInput) async throws -> [AppNotification] {
+        try await repository.fetchAll(input: input)
     }
 }

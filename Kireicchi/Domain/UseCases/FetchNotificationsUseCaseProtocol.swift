@@ -1,5 +1,5 @@
 import Foundation
 
 protocol FetchNotificationsUseCaseProtocol {
-    func execute() async throws -> [AppNotification]
+    func execute(input: NotificationInput) async throws -> [AppNotification]
 }

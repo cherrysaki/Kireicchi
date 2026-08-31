@@ -1,33 +1,104 @@
 import Foundation
 import FirebaseFirestore
 
-/// AppNotification のうち .lowScoreWarning のみ、Firestore の実データ
-/// （users/{uid}/appNotifications。Cloud Functions の dailyCrisisNotifications が
-/// 危機レベル「注意」「家出」の間、毎日1件ずつ書き込む）に接続する。
-///
-/// .parentMessage / .friendRequest はまだ実データソースが無いため、ダミーデータの
-/// まま返す。将来の差し替え方針:
-/// - parentMessage: LINE Quick Reply連携の実装後、専用Repositoryに差し替え
-/// - friendRequest: フレンド機能の実装後、専用Repositoryに差し替え
+/// お知らせの実データを統合する Repository。
+/// - friendRequest: Firestore friendRequests（自分宛て・pending）
+/// - postcardReceived: 端末コレクション（input.receivedPostcards）＋ Firestore postcards の未取り込み分
+/// - captureReminder: 端末内情報（BuildLocalNotificationsUseCase）
+/// - lowScoreWarning: Firestore users/{uid}/appNotifications
+///   （Cloud Functions の dailyCrisisNotifications が危機レベル「注意」「家出」の間、毎日1件書き込む）
+/// - parentMessage: LINE→アプリ経路が未実装のため現状データ源なし
 final class NotificationRepository: NotificationRepositoryProtocol {
     private var db: Firestore { Firestore.firestore() }
+    private let friendRepository: FriendRepositoryProtocol
+    private let postcardRepository: PostcardRepositoryProtocol
+    private let readStore: NotificationReadStoreProtocol
+    private let buildLocalNotifications: BuildLocalNotificationsUseCaseProtocol
     private let authService: AuthServiceProtocol
 
-    init(authService: AuthServiceProtocol = AuthService()) {
+    init(
+        friendRepository: FriendRepositoryProtocol,
+        postcardRepository: PostcardRepositoryProtocol,
+        readStore: NotificationReadStoreProtocol,
+        buildLocalNotifications: BuildLocalNotificationsUseCaseProtocol,
+        authService: AuthServiceProtocol
+    ) {
+        self.friendRepository = friendRepository
+        self.postcardRepository = postcardRepository
+        self.readStore = readStore
+        self.buildLocalNotifications = buildLocalNotifications
         self.authService = authService
     }
 
-    func fetchAll() async throws -> [AppNotification] {
-        guard let uid = authService.currentUid else {
-            return Self.dummyNotifications
+    func fetchAll(input: NotificationInput) async throws -> [AppNotification] {
+        var items = buildLocalNotifications.execute(input: input)
+        items += postcardNotifications(from: input.receivedPostcards)
+
+        // Firestore 側は失敗しても端末内のお知らせは出す
+        if let uid = input.uid {
+            do {
+                items += try await fetchCrisisNotifications(uid: uid)
+            } catch {
+                print("[NotificationRepository] appNotifications failed: \(error)")
+            }
+
+            do {
+                let requests = try await friendRepository.fetchIncomingRequests(uid: uid)
+                items += requests.compactMap { request in
+                    guard let id = request.id else { return nil }
+                    return AppNotification(
+                        id: "friendRequest:\(id)",
+                        kind: .friendRequest,
+                        title: "フレンド申請が届いています",
+                        body: "「\(request.fromUsername)」さんからフレンド申請が届いています。",
+                        createdAt: request.createdAt,
+                        isRead: false
+                    )
+                }
+            } catch {
+                print("[NotificationRepository] friend requests failed: \(error)")
+            }
+
+            do {
+                let knownIds = Set(input.receivedPostcards.map(\.id))
+                let pending = try await postcardRepository.fetchIncoming(uid: uid)
+                    .filter { $0.id.map { !knownIds.contains($0) } ?? false }
+                items += postcardNotifications(from: pending.map {
+                    ReceivedPostcardSummary(id: $0.id ?? "", fromUsername: $0.fromUsername, sentAt: $0.createdAt)
+                })
+            } catch {
+                print("[NotificationRepository] postcards failed: \(error)")
+            }
         }
 
+        let readIds = readStore.readIds()
+        return items
+            .map { item in
+                var copy = item
+                copy.isRead = copy.isRead || readIds.contains(item.id)
+                return copy
+            }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func markAsRead(id: String) async throws {
+        readStore.markAsRead(id: id)
+        // 危機通知（appNotifications 由来）は Firestore 側の isRead も更新する。
+        // プレフィックス付きの派生ID（friendRequest: 等）はドキュメントが無いが、無視してよい。
+        if let uid = authService.currentUid, !id.contains(":") {
+            try? await db.collection("users").document(uid)
+                .collection("appNotifications").document(id)
+                .updateData(["isRead": true])
+        }
+    }
+
+    /// dailyCrisisNotifications が書き込む users/{uid}/appNotifications を取得する。
+    private func fetchCrisisNotifications(uid: String) async throws -> [AppNotification] {
         let snapshot = try await db.collection("users").document(uid)
             .collection("appNotifications")
             .order(by: "createdAt", descending: true)
             .getDocuments()
-
-        let lowScoreWarnings: [AppNotification] = snapshot.documents.compactMap { doc in
+        return snapshot.documents.compactMap { doc in
             let data = doc.data()
             guard let title = data["title"] as? String,
                   let body = data["body"] as? String,
@@ -41,36 +112,18 @@ final class NotificationRepository: NotificationRepositoryProtocol {
                 isRead: data["isRead"] as? Bool ?? false
             )
         }
-
-        return (lowScoreWarnings + Self.dummyNotifications)
-            .sorted { $0.createdAt > $1.createdAt }
     }
 
-    func markAsRead(id: String) async throws {
-        guard let uid = authService.currentUid else { return }
-        // .parentMessage/.friendRequest はダミーIDのためFirestoreに存在せず、
-        // 更新は失敗するが無視してよい（実データ接続後は自然に解消する）。
-        try? await db.collection("users").document(uid)
-            .collection("appNotifications").document(id)
-            .updateData(["isRead": true])
+    private func postcardNotifications(from postcards: [ReceivedPostcardSummary]) -> [AppNotification] {
+        postcards.map {
+            AppNotification(
+                id: "postcard:\($0.id)",
+                kind: .postcardReceived,
+                title: "ポストカードが届きました",
+                body: "「\($0.fromUsername)」さんからポストカードが届きました。",
+                createdAt: $0.sentAt,
+                isRead: false
+            )
+        }
     }
-
-    private static let dummyNotifications: [AppNotification] = [
-        AppNotification(
-            id: "dummy-parent-1",
-            kind: .parentMessage,
-            title: "保護者からのメッセージ",
-            body: "お片付けしようね！応援してるよ😊",
-            createdAt: Date().addingTimeInterval(-60 * 60 * 3),
-            isRead: false
-        ),
-        AppNotification(
-            id: "dummy-friend-1",
-            kind: .friendRequest,
-            title: "フレンド申請が届いています",
-            body: "「ゆっけ」さんからフレンド申請が届いています。",
-            createdAt: Date().addingTimeInterval(-60 * 60 * 5),
-            isRead: false
-        ),
-    ]
 }

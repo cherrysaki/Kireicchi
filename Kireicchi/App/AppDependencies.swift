@@ -32,7 +32,6 @@ enum ParentLinkError: LocalizedError {
 
 @MainActor
 final class AppDependencies: ObservableObject {
-    @Published var useMockConnectivity: Bool = false
     @Published var currentUser: AppUser? = nil
     @Published var authProvider: String = ""
     @Published var bootstrapError: String? = nil
@@ -45,6 +44,15 @@ final class AppDependencies: ObservableObject {
     private let unlinkParentUseCase: UnlinkParentUseCaseProtocol
     private let fetchNotificationsUseCase: FetchNotificationsUseCaseProtocol
     private let markNotificationAsReadUseCase: MarkNotificationAsReadUseCaseProtocol
+    private let userIdRepository: UserIdRepositoryProtocol
+    private let fetchFriendsUseCase: FetchFriendsUseCaseProtocol
+    private let searchFriendUseCase: SearchFriendUseCaseProtocol
+    private let sendFriendRequestUseCase: SendFriendRequestUseCaseProtocol
+    private let respondFriendRequestUseCase: RespondFriendRequestUseCaseProtocol
+    private let cancelFriendRequestUseCase: CancelFriendRequestUseCaseProtocol
+    private let removeFriendUseCase: RemoveFriendUseCaseProtocol
+    private let sendPostcardUseCase: SendPostcardUseCaseProtocol
+    private let syncPostcardsUseCase: SyncPostcardsUseCaseProtocol
 
     static let shared = AppDependencies()
 
@@ -65,15 +73,33 @@ final class AppDependencies: ObservableObject {
             repository: ParentLinkRepository()
         )
 
-        // NotificationRepository は fetch/markAsRead で状態を共有する必要があるため、
-        // 同一インスタンスを両UseCaseに渡す。.lowScoreWarning は Firestore
-        // （dailyCrisisNotifications Cloud Functionが書き込む users/{uid}/appNotifications）
-        // に接続済み。.parentMessage/.friendRequest はまだダミーのまま
-        // （NotificationRepository内部で保持）。それぞれの実データソースが揃ったら
-        // NotificationRepositoryProtocol に準拠した実装への差し替えで個別に対応できる。
-        let notificationRepository = NotificationRepository()
+        let userIdRepository = UserIdRepository()
+        let friendRepository = FriendRepository()
+        let postcardRepository = PostcardRepository()
+
+        // .lowScoreWarning は dailyCrisisNotifications Cloud Function が書き込む
+        // users/{uid}/appNotifications、友達申請・ポストカードは各Repository、
+        // 撮影リマインダーは端末内判定から統合して取得する。
+        let notificationRepository = NotificationRepository(
+            friendRepository: friendRepository,
+            postcardRepository: postcardRepository,
+            readStore: NotificationReadStore(),
+            buildLocalNotifications: BuildLocalNotificationsUseCase(),
+            authService: authService
+        )
         self.fetchNotificationsUseCase = FetchNotificationsUseCase(repository: notificationRepository)
         self.markNotificationAsReadUseCase = MarkNotificationAsReadUseCase(repository: notificationRepository)
+
+        self.userIdRepository = userIdRepository
+        self.fetchFriendsUseCase = FetchFriendsUseCase(repository: friendRepository)
+        self.searchFriendUseCase = SearchFriendUseCase(repository: userIdRepository)
+        self.sendFriendRequestUseCase = SendFriendRequestUseCase(repository: friendRepository)
+        self.respondFriendRequestUseCase = RespondFriendRequestUseCase(repository: friendRepository)
+        self.cancelFriendRequestUseCase = CancelFriendRequestUseCase(repository: friendRepository)
+        self.removeFriendUseCase = RemoveFriendUseCase(repository: friendRepository)
+
+        self.sendPostcardUseCase = SendPostcardUseCase(repository: postcardRepository)
+        self.syncPostcardsUseCase = SyncPostcardsUseCase(repository: postcardRepository)
     }
 
     func bootstrap() async {
@@ -86,9 +112,22 @@ final class AppDependencies: ObservableObject {
             )
             self.currentUser = user
             self.authProvider = session.provider
+            await ensureUserId(user)
         } catch {
             self.bootstrapError = "サーバーに接続できませんでした (\(error.localizedDescription))"
             print("[bootstrap] failed: \(error)")
+        }
+    }
+
+    /// ユーザーIDが未発行なら生成して users/{uid}.userId に保存する（失敗時はログのみ）。
+    private func ensureUserId(_ user: AppUser) async {
+        guard let uid = user.uid, user.userId == nil else { return }
+        do {
+            let userId = try await userIdRepository.generateAndReserve(uid: uid)
+            let updated = try await userRepository.update(uid: uid) { $0.userId = userId }
+            self.currentUser = updated
+        } catch {
+            print("[bootstrap] userId issue failed: \(error)")
         }
     }
 
@@ -106,33 +145,79 @@ final class AppDependencies: ObservableObject {
         }
     }
 
-    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String, username: String) async {
+    /// ユーザーIDを変更する場合、他人が使用中なら FriendError.userIdTaken、形式不正なら FriendError.invalidUserId を投げる。
+    func updateSettings(hour: Int, minute: Int, isEnabled: Bool, characterId: String, username: String, userId: String) async throws {
         guard let uid = currentUser?.uid else { return }
         let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
-        do {
-            let updated = try await userRepository.update(uid: uid) { user in
-                user.notificationSettings = NotificationSettingsData(hour: hour, minute: minute, isEnabled: isEnabled)
-                user.selectedCharacterId = characterId
-                user.username = trimmed.isEmpty ? nil : trimmed
-            }
-            self.currentUser = updated
-        } catch {
-            print("[updateSettings] failed: \(error)")
+        let normalizedUserId = UserIdRepository.normalize(userId)
+        let currentUserId = currentUser?.userId
+        if !normalizedUserId.isEmpty, normalizedUserId != currentUserId {
+            try await userIdRepository.change(to: normalizedUserId, uid: uid, previousUserId: currentUserId)
         }
+        let updated = try await userRepository.update(uid: uid) { user in
+            user.notificationSettings = NotificationSettingsData(hour: hour, minute: minute, isEnabled: isEnabled)
+            user.selectedCharacterId = characterId
+            user.username = trimmed.isEmpty ? nil : trimmed
+            if !normalizedUserId.isEmpty { user.userId = normalizedUserId }
+        }
+        self.currentUser = updated
     }
 
-    func updateUsername(_ username: String) async {
+    func updateUsername(_ username: String) async throws {
         guard let uid = currentUser?.uid else { return }
         let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        do {
-            let updated = try await userRepository.update(uid: uid) { user in
-                user.username = trimmed
-            }
-            self.currentUser = updated
-        } catch {
-            print("[updateUsername] failed: \(error)")
+        let updated = try await userRepository.update(uid: uid) { user in
+            user.username = trimmed
         }
+        self.currentUser = updated
+    }
+
+    var myFriendProfile: FriendProfile? {
+        guard let user = currentUser, let uid = user.uid else { return nil }
+        guard let username = user.username, !username.isEmpty else { return nil }
+        return FriendProfile(uid: uid, username: username, selectedCharacterId: user.selectedCharacterId, userId: user.userId)
+    }
+
+    func makeFriendsViewModel() -> FriendsViewModel {
+        FriendsViewModel(
+            myProfile: myFriendProfile,
+            myUid: currentUser?.uid,
+            fetchFriendsUseCase: fetchFriendsUseCase,
+            searchFriendUseCase: searchFriendUseCase,
+            sendFriendRequestUseCase: sendFriendRequestUseCase,
+            respondFriendRequestUseCase: respondFriendRequestUseCase,
+            cancelFriendRequestUseCase: cancelFriendRequestUseCase,
+            removeFriendUseCase: removeFriendUseCase
+        )
+    }
+
+    func makeSendPostcardViewModel(pixelArtData: Data, analysis: RoomAnalysis) -> SendPostcardViewModel {
+        let characterRaw = UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
+        return SendPostcardViewModel(
+            pixelArtData: pixelArtData,
+            score: analysis.score,
+            rank: analysis.rank.rawValue,
+            characterType: CharacterType(rawValue: characterRaw) ?? .character01,
+            characterState: analysis.characterState,
+            myProfile: myFriendProfile,
+            fetchFriendsUseCase: fetchFriendsUseCase,
+            sendPostcardUseCase: sendPostcardUseCase,
+            composePostcardImageUseCase: ComposePostcardImageUseCase()
+        )
+    }
+
+    func makePostcardCollectionViewModel(store: PostcardStoreProtocol) -> PostcardCollectionViewModel {
+        PostcardCollectionViewModel(
+            myUid: currentUser?.uid,
+            store: store,
+            syncPostcardsUseCase: syncPostcardsUseCase
+        )
+    }
+
+    func fetchIncomingFriendRequestCount() async throws -> Int {
+        guard let uid = currentUser?.uid else { return 0 }
+        return try await fetchFriendsUseCase.execute(uid: uid).incomingRequests.count
     }
 
     func generateInviteCode() async throws -> InviteCode {
@@ -153,35 +238,9 @@ final class AppDependencies: ObservableObject {
         OpenAIClient()
     }
 
-    func currentPeerSession() -> PeerSessionProtocol {
-        if useMockConnectivity {
-            return MockPeerSession()
-        } else {
-            return PeerSession()
-        }
-    }
 
-    func currentDistanceTracker() -> NearbyDistanceTrackerProtocol {
-        if useMockConnectivity {
-            return MockNearbyDistanceTracker()
-        } else {
-            return NearbyDistanceTracker()
-        }
-    }
-
-    func makeFriendVisitCoordinator() -> FriendVisitCoordinator {
-        FriendVisitCoordinator(
-            peerSession: currentPeerSession(),
-            distanceTracker: currentDistanceTracker()
-        )
-    }
-
-    func toggleMockConnectivity() {
-        useMockConnectivity.toggle()
-    }
-
-    func fetchNotifications() async throws -> [AppNotification] {
-        try await fetchNotificationsUseCase.execute()
+    func fetchNotifications(input: NotificationInput) async throws -> [AppNotification] {
+        try await fetchNotificationsUseCase.execute(input: input)
     }
 
     func markNotificationAsRead(id: String) async throws {

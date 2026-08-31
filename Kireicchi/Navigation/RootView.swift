@@ -42,11 +42,14 @@ struct RootView: View {
                         HistoryView(viewModel: HistoryViewModel(
                             historyStore: RoomHistoryStore(context: modelContext)
                         ))
-                    case .friendVisit:
-                        FriendVisitView(
-                            myDisplayName: deps.currentUser?.username ?? deps.currentUser?.displayName ?? "私",
-                            myCharacterId: UserDefaults.standard.string(forKey: "selectedCharacterID") ?? CharacterType.character01.rawValue
+                    case .postcards:
+                        PostcardCollectionView(
+                            viewModel: deps.makePostcardCollectionViewModel(
+                                store: PostcardStore(context: modelContext)
+                            )
                         )
+                    case .postcardDetail(let record):
+                        PostcardDetailView(record: record)
                     case .recordDetail(let record):
                         RecordDetailView(record: record)
                     }

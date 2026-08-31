@@ -5,9 +5,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // users/{uid}: 本人のみ許可（未認証・他人は拒否）
+    // users/{uid}: 書き込みと一覧は本人のみ。単体取得(get)はともだち表示のため認証済みユーザーに許可。
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow get: if request.auth != null;
+      allow list, write: if request.auth != null && request.auth.uid == userId;
 
       // users/{uid} 配下の全サブコレクション・ドキュメント（roomScores 等）も本人限定
       match /{document=**} {
@@ -33,6 +34,88 @@ service cloud.firestore {
         && request.resource.data.expiresAt <= request.time + duration.value(15, 'm')
         && request.resource.data.expiresAt > request.time;
       allow update, delete, get, list: if false;
+    }
+
+    // userIds/{userId}: 英数字ユーザーIDの一意性担保とともだち検索用。
+    // 取得は認証済み全員。作成は自分の uid でのみ（英数字4〜16文字）。
+    // ID変更時に旧IDの予約を自分で削除できる。他人の予約は触れない。
+    match /userIds/{userId} {
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && userId.matches('^[A-Z0-9]{4,16}$');
+      allow delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // friendRequests/{fromUid}_{toUid}: ともだち申請。
+    // get は「存在チェック」（申請前の重複確認）で未存在ドキュメントにも走るため、
+    // resource == null（未存在）を許可しないと permission denied になる点に注意。
+    match /friendRequests/{requestId} {
+      allow get: if request.auth != null
+        && (resource == null
+            || resource.data.fromUid == request.auth.uid
+            || resource.data.toUid == request.auth.uid);
+      allow list: if request.auth != null
+        && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid != request.auth.uid
+        && request.resource.data.status == "pending"
+        && requestId == request.resource.data.fromUid + "_" + request.resource.data.toUid;
+      // 受信者のみ status を accepted / declined に変更できる（他フィールドは不変）
+      allow update: if request.auth != null
+        && resource.data.toUid == request.auth.uid
+        && resource.data.status == "pending"
+        && request.resource.data.status in ["accepted", "declined"]
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "updatedAt"]);
+      // ともだち削除時に「あれば消す」で未存在ドキュメントの delete も走るため resource == null を許可
+      allow delete: if request.auth != null
+        && (resource == null
+            || resource.data.fromUid == request.auth.uid
+            || resource.data.toUid == request.auth.uid);
+    }
+
+    // friendships/{uidA}_{uidB}: 成立したともだち関係（members はソート済み2件）。
+    // 作成は申請の受信者が、同一バッチで該当 friendRequest を accepted にした場合のみ。
+    match /friendships/{friendshipId} {
+      // get は申請前の「もう友達か」の存在チェックにも使うため未存在（resource == null）を許可
+      allow get: if request.auth != null
+        && (resource == null || request.auth.uid in resource.data.members);
+      allow list, delete: if request.auth != null
+        && request.auth.uid in resource.data.members;
+      allow create: if request.auth != null
+        && request.auth.uid in request.resource.data.members
+        && request.resource.data.members.size() == 2
+        && friendshipId == request.resource.data.members[0] + "_" + request.resource.data.members[1]
+        && acceptedRequestExists(request.resource.data.members, request.auth.uid);
+      allow update: if false;
+    }
+
+    function acceptedRequestExists(members, me) {
+      let other = members[0] == me ? members[1] : members[0];
+      let path = /databases/$(database)/documents/friendRequests/$(other + "_" + me);
+      return existsAfter(path)
+        && getAfter(path).data.status == "accepted"
+        && getAfter(path).data.toUid == me;
+    }
+
+    // postcards/{postcardId}: ともだちに送る部屋のドット絵ポストカード。
+    // 作成は送信者本人かつ friendships が成立している相手宛のみ。読み取り・削除は受信者のみ。
+    match /postcards/{postcardId} {
+      allow create: if request.auth != null
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid != request.auth.uid
+        && exists(/databases/$(database)/documents/friendships/$(friendshipId(request.resource.data.fromUid, request.resource.data.toUid)));
+      allow read, delete: if request.auth != null
+        && resource.data.toUid == request.auth.uid;
+      allow update: if false;
+    }
+
+    function friendshipId(a, b) {
+      return a < b ? a + "_" + b : b + "_" + a;
     }
 
     // 上記のいずれにもマッチしないパスはすべて拒否（デフォルト deny）。

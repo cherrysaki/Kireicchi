@@ -3,7 +3,7 @@ import SwiftUI
 struct HomeTabBar: View {
     let onHome: () -> Void
     let onCapture: () -> Void
-    let onFriends: () -> Void
+    let onPostcards: () -> Void
     var canCapture: Bool = true
 
     var body: some View {
@@ -27,8 +27,8 @@ struct HomeTabBar: View {
 
                 Spacer()
 
-                Button(action: onFriends) {
-                    Image(systemName: "figure.2")
+                Button(action: onPostcards) {
+                    Image(systemName: "envelope.fill")
                         .font(DesignSystem.Font.title3)
                         .foregroundColor(DesignSystem.Color.primaryDark)
                         .frame(width: 56, height: 56)
@@ -61,7 +61,7 @@ struct HomeTabBar: View {
         DesignSystem.Color.background.ignoresSafeArea()
         VStack {
             Spacer()
-            HomeTabBar(onHome: {}, onCapture: {}, onFriends: {})
+            HomeTabBar(onHome: {}, onCapture: {}, onPostcards: {})
                 .padding(.bottom, 16)
         }
     }

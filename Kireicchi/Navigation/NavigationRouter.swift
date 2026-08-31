@@ -13,7 +13,8 @@ final class NavigationRouter: ObservableObject {
         case settings
         case cleanupTimer
         case history
-        case friendVisit
+        case postcards
+        case postcardDetail(record: PostcardRecord)
         case recordDetail(record: RoomHistoryRecord)
     }
     

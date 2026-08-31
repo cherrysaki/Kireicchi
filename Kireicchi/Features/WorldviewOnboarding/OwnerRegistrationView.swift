@@ -6,6 +6,7 @@ struct OwnerRegistrationView: View {
 
     @State private var ownerName: String = ""
     @State private var isSaving = false
+    @State private var errorMessage: String?
     @FocusState private var isNameFocused: Bool
 
     private let maxLength = 12
@@ -71,6 +72,14 @@ struct OwnerRegistrationView: View {
             }
         }
         .onAppear { isNameFocused = true }
+        .alert("登録できませんでした", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     private func register() {
@@ -78,8 +87,14 @@ struct OwnerRegistrationView: View {
         guard !name.isEmpty, !isSaving else { return }
         isSaving = true
         Task {
-            await deps.updateUsername(name)
-            hasCompletedOwnerRegistration = true
+            do {
+                try await deps.updateUsername(name)
+                hasCompletedOwnerRegistration = true
+            } catch {
+                isSaving = false
+                errorMessage = error.localizedDescription
+                print("[OwnerRegistrationView] register failed: \(error)")
+            }
         }
     }
 }
