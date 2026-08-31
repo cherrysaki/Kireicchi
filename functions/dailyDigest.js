@@ -1,6 +1,8 @@
 const { getFirestore } = require("firebase-admin/firestore");
 const { logger } = require("firebase-functions");
 const { pushText } = require("./lineMessagingApi");
+const { fetchCrisisLevel } = require("./crisisLevel");
+const { buildDigestMessage } = require("./digestMessages");
 
 /**
  * dateがJST(Asia/Tokyo)で「今日」かどうかを判定する。
@@ -14,8 +16,11 @@ function isTodayInJst(date) {
 }
 
 /**
- * 1人の保護者(parentLinks 1件)に対して、対象の子の直近スコアが「今日」であれば
- * LINE Pushでダイジェストメッセージを送る。今日の更新が無ければ何もしない。
+ * 1人の保護者(parentLinks 1件)に対して、対象の子の危機レベル(crisisLevel.js)に
+ * 応じたLINE Pushダイジェストメッセージを送る。
+ * 「通常」の場合は従来通り、今日の撮影が無ければ何も送らない
+ * （即時通知は今回のスコープ外のため、19:00時点で「今日はまだ通常運転」なら静か
+ * にしておく）。「注意」「家出」の場合は、今日の撮影の有無に関わらず送る。
  */
 async function digestForLink(db, link, channelAccessToken) {
   const { childId, lineUserId } = link;
@@ -24,35 +29,28 @@ async function digestForLink(db, link, channelAccessToken) {
     return;
   }
 
-  const scoreSnap = await db
-    .collection("users")
-    .doc(childId)
-    .collection("roomScores")
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .get();
+  const crisis = await fetchCrisisLevel(db, childId);
 
-  if (scoreSnap.empty) {
-    logger.info("[dailyDigest] no roomScores yet, skip", { childId });
-    return;
-  }
-
-  const scoreDoc = scoreSnap.docs[0].data();
-  const createdAt = scoreDoc.createdAt;
-  if (!createdAt || !isTodayInJst(createdAt.toDate())) {
-    logger.info("[dailyDigest] latest score is not from today(JST), skip", { childId });
-    return;
+  if (crisis.level === "normal") {
+    const createdAt = crisis.latestScore?.createdAt;
+    if (!createdAt || !isTodayInJst(createdAt.toDate())) {
+      logger.info("[dailyDigest] normal level and no capture today(JST), skip", { childId });
+      return;
+    }
   }
 
   const userSnap = await db.collection("users").doc(childId).get();
   const username = userSnap.exists ? userSnap.data().username : undefined;
-  const text = username
-    ? `${username}ちゃんのお部屋、今日のスコアは${scoreDoc.score}点でした`
-    : `お子さんのお部屋、今日のスコアは${scoreDoc.score}点でした`;
+  const text = buildDigestMessage(crisis.level, crisis.reasons, crisis.latestScore?.score, username);
 
   try {
     await pushText(lineUserId, text, channelAccessToken);
-    logger.info("[dailyDigest] pushed", { childId, lineUserId, score: scoreDoc.score });
+    logger.info("[dailyDigest] pushed", {
+      childId,
+      lineUserId,
+      level: crisis.level,
+      reasons: crisis.reasons,
+    });
   } catch (error) {
     logger.warn("[dailyDigest] push failed", {
       childId,

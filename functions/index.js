@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 const { verifyLineSignature } = require("./lineSignature");
 const { dispatchLineEvent } = require("./lineEventHandlers");
 const { runDailyDigest } = require("./dailyDigest");
+const { runDailyCrisisNotifications } = require("./dailyCrisisNotifications");
 const { unlinkParentLinks } = require("./parentLinking");
 
 admin.initializeApp();
@@ -63,6 +64,23 @@ exports.dailyScoreDigest = onSchedule(
   },
   async () => {
     await runDailyDigest(LINE_CHANNEL_ACCESS_TOKEN.value());
+  }
+);
+
+/**
+ * 1日1回、危機レベルが「注意」または「家出」の全ユーザーにアプリ内お知らせ
+ * （AppNotification .lowScoreWarning）を生成するバッチ。dailyScoreDigestと
+ * 同じスケジュールで実行し、判定ロジック（crisisLevel.js）を共有する。
+ * parentLinks の有無に依らず全ユーザーが対象（LINE未連携でも生成される）。
+ */
+exports.dailyCrisisNotifications = onSchedule(
+  {
+    schedule: DAILY_DIGEST_SCHEDULE,
+    timeZone: DAILY_DIGEST_TIME_ZONE,
+    region: "asia-northeast1",
+  },
+  async () => {
+    await runDailyCrisisNotifications();
   }
 );
 
