@@ -6,13 +6,15 @@ const { replyText } = require("./lineMessagingApi");
 // (CreateInviteCodeUseCase.generateCode と同じアルファベット)。
 const INVITE_CODE_PATTERN = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/;
 
+const REDEEM_SUCCESS_MESSAGE = "連携が完了しました✨";
+
 const REDEEM_FAILURE_MESSAGES = {
   not_found:
-    "入力されたコードが見つかりませんでした。お子さまの「きれいっち」アプリの設定画面で発行された6桁のコードをそのまま送信してください。",
+    "入力されたコードが見つかりませんでした💦\nお子さまの「きれいっち」アプリの設定画面で発行された6桁のコードを、そのまま送信してください！\n例：7XQKPT",
   already_used:
-    "このコードはすでに使用されています。新しい連携コードをお子さまの端末で発行してもらってください。",
+    "このコードはすでに使用されています💦\n新しい連携コードをお子さまの端末で発行してください！",
   expired:
-    "このコードの有効期限が切れています(発行から10分間有効です)。お子さまの端末で新しいコードを発行してもらい、もう一度お試しください。",
+    "このコードの有効期限が切れています(発行から10分間有効です)💦\nお子さまの端末で新しいコードを発行し、もう一度お試しください✨",
 };
 
 /**
@@ -68,7 +70,7 @@ async function handleMessageEvent(event, deps) {
   });
 
   if (event.replyToken) {
-    await replyText(event.replyToken, "連携が完了しました", deps.channelAccessToken);
+    await replyText(event.replyToken, REDEEM_SUCCESS_MESSAGE, deps.channelAccessToken);
   }
 }
 
