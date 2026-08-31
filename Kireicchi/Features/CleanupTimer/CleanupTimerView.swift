@@ -16,63 +16,22 @@ struct CleanupTimerView: View {
         ZStack {
             DesignSystem.Color.background.ignoresSafeArea(.all)
 
+            // 上部バーと下部ボタン群は状態によらず固定し、中央だけを差し替える
             GeometryReader { geo in
-                let metrics = TimerMetrics(size: geo.size, isRunning: viewModel.isRunning)
+                VStack(spacing: 0) {
+                    topBar
 
-                VStack(spacing: viewModel.isRunning ? 16 : 24) {
-                    // 戻るボタン（画面上部）
-                    HStack {
-                        Button(action: {
-                            navigationRouter.navigateBack()
-                        }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(DesignSystem.Font.title3)
-                                Text("戻る")
-                                    .font(DesignSystem.Font.subheadline)
-                            }
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+                    stateContent(width: geo.size.width - 32, height: geo.size.height - Self.fixedChromeHeight)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                    if !viewModel.isRunning {
-                        Text("お片付けタイマー")
-                            .font(DesignSystem.Font.pixelMedium)
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                    }
+                    controlButton
+                        .padding(.top, 12)
 
-                    Spacer()
-
-                    if !viewModel.isRunning {
-                        timePickerSection
-                    }
-
-                    if viewModel.isRunning {
-                        VStack(spacing: 16) {
-                            Text("お片付け中...")
-                                .font(DesignSystem.Font.pixelMedium)
-                                .foregroundColor(DesignSystem.Color.primary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-
-                            timerDisplaySection(metrics)
-                        }
-                    } else {
-                        timerDisplaySection(metrics)
-                    }
-
-                    Spacer().frame(height: viewModel.isRunning ? 8 : 16)
-
-                    timerControlSection
-
-                    Spacer()
-
-                    bottomButtonSection
+                    retakeButton
+                        .padding(.top, 16)
+                        .padding(.bottom, 16)
                 }
-                .padding(16)
+                .padding(.horizontal, 16)
                 .frame(width: geo.size.width, height: geo.size.height)
             }
         }
@@ -97,15 +56,75 @@ struct CleanupTimerView: View {
         }
     }
 
-    /// 画面サイズから実行中の円・文字サイズを決める。開始前は従来の固定値。
+    /// 上部バー＋下部ボタン群のおおよその高さ。中央コンテンツに使える高さの見積もりに使う。
+    private static let fixedChromeHeight: CGFloat = 44 + 12 + 72 + 16 + 24 + 16
+
+    // MARK: - Top
+
+    private var topBar: some View {
+        HStack {
+            Button(action: {
+                navigationRouter.navigateBack()
+            }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left")
+                        .font(DesignSystem.Font.title3)
+                    Text("戻る")
+                        .font(DesignSystem.Font.subheadline)
+                }
+                .foregroundColor(DesignSystem.Color.textPrimary)
+            }
+            Spacer()
+        }
+        .padding(.top, 8)
+        .frame(height: 44)
+    }
+
+    // MARK: - Center
+
+    @ViewBuilder
+    private func stateContent(width: CGFloat, height: CGFloat) -> some View {
+        let metrics = TimerMetrics(width: width, height: height, isRunning: viewModel.isRunning)
+
+        if viewModel.isRunning {
+            VStack(spacing: 16) {
+                Text("お片付け中...")
+                    .font(DesignSystem.Font.pixelMedium)
+                    .foregroundColor(DesignSystem.Color.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                Text(timeString(from: viewModel.remainingSeconds))
+                    .font(.system(size: metrics.fontSize, weight: .bold, design: .monospaced))
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+
+                timerCircle(metrics)
+            }
+        } else {
+            VStack(spacing: 16) {
+                Text("お片付けタイマー")
+                    .font(DesignSystem.Font.pixelMedium)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+
+                timePickerSection
+
+                timerCircle(metrics)
+            }
+        }
+    }
+
+    /// 中央コンテンツに使える幅・高さから円・文字サイズを決める。開始前は従来の固定値。
     private struct TimerMetrics {
         let circleSize: CGFloat
         let lineWidth: CGFloat
         let fontSize: CGFloat
 
-        init(size: CGSize, isRunning: Bool) {
+        init(width: CGFloat, height: CGFloat, isRunning: Bool) {
             if isRunning {
-                circleSize = min(size.width - 48, size.height * 0.40, 300)
+                // 120 = タイトル＋残り時間＋spacing の概算
+                circleSize = max(160, min(width - 16, height - 120, 300))
                 lineWidth = 16
                 fontSize = 44
             } else {
@@ -134,59 +153,51 @@ struct CleanupTimerView: View {
         }
     }
 
-    private func timerDisplaySection(_ metrics: TimerMetrics) -> some View {
-        VStack(spacing: 12) {
+    private func timerCircle(_ metrics: TimerMetrics) -> some View {
+        ZStack {
+            Circle()
+                .stroke(DesignSystem.Color.secondary.opacity(0.3), lineWidth: metrics.lineWidth)
+                .frame(width: metrics.circleSize, height: metrics.circleSize)
+
+            Circle()
+                .trim(from: 0, to: viewModel.progress)
+                .stroke(
+                    DesignSystem.Color.primary,
+                    style: StrokeStyle(lineWidth: metrics.lineWidth, lineCap: .round)
+                )
+                .frame(width: metrics.circleSize, height: metrics.circleSize)
+                .rotationEffect(.degrees(-90))
+                .animation(.linear(duration: 0.5), value: viewModel.progress)
+
             if viewModel.isRunning {
-                Text(timeString(from: viewModel.remainingSeconds))
-                    .font(.system(size: metrics.fontSize, weight: .bold, design: .monospaced))
-                    .foregroundColor(DesignSystem.Color.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-            }
-
-            ZStack {
-                Circle()
-                    .stroke(DesignSystem.Color.secondary.opacity(0.3), lineWidth: metrics.lineWidth)
-                    .frame(width: metrics.circleSize, height: metrics.circleSize)
-
-                Circle()
-                    .trim(from: 0, to: viewModel.progress)
-                    .stroke(
-                        DesignSystem.Color.primary,
-                        style: StrokeStyle(lineWidth: metrics.lineWidth, lineCap: .round)
-                    )
-                    .frame(width: metrics.circleSize, height: metrics.circleSize)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.5), value: viewModel.progress)
-
-                if viewModel.isRunning {
-                    CharacterView(
-                        characterType: .character01,
-                        characterState: nil,
-                        forceGif: .cheer
-                    )
-                    .frame(width: metrics.circleSize * 0.85, height: metrics.circleSize * 0.85)
-                    .transition(.opacity)
-                } else {
-                    VStack {
-                        Text(timeString(from: viewModel.remainingSeconds))
-                            .font(.system(size: metrics.fontSize, weight: .bold, design: .monospaced))
-                            .foregroundColor(DesignSystem.Color.textPrimary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                        Text("MM:SS")
-                            .font(DesignSystem.Font.pixelSmall)
-                            .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-                    }
-                    .transition(.opacity)
+                CharacterView(
+                    characterType: .character01,
+                    characterState: nil,
+                    forceGif: .cheer
+                )
+                .frame(width: metrics.circleSize * 0.85, height: metrics.circleSize * 0.85)
+                .transition(.opacity)
+            } else {
+                VStack {
+                    Text(timeString(from: viewModel.remainingSeconds))
+                        .font(.system(size: metrics.fontSize, weight: .bold, design: .monospaced))
+                        .foregroundColor(DesignSystem.Color.textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Text("MM:SS")
+                        .font(DesignSystem.Font.pixelSmall)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
                 }
+                .transition(.opacity)
             }
-            .frame(width: metrics.circleSize + metrics.lineWidth, height: metrics.circleSize + metrics.lineWidth)
-            .animation(.easeInOut(duration: 0.2), value: viewModel.isRunning)
         }
+        .frame(width: metrics.circleSize + metrics.lineWidth, height: metrics.circleSize + metrics.lineWidth)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isRunning)
     }
 
-    private var timerControlSection: some View {
+    // MARK: - Bottom
+
+    private var controlButton: some View {
         Button(action: {
             if viewModel.isRunning {
                 viewModel.pause()
@@ -197,24 +208,21 @@ struct CleanupTimerView: View {
             Text(viewModel.isRunning ? "一時停止" : "始める")
                 .font(DesignSystem.Font.pixelMedium)
                 .foregroundColor(DesignSystem.Color.textOnPrimary)
-                .padding(.horizontal, 40)
+                .frame(width: 220)
                 .padding(.vertical, 20)
                 .background(DesignSystem.Color.primary)
                 .clipShape(PixelCornerRectangle(cornerRadius: 18))
         }
     }
 
-    private var bottomButtonSection: some View {
-        VStack(spacing: 16) {
-            Button(action: {
-                navigationRouter.popToRoot()
-                navigationRouter.navigate(to: .capture)
-            }) {
-                Text("もう一度撮影")
-                    .font(DesignSystem.Font.caption)
-                    .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
-            }
-            .padding(.bottom, 16)
+    private var retakeButton: some View {
+        Button(action: {
+            navigationRouter.popToRoot()
+            navigationRouter.navigate(to: .capture)
+        }) {
+            Text("もう一度撮影")
+                .font(DesignSystem.Font.caption)
+                .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.6))
         }
     }
 
