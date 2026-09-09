@@ -1,7 +1,10 @@
 const { getStorage } = require("firebase-admin/storage");
 const { logger } = require("firebase-functions");
 
-// 署名付きURLの有効期限（日数）。仮の初期値で、ここを変更するだけで調整できる。
+// 署名付きURLの有効期限（日数）。
+// GCSのv4署名付きURLは有効期限の上限が7日と決まっており、これ以上には延長できない
+// （超える値を指定するとgetSignedUrlがエラーになる）。恒久URL・公開バケットにしない
+// 方針を維持するため、上限いっぱいの7日を初期値としている。
 const SIGNED_URL_EXPIRY_DAYS = 7;
 
 /**
