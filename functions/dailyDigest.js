@@ -18,18 +18,20 @@ const { getSignedRoomScoreImageUrl } = require("./roomScoreImage");
  */
 
 /**
- * LINE pushの messages 配列を組み立てる。テキストを1つ目、画像（あれば）を2つ目にする
- * のは、プッシュ通知のプレビューで内容が読めるようにするため。Firestore/Storageに
- * 依存しない純粋関数にして単体で検証しやすくしている。
+ * LINE pushの messages 配列を組み立てる。画像（あれば）を1つ目、テキストを2つ目にする
+ * （トーク画面での見え方を優先し、写真の下に説明が続く順序にしている）。画像が無い
+ * 日はテキストのみになる。Firestore/Storageに依存しない純粋関数にして単体で
+ * 検証しやすくしている。
  *
  * @param {string} text
  * @param {string|null} imageUrl 署名付きURL、または画像を添付しない場合は null
  */
 function assembleDigestMessages(text, imageUrl) {
-  const messages = [{ type: "text", text }];
+  const messages = [];
   if (imageUrl) {
     messages.push(buildImageMessage(imageUrl));
   }
+  messages.push({ type: "text", text });
   return messages;
 }
 
