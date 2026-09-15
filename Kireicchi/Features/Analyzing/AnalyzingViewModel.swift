@@ -175,9 +175,10 @@ final class AnalyzingViewModel: AnalyzingViewModelProtocol, ObservableObject {
                 let score = analysis.score
                 let rank = CleanlinessRank.fromScore(analysis.score).rawValue
                 let repository = roomScoreRepository
+                let imageDataForUpload = pixelData
                 Task {
                     do {
-                        try await repository.save(uid: uid, score: score, rank: rank)
+                        try await repository.save(uid: uid, score: score, rank: rank, pixelArtImageData: imageDataForUpload)
                     } catch {
                         print("[roomScore] Firestore への書き込みに失敗: \(error)")
                     }

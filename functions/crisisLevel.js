@@ -19,6 +19,12 @@ const CRISIS_THRESHOLDS = {
   WARNING_SCORE_THRESHOLD: 40, // 直近スコアが全てこの点未満で「注意」
 };
 
+// fetchCrisisLevel が取得する roomScores の件数上限。危機レベル判定自体は先頭
+// WARNING_SCORE_STREAK 件しか使わないが、連続撮影日数（consecutiveCaptureDays.js）の
+// 算出にも同じ取得結果を使い回すため、長期間の連続記録も数えられるよう大きめに
+// 取っている（Firestore読み取りを二重にしないため）。仮の初期値で調整可能。
+const ROOM_SCORES_FETCH_LIMIT = 400;
+
 /**
  * 与えられた直近スコア群（createdAt降順、最大 WARNING_SCORE_STREAK 件）から
  * 危機レベルを判定する。Firestoreに依存しない純粋関数にして単体で検証しやすくしている。
@@ -65,6 +71,10 @@ function computeCrisisLevel(scores, now = new Date()) {
 
 /**
  * Firestoreから直近の roomScores を取得し、危機レベルを判定する。
+ * 戻り値の scores には取得した生データ（createdAt降順、最大 ROOM_SCORES_FETCH_LIMIT 件）を
+ * そのまま含める。連続撮影日数の算出（consecutiveCaptureDays.js）が同じ取得結果を
+ * 使い回せるようにするためで、危機レベル判定自体の挙動には影響しない
+ * （computeCrisisLevel は内部で先頭 WARNING_SCORE_STREAK 件だけを見る）。
  *
  * @param {FirebaseFirestore.Firestore} db
  * @param {string} childId
@@ -76,11 +86,11 @@ async function fetchCrisisLevel(db, childId, now = new Date()) {
     .doc(childId)
     .collection("roomScores")
     .orderBy("createdAt", "desc")
-    .limit(CRISIS_THRESHOLDS.WARNING_SCORE_STREAK)
+    .limit(ROOM_SCORES_FETCH_LIMIT)
     .get();
 
   const scores = snap.docs.map((doc) => doc.data());
-  return computeCrisisLevel(scores, now);
+  return { ...computeCrisisLevel(scores, now), scores };
 }
 
-module.exports = { CRISIS_THRESHOLDS, computeCrisisLevel, fetchCrisisLevel };
+module.exports = { CRISIS_THRESHOLDS, ROOM_SCORES_FETCH_LIMIT, computeCrisisLevel, fetchCrisisLevel };
