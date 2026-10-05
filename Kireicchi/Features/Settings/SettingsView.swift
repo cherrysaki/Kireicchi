@@ -53,7 +53,6 @@ struct SettingsView: View {
                         userIdSection
                         captureTimeSection
                         notificationToggleSection
-                        parentLinkSection
                         commentSection
 
                         #if DEBUG
