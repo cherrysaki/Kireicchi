@@ -55,7 +55,6 @@ struct SettingsView: View {
                         notificationToggleSection
                         parentLinkSection
                         commentSection
-                        AppleLoginSection()
 
                         #if DEBUG
                         debugSection
