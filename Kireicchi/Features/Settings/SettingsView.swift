@@ -340,15 +340,7 @@ struct SettingsView: View {
                 .disabled(isUnlinkingParent)
                 #endif
             }
-            .padding(14)
-            .pixelSquareCard(
-                fill: DesignSystem.Color.surface,
-                border: DesignSystem.Color.primary,
-                borderWidth: 2,
-                shadowOffset: 3
-            )
             .padding(.horizontal)
-            .padding(.trailing, 3)
         }
         #if DEBUG
         .confirmationDialog(
