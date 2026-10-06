@@ -8,6 +8,11 @@ struct AnalysisResultView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [LatestRoomRecord]
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
     
     private var pixelArtImage: UIImage {
         UIImage(data: pixelArtData) ?? UIImage(systemName: "photo")!
@@ -79,9 +84,8 @@ struct AnalysisResultView: View {
     private var characterCommentRow: some View {
         HStack(spacing: -12) {
             CharacterView(
-                characterType: .character01,
-                characterState: nil,
-                forceGif: .cheer
+                characterType: selectedCharacterType,
+                playbackMode: .fixed(.cheer)
             )
             .frame(width: 160, height: 160)
             .padding(.leading, -24)
@@ -164,7 +168,10 @@ struct AnalysisResultView: View {
     
     private var missionEmptyState: some View {
         VStack(spacing: 12) {
-            CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
+            CharacterView(
+                characterType: selectedCharacterType,
+                playbackMode: .fixed(.cheer)
+            )
                 .frame(width: 120, height: 120)
             Text(allMissions.isEmpty ? "きれいなお部屋だね！" : "全部終わった！")
                 .font(DesignSystem.Font.title2)

@@ -26,7 +26,7 @@ struct OwnerRegistrationView: View {
                     .foregroundColor(DesignSystem.Color.textPrimary)
                     .multilineTextAlignment(.center)
 
-                CharacterView(characterType: .character01, characterState: .happy)
+                CharacterView(characterType: .character01, mood: .happy)
                     .frame(width: 160, height: 160)
                     .padding(.top,  -32)
                     .padding(.bottom,  -32)

@@ -12,6 +12,11 @@ struct SwipeMissionStack: View {
     @State private var dragOffset: CGSize = .zero
     @State private var exitingId: String?
     @State private var exitOffset: CGSize = .zero
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
 
     private let swipeThreshold: CGFloat = 100
     private let maxBackCards = 2
@@ -57,7 +62,10 @@ struct SwipeMissionStack: View {
 
     private var emptyState: some View {
         VStack(spacing: 14) {
-            CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
+            CharacterView(
+                characterType: selectedCharacterType,
+                playbackMode: .fixed(.cheer)
+            )
                 .frame(width: 140, height: 140)
             Text("全部終わった！")
                 .font(DesignSystem.Font.title2)

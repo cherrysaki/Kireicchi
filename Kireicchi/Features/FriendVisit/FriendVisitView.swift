@@ -106,7 +106,8 @@ struct FriendVisitView: View {
 
             CharacterView(
                 characterType: myCharacterType,
-                characterState: .happy
+                mood: .happy,
+                playbackMode: .homeIdle
             )
             .frame(width: 200, height: 200)
             .offset(x: isVisitingState ? -80 : 0)
@@ -115,8 +116,7 @@ struct FriendVisitView: View {
             if let friend = viewModel.friend, isVisitingState {
                 CharacterView(
                     characterType: friend.characterType,
-                    characterState: .happy,
-                    forceGif: .cheer
+                    playbackMode: .fixed(.cheer)
                 )
                 .frame(width: 200, height: 200)
                 .offset(x: 80)

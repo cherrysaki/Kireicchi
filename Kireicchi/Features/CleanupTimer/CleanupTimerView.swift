@@ -1,6 +1,12 @@
 import SwiftUI
 
 struct CleanupTimerView: View {
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
+
     @StateObject private var viewModel: CleanupTimerViewModel
     @EnvironmentObject var navigationRouter: NavigationRouter
 
@@ -137,9 +143,8 @@ struct CleanupTimerView: View {
 
                 if viewModel.isRunning {
                     CharacterView(
-                        characterType: .character01,
-                        characterState: nil,
-                        forceGif: .cheer
+                        characterType: selectedCharacterType,
+                        playbackMode: .fixed(.cheer)
                     )
                     .frame(width: circleSize * 0.85, height: circleSize * 0.85)
                     .transition(.opacity)

@@ -21,7 +21,7 @@ struct UsernameRegistrationView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                CharacterView(characterType: .character01, characterState: .happy)
+                CharacterView(characterType: .character01, mood: .happy)
                     .frame(width: 220, height: 220)
 
                 VStack(spacing: 8) {

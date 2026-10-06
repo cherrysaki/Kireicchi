@@ -19,7 +19,7 @@ struct AppUser: Codable, Equatable {
             authProvider: authProvider,
             displayName: nil,
             username: nil,
-            selectedCharacterId: "cat",
+            selectedCharacterId: CharacterType.character01.rawValue,
             notificationSettings: .default
         )
     }
