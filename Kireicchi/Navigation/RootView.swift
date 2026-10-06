@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct RootView: View {
     @StateObject private var navigationRouter = NavigationRouter()
@@ -7,12 +8,15 @@ struct RootView: View {
     @AppStorage("hasShownWorldviewOnboarding") private var hasShownWorldviewOnboarding: Bool = false
     @AppStorage("hasShownTutorial") private var hasShownTutorial: Bool = false
     @AppStorage("hasCompletedOwnerRegistration") private var hasCompletedOwnerRegistration: Bool = false
+    @AppStorage("hasSelectedInitialCharacter") private var hasSelectedInitialCharacter: Bool = false
 
     var body: some View {
         if !hasShownWorldviewOnboarding {
             WorldviewOnboardingView()
         } else if !hasCompletedOwnerRegistration {
             OwnerRegistrationView()
+        } else if !hasSelectedInitialCharacter {
+            CharacterSelectionView()
         } else if !hasShownTutorial {
             TutorialView()
         } else {

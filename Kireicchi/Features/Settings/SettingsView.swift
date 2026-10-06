@@ -11,7 +11,7 @@ struct SettingsView: View {
     @State private var selectedHour = 19
     @State private var selectedMinute = 0
     @State private var notificationsEnabled = true
-    @State private var selectedCharacterId = "cat"
+    @State private var selectedCharacterId = CharacterType.character01.rawValue
     @State private var username = ""
     @State private var userId = ""
     @State private var showTimePicker = false
@@ -27,6 +27,13 @@ struct SettingsView: View {
     @State private var unlinkResultMessage: String?
     #endif
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterId)
+            ?? CharacterType(rawValue: selectedCharacterTypeRaw)
+            ?? .character01
+    }
 
     private let usernameMaxLength = 12
     private let userIdMaxLength = 16
@@ -51,6 +58,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         usernameSection
                         userIdSection
+                        characterSection
                         captureTimeSection
                         notificationToggleSection
                         parentLinkSection
@@ -229,6 +237,26 @@ struct SettingsView: View {
                 .padding(.horizontal)
                 .padding(.trailing, 3)
             }
+        }
+    }
+
+    private var characterSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionLabel("いっしょに暮らす子")
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+                ForEach(CharacterType.allCases, id: \.self) { characterType in
+                    CharacterChoiceCard(
+                        characterType: characterType,
+                        isSelected: selectedCharacterType == characterType,
+                        showsIntroduction: false
+                    ) {
+                        selectedCharacterId = characterType.rawValue
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .padding(.trailing, 3)
         }
     }
 
@@ -413,9 +441,8 @@ struct SettingsView: View {
     private var commentSection: some View {
         HStack(spacing: 12) {
             CharacterView(
-                characterType: .character01,
-                characterState: nil,
-                forceGif: .cheer
+                characterType: selectedCharacterType,
+                playbackMode: .fixed(.cheer)
             )
             .frame(width: 80, height: 80)
 
@@ -473,7 +500,7 @@ struct SettingsView: View {
                         .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
                         .padding(.horizontal)
                     
-                    Text("キャラクター状態: \(CharacterState.fromScore(record.score).rawValue)")
+                    Text("キャラクター状態: \(CharacterMood.fromScore(record.score).rawValue)")
                         .font(DesignSystem.Font.caption)
                         .foregroundColor(DesignSystem.Color.primary)
                         .padding(.horizontal)
@@ -623,7 +650,7 @@ struct SettingsView: View {
     }
 
     private func updateLatestRecordScore(_ score: Int) {
-        let newState = CharacterState.fromScore(score)
+        let newState = CharacterMood.fromScore(score)
         print("🔧 Debug: スコア更新ボタンが押されました。スコア: \(score) → キャラクター状態: \(newState.rawValue)")
         
         if records.isEmpty {
@@ -638,7 +665,7 @@ struct SettingsView: View {
             )
             modelContext.insert(dummyRecord)
         } else if let record = records.first {
-            let oldState = CharacterState.fromScore(record.score)
+            let oldState = CharacterMood.fromScore(record.score)
             print("🔧 Debug: 既存レコードのスコアを \(record.score)(\(oldState.rawValue)) から \(score)(\(newState.rawValue)) に更新します。")
             record.score = score
             // Happiness.calculate は capturedAt からの経過時間で減衰するため、
@@ -696,7 +723,11 @@ struct SettingsView: View {
         selectedHour = user.notificationSettings.hour
         selectedMinute = user.notificationSettings.minute
         notificationsEnabled = user.notificationSettings.isEnabled
-        selectedCharacterId = user.selectedCharacterId
+        let characterType = CharacterType(rawValue: user.selectedCharacterId)
+            ?? CharacterType(rawValue: selectedCharacterTypeRaw)
+            ?? .character01
+        selectedCharacterId = characterType.rawValue
+        selectedCharacterTypeRaw = characterType.rawValue
         username = user.username ?? ""
         userId = user.userId ?? ""
     }
@@ -719,6 +750,7 @@ struct SettingsView: View {
                     username: name,
                     userId: newUserId
                 )
+                selectedCharacterTypeRaw = characterId
                 isSaving = false
                 navigationRouter.navigateBack()
             } catch {

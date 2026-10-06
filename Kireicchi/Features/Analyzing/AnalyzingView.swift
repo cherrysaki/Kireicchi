@@ -7,6 +7,11 @@ struct AnalyzingView: View {
     @EnvironmentObject var deps: AppDependencies
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: AnalyzingViewModel
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
 
     init(imageData: Data,
          viewModel: AnalyzingViewModel? = nil) {
@@ -51,9 +56,8 @@ struct AnalyzingView: View {
                 Spacer()
 
                 CharacterView(
-                    characterType: .character01,
-                    characterState: nil,
-                    forceGif: .run
+                    characterType: selectedCharacterType,
+                    playbackMode: .fixed(.run)
                 )
                 .frame(width: 360, height: 360)
                 .scaleEffect(viewModel.isAnalyzing ? 1.05 : 0.95)

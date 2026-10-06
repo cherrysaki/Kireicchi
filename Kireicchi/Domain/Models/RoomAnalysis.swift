@@ -6,7 +6,7 @@ struct RoomAnalysis: Hashable {
     let messyPoints: [MessyPoint]
     let characterComment: String
     
-    var characterState: CharacterState {
-        return CharacterState.fromScore(score)
+    var characterMood: CharacterMood {
+        CharacterMood.fromScore(score)
     }
 }

@@ -87,7 +87,7 @@ struct TutorialView: View {
             title: "きれいっちへようこそ！",
             subtitle: "激落くんの妖精\nきれいっちと一緒に\nお部屋をきれいにしよう！",
             media: AnyView(
-                CharacterView(characterType: .character01, characterState: .happy)
+                CharacterView(characterType: .character01, mood: .happy)
                     .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
@@ -135,7 +135,7 @@ struct TutorialView: View {
             title: "きれいっちを元気にしよう！",
             subtitle: "部屋がきれいだと\nきれいっちが元気になるよ！\n7日間撮影しないと家出しちゃう…",
             media: AnyView(
-                CharacterView(characterType: .character01, characterState: .sad)
+                CharacterView(characterType: .character01, mood: .sad)
                     .frame(width: 280, height: 280)
             ),
             buttonTitle: "次へ",
@@ -149,7 +149,7 @@ struct TutorialView: View {
             title: "さあ始めよう！",
             subtitle: "毎日撮影して\nきれいっちを元気にしてあげてね！",
             media: AnyView(
-                CharacterView(characterType: .character01, characterState: .happy)
+                CharacterView(characterType: .character01, mood: .happy)
                     .frame(width: 280, height: 280)
             ),
             buttonTitle: "始める",

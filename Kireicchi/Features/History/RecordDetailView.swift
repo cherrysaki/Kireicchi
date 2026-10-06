@@ -4,6 +4,11 @@ import SwiftData
 struct RecordDetailView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     let record: RoomHistoryRecord
+    @AppStorage("selectedCharacterID") private var selectedCharacterTypeRaw = CharacterType.character01.rawValue
+
+    private var selectedCharacterType: CharacterType {
+        CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
+    }
 
     private var pixelArtImage: UIImage? {
         record.pixelArtImageData.flatMap { UIImage(data: $0) }
@@ -126,7 +131,10 @@ struct RecordDetailView: View {
     // MARK: - Comment
     private func commentSection(_ comment: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            CharacterView(characterType: .character01, characterState: nil, forceGif: .cheer)
+            CharacterView(
+                characterType: selectedCharacterType,
+                playbackMode: .fixed(.cheer)
+            )
                 .frame(width: 64, height: 64)
 
             Text(comment)
