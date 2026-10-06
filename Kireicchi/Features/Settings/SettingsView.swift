@@ -319,6 +319,7 @@ struct SettingsView: View {
                         .padding(.vertical, 10)
                 }
                 .buttonStyle(PixelButtonStyle())
+                .frame(height: 40)
                 .disabled(isGeneratingInviteCode)
 
                 #if DEBUG
@@ -338,6 +339,7 @@ struct SettingsView: View {
                         .padding(.vertical, 10)
                 }
                 .buttonStyle(PixelButtonStyle())
+                .frame(height: 40)
                 .disabled(isUnlinkingParent)
                 #endif
             }
@@ -552,6 +554,7 @@ struct SettingsView: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(PixelButtonStyle())
+        .frame(height: 40)
     }
 
     private func resetTodayHistoryRecords() {
@@ -594,6 +597,7 @@ struct SettingsView: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(PixelButtonStyle())
+        .frame(height: 40)
     }
     
     private func debugRunawayButton(title: String, isRunaway: Bool) -> some View {
@@ -607,8 +611,9 @@ struct SettingsView: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(PixelButtonStyle())
+        .frame(height: 40)
     }
-    
+
     private func updateLatestRecordScore(_ score: Int) {
         let newState = CharacterState.fromScore(score)
         print("🔧 Debug: スコア更新ボタンが押されました。スコア: \(score) → キャラクター状態: \(newState.rawValue)")
