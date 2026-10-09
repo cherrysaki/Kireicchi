@@ -16,19 +16,22 @@ struct MessyPoint: Hashable, Codable, Identifiable {
     let label: String
     let priority: Int  // 1〜5 (5が最高優先度)
     let bbox: NormalizedRect?
+    let estimatedMinutes: Int?  // 片付けの目安分数 1〜30（任意）
 
     var id: String { "\(label)|\(priority)" }
 
-    init(label: String, priority: Int, bbox: NormalizedRect? = nil) {
+    init(label: String, priority: Int, bbox: NormalizedRect? = nil, estimatedMinutes: Int? = nil) {
         self.label = label
         self.priority = priority
         self.bbox = bbox
+        self.estimatedMinutes = estimatedMinutes
     }
 
     private enum CodingKeys: String, CodingKey {
         case label
         case priority
         case bbox
+        case estimatedMinutes = "estimated_minutes"
     }
 
     init(from decoder: Decoder) throws {
@@ -36,6 +39,11 @@ struct MessyPoint: Hashable, Codable, Identifiable {
         self.label = try container.decode(String.self, forKey: .label)
         self.priority = try container.decode(Int.self, forKey: .priority)
         self.bbox = try Self.decodeBBox(from: container)
+        if let minutes = try? container.decodeIfPresent(Int.self, forKey: .estimatedMinutes) {
+            self.estimatedMinutes = min(max(minutes, 1), 30)  // 範囲外はクリップ
+        } else {
+            self.estimatedMinutes = nil  // キー無し・デコード失敗はnil
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -45,6 +53,7 @@ struct MessyPoint: Hashable, Codable, Identifiable {
         if let bbox {
             try container.encode([bbox.x, bbox.y, bbox.w, bbox.h], forKey: .bbox)
         }
+        try container.encodeIfPresent(estimatedMinutes, forKey: .estimatedMinutes)
     }
 
     private static func decodeBBox(from container: KeyedDecodingContainer<CodingKeys>) throws -> NormalizedRect? {
