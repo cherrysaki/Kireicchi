@@ -5,16 +5,32 @@ struct RoomAnalysisRequest: Codable {
     let model: String
     let messages: [ChatMessage]
     let maxTokens: Int
-    
+    let temperature: Double
+    let seed: Int
+    let responseFormat: ResponseFormat
+
     private enum CodingKeys: String, CodingKey {
         case model
         case messages
         case maxTokens = "max_tokens"
+        case temperature
+        case seed
+        case responseFormat = "response_format"
     }
-    
+
+    struct ResponseFormat: Codable {
+        let type: String
+    }
+
     init(imageData: Data) {
         self.model = "gpt-4o"
-        self.maxTokens = 700
+        // 観点別スコア＋目安時間でトークンが増えるため上限を引き上げる
+        self.maxTokens = 1200
+        // 再現性を優先し温度0。seedで更に揺れを抑える（best-effort）。
+        self.temperature = 0
+        self.seed = 7
+        // JSONオブジェクトを強制し、パース失敗の揺れを減らす
+        self.responseFormat = ResponseFormat(type: "json_object")
 
         // アップロード時間・トークン削減のため送信前に縮小（bboxは正規化座標なので影響なし）
         let payloadData: Data
