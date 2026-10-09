@@ -15,12 +15,12 @@ struct OpenAIResponse: Codable {
 
 // 部屋解析結果のデータ構造（OpenAIが返すJSON）
 struct RoomAnalysisResponse: Codable {
-    let score: Int
+    let axes: RubricAxes
     let messyPoints: [MessyPoint]
     let characterComment: String
-    
+
     private enum CodingKeys: String, CodingKey {
-        case score
+        case axes
         case messyPoints = "messy_points"
         case characterComment = "character_comment"
     }
@@ -76,11 +76,11 @@ struct RoomAnalysisResponseParser {
     }
     
     private static func validate(_ response: RoomAnalysisResponse) throws {
-        // スコアの範囲チェック
-        guard response.score >= 0 && response.score <= 100 else {
-            throw RoomAnalysisError.invalidScore(response.score)
+        // 観点スコアの範囲チェック（各0〜100）
+        guard response.axes.isValid else {
+            throw RoomAnalysisError.invalidAxes
         }
-        
+
         // priorityの範囲チェック
         for messyPoint in response.messyPoints {
             guard messyPoint.priority >= 1 && messyPoint.priority <= 5 else {
@@ -101,6 +101,7 @@ enum RoomAnalysisError: LocalizedError {
     case invalidJSONFormat
     case jsonDecodingFailed(Error)
     case invalidScore(Int)
+    case invalidAxes
     case invalidPriority(Int)
     case commentTooLong(Int)
     
@@ -114,6 +115,8 @@ enum RoomAnalysisError: LocalizedError {
             return "JSONのデコードに失敗しました: \(error.localizedDescription)"
         case .invalidScore(let score):
             return "スコアが範囲外です: \(score) (0-100)"
+        case .invalidAxes:
+            return "観点スコアが範囲外です (各0-100)"
         case .invalidPriority(let priority):
             return "優先度が範囲外です: \(priority) (1-5)"
         case .commentTooLong(let length):

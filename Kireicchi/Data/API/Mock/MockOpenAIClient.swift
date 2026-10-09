@@ -19,7 +19,7 @@ final class MockOpenAIClient: OpenAIClientProtocol {
 
         // 仕様通りのダミーデータを返す
         return RoomAnalysisResponse(
-            score: 65,
+            axes: RubricAxes(floor: 60, surfaces: 55, clutter: 70, storage: 75, tidiness: 65),
             messyPoints: [
                 MessyPoint(label: "床の上の服", priority: 3,
                            bbox: NormalizedRect(x: 0.10, y: 0.62, w: 0.45, h: 0.30)),
