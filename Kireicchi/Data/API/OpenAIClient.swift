@@ -50,11 +50,13 @@ final class OpenAIClient: OpenAIClientProtocol {
                 throw OpenAIClientError.httpError(httpResponse.statusCode, rawResponseString)
             }
             
-            // デバッグ: 生のレスポンス文字列をログ出力
+            // デバッグ: 生のレスポンス文字列をログ出力（DEBUGビルドのみ）
+            #if DEBUG
             print("=== OpenAI Raw Response ===")
             print(rawResponseString)
             print("===========================")
-            
+            #endif
+
             do {
                 let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
                 let analysisResponse = try RoomAnalysisResponseParser.parse(from: openAIResponse)

@@ -27,6 +27,11 @@ final class AnalyzeRoomUseCase: AnalyzeRoomUseCaseProtocol {
         let messyPoints = response.messyPoints
             .sorted { $0.priority > $1.priority }  // 優先度が高い順
 
+        #if DEBUG
+        ScoringDebugLogger.log(axes: response.axes, weights: weights,
+                               persona: .default, finalScore: score)
+        #endif
+
         return RoomAnalysis(
             score: score,
             rank: rank,

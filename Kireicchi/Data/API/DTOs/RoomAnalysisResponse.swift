@@ -51,10 +51,12 @@ struct RoomAnalysisResponseParser {
             
             return analysisResponse
         } catch {
-            // デバッグ: JSONデコード失敗時の詳細ログ
+            // デバッグ: JSONデコード失敗時の詳細ログ（DEBUGビルドのみ）
+            #if DEBUG
             print("=== JSON Decode Error ===")
             print(error)
             print("========================")
+            #endif
             throw RoomAnalysisError.jsonDecodingFailed(error)
         }
     }
