@@ -7,17 +7,21 @@ import Foundation
 enum ScoringDebugLogger {
     private static let fileName = "scoring_debug_log.jsonl"
 
-    static func log(axes: RubricAxes,
-                    weights: RubricWeights,
-                    persona: EvaluatorPersona,
-                    finalScore: Int) {
-        guard let dir = try? FileManager.default.url(
+    /// ログファイルのURL（共有用に公開）。Application Support配下に作成する。
+    static var logFileURL: URL? {
+        try? FileManager.default.url(
             for: .applicationSupportDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
-        ) else { return }
-        let url = dir.appendingPathComponent(fileName)
+        ).appendingPathComponent(fileName)
+    }
+
+    static func log(axes: RubricAxes,
+                    weights: RubricWeights,
+                    persona: EvaluatorPersona,
+                    finalScore: Int) {
+        guard let url = logFileURL else { return }
 
         let entry: [String: Any] = [
             "at": ISO8601DateFormatter().string(from: Date()),

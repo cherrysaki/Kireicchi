@@ -544,6 +544,32 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal)
             }
+
+            // 採点ログの共有（検証用）
+            VStack(alignment: .leading, spacing: 8) {
+                Text("採点ログ")
+                    .font(DesignSystem.Font.subheadline)
+                    .foregroundColor(DesignSystem.Color.textPrimary)
+                    .padding(.horizontal)
+
+                if let logURL = ScoringDebugLogger.logFileURL,
+                   FileManager.default.fileExists(atPath: logURL.path) {
+                    ShareLink(item: logURL) {
+                        Text("ログを共有 (scoring_debug_log.jsonl)")
+                            .font(DesignSystem.Font.caption)
+                            .foregroundColor(DesignSystem.Color.textOnPrimary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(PixelButtonStyle())
+                    .padding(.horizontal)
+                } else {
+                    Text("ログはまだありません")
+                        .font(DesignSystem.Font.caption)
+                        .foregroundColor(DesignSystem.Color.textPrimary.opacity(0.7))
+                        .padding(.horizontal)
+                }
+            }
         }
     }
 
