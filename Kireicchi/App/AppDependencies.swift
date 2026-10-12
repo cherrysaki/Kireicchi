@@ -106,10 +106,30 @@ final class AppDependencies: ObservableObject {
         bootstrapError = nil
         do {
             let session = try await authService.ensureSignedIn()
-            let user = try await userRepository.createIfMissing(
+            var user = try await userRepository.createIfMissing(
                 uid: session.uid,
                 authProvider: session.provider
             )
+
+            let defaults = UserDefaults.standard
+            let hasLocalSelection = defaults.bool(forKey: "hasSelectedInitialCharacter")
+            let localCharacter = defaults.string(forKey: "selectedCharacterID")
+                .flatMap(CharacterType.init(rawValue:))
+
+            if hasLocalSelection,
+               let localCharacter,
+               user.selectedCharacterId != localCharacter.rawValue {
+                do {
+                    user = try await userRepository.update(uid: session.uid) { user in
+                        user.selectedCharacterId = localCharacter.rawValue
+                    }
+                } catch {
+                    print("[bootstrap] character sync failed: \(error)")
+                }
+            } else if let remoteCharacter = CharacterType(rawValue: user.selectedCharacterId) {
+                defaults.set(remoteCharacter.rawValue, forKey: "selectedCharacterID")
+            }
+
             self.currentUser = user
             self.authProvider = session.provider
             await ensureUserId(user)
@@ -199,7 +219,7 @@ final class AppDependencies: ObservableObject {
             score: analysis.score,
             rank: analysis.rank.rawValue,
             characterType: CharacterType(rawValue: characterRaw) ?? .character01,
-            characterState: analysis.characterState,
+            characterState: analysis.characterMood,
             myProfile: myFriendProfile,
             fetchFriendsUseCase: fetchFriendsUseCase,
             sendPostcardUseCase: sendPostcardUseCase,
@@ -232,6 +252,20 @@ final class AppDependencies: ObservableObject {
             throw ParentLinkError.notSignedIn
         }
         try await unlinkParentUseCase.execute()
+    }
+
+    func updateSelectedCharacter(_ characterType: CharacterType) async {
+        UserDefaults.standard.set(characterType.rawValue, forKey: "selectedCharacterID")
+        guard let uid = currentUser?.uid else { return }
+
+        do {
+            let updated = try await userRepository.update(uid: uid) { user in
+                user.selectedCharacterId = characterType.rawValue
+            }
+            self.currentUser = updated
+        } catch {
+            print("[updateSelectedCharacter] failed: \(error)")
+        }
     }
 
     func currentOpenAIClient() -> OpenAIClientProtocol {

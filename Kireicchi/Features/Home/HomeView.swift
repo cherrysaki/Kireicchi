@@ -37,23 +37,14 @@ struct HomeView: View {
         CharacterType(rawValue: selectedCharacterTypeRaw) ?? .character01
     }
 
-    private var characterState: CharacterState {
-        guard let record = latestRecord else { return .happy }
-        let happiness = Happiness.calculate(
-            score: record.score,
-            capturedAt: record.capturedAt
-        )
-        return CharacterState.fromHappiness(happiness)
-    }
-
-    private func characterState(at now: Date) -> CharacterState {
+    private func characterMood(at now: Date) -> CharacterMood {
         guard let record = latestRecord else { return .happy }
         let happiness = Happiness.calculate(
             score: record.score,
             capturedAt: record.capturedAt,
             now: now
         )
-        return CharacterState.fromHappiness(happiness)
+        return CharacterMood.fromHappiness(happiness)
     }
 
     @AppStorage("isInRunawayState") private var isInRunawayState: Bool = false
@@ -407,7 +398,8 @@ struct HomeView: View {
                         Spacer()
                         CharacterView(
                             characterType: selectedCharacterType,
-                            characterState: characterState(at: now)
+                            mood: characterMood(at: now),
+                            playbackMode: .homeIdle
                         )
                         .frame(
                             width: geo.size.width * 0.5,

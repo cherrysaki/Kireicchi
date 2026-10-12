@@ -189,8 +189,8 @@ struct RunawayEggView: View {
 
             CharacterView(
                 characterType: selectedCharacterType,
-                characterState: nil,
-                forceGif: .happy
+                mood: .happy,
+                playbackMode: .fixed(.idle)
             )
             .frame(width: 280, height: 280)
             .scaleEffect(characterScale)

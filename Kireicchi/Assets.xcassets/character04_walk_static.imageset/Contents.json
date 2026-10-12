@@ -1,0 +1,12 @@
+{
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "images": [
+    {
+      "filename": "character04_walk_static.png",
+      "idiom": "universal"
+    }
+  ]
+}

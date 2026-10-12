@@ -1,0 +1,37 @@
+{
+  "tool": "built-in image_gen",
+  "references": [
+    "../CleaningCharacters/references/character01.png",
+    "../CleaningCharacters/character01/character01_happy.png"
+  ],
+  "images": [
+    {
+      "key": "genki",
+      "label": "元気",
+      "file": "happy.png",
+      "prompt": "Create exactly ONE full-body white Kireicchi mascot portrait. Image 1 defines the original character identity and correct muted medium-blue stepped outline (approximately #2B65B3); Image 2 is the current upright version and defines the standing pose, proportions and transparent framing. Preserve this same plump white one-piece body, tiny attached hands and feet, blue perimeter, black oval eyes with white square/cross sparkle highlights, block pink cheeks, extremely pale lavender lower-edge shading. Same character, same upright front view, same size and same limited pixel-art style across all expression variants. Change ONLY the facial expression as described below; do not redesign the body or add accessories. Blue body outline must match original, not black or neon blue. One centered character with ample padding on genuine transparent background. No labels, text, scene, floor, outside shadow or extra characters. Expression: 元気 / happy and energetic. Bright sparkling open oval eyes, original wide open joyful smile with deep rose interior and pink tongue, rosy cheeks. Charming and lively, as cute as the original."
+    },
+    {
+      "key": "futsu",
+      "label": "普通",
+      "file": "normal.png",
+      "prompt": "Create exactly ONE full-body white Kireicchi mascot portrait. Image 1 defines the original character identity and correct muted medium-blue stepped outline (approximately #2B65B3); Image 2 is the current upright version and defines the standing pose, proportions and transparent framing. Preserve this same plump white one-piece body, tiny attached hands and feet, blue perimeter, black oval eyes with white square/cross sparkle highlights, block pink cheeks, extremely pale lavender lower-edge shading. Same character, same upright front view, same size and same limited pixel-art style across all expression variants. Change ONLY the facial expression as described below; do not redesign the body or add accessories. Blue body outline must match original, not black or neon blue. One centered character with ample padding on genuine transparent background. No labels, text, scene, floor, outside shadow or extra characters. Expression: 普通 / calm, comfortable neutral mood. Original open black oval eyes with their white sparkle design, relaxed eyes, gentle small CLOSED smile, softly pink cheeks. Peaceful and cute, not tired or sad."
+    },
+    {
+      "key": "fucho",
+      "label": "不調",
+      "file": "sad.png",
+      "prompt": "Create exactly ONE full-body white Kireicchi mascot portrait. Image 1 defines the original character identity and correct muted medium-blue stepped outline (approximately #2B65B3); Image 2 is the current upright version and defines the standing pose, proportions and transparent framing. Preserve this same plump white one-piece body, tiny attached hands and feet, blue perimeter, black oval eyes with white square/cross sparkle highlights, block pink cheeks, extremely pale lavender lower-edge shading. Same character, same upright front view, same size and same limited pixel-art style across all expression variants. Change ONLY the facial expression as described below; do not redesign the body or add accessories. Blue body outline must match original, not black or neon blue. One centered character with ample padding on genuine transparent background. No labels, text, scene, floor, outside shadow or extra characters. Expression: 不調 / slightly sad and low energy. Original black oval eyes gently droop with subtle worried upper corners, keep small white highlights, tiny downturned mouth, soft pink cheeks. Lovably subdued and delicate, not sick, angry, scary or crying. No tears, sweat or floating symbols."
+    },
+    {
+      "key": "runaway",
+      "label": "家出",
+      "file": "runaway.png",
+      "prompt": "Generate ONE complete full-body pixel-art sprite of white Kireicchi in the 家出 / leaving-home state, with genuine transparent background. Image 1 is the pose and prop reference: reproduce the touching composition of the small white mascot walking away, holding a brown wooden stick diagonally over its shoulder with a pink cloth bundle tied to the far end on screen right. The pink bundle has simple white pixel polka-dot/star-like marks and a knot with two small cloth ends. Sad tiny downturned mouth, glossy black oval eyes with white square and cross sparkle highlights, pink cheeks and ONE small light-blue tear on its cheek. Image 2 is the established character identity, face, proportions and style reference: preserve its plump white single-piece blob body, tiny hands/feet, simple chunky pixel detail, very pale lavender lower-edge shading and medium BLUE stepped body outline matching Image 2. Do not use black for the body perimeter; eyes, mouth, stick and cloth may have their appropriate dark outlines. Keep the animal-free simple cute original look, no extra anatomy or clothing. Character's small hand visibly grips the stick, feet make a gentle leaving step. Entire body, stick, knot and bundle fully visible with generous transparent padding, balanced centered composition. Exactly one character and one bindle, no lettering, no background color, no scenery, no floor, no shadow outside the sprite, no checkerboard.",
+      "references": [
+        "references/runaway-pose.png",
+        "sad.png"
+      ]
+    }
+  ]
+}

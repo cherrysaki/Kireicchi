@@ -22,7 +22,7 @@ struct AppUser: Codable, Equatable {
             displayName: nil,
             username: nil,
             userId: nil,
-            selectedCharacterId: "cat",
+            selectedCharacterId: CharacterType.character01.rawValue,
             notificationSettings: .default
         )
     }

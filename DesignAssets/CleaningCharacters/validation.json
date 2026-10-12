@@ -1,0 +1,1137 @@
+{
+  "sheets": [
+    {
+      "id": "character02",
+      "sheet": "moods",
+      "source_boxes": [
+        [
+          50,
+          32,
+          341,
+          257
+        ],
+        [
+          432,
+          27,
+          722,
+          257
+        ],
+        [
+          814,
+          37,
+          1108,
+          256
+        ],
+        [
+          1201,
+          34,
+          1491,
+          257
+        ],
+        [
+          46,
+          280,
+          341,
+          506
+        ],
+        [
+          429,
+          266,
+          729,
+          506
+        ],
+        [
+          814,
+          272,
+          1109,
+          506
+        ],
+        [
+          1199,
+          275,
+          1492,
+          506
+        ],
+        [
+          43,
+          526,
+          339,
+          756
+        ],
+        [
+          426,
+          532,
+          722,
+          756
+        ],
+        [
+          808,
+          529,
+          1106,
+          755
+        ],
+        [
+          1195,
+          526,
+          1490,
+          756
+        ],
+        [
+          45,
+          773,
+          341,
+          1000
+        ],
+        [
+          429,
+          773,
+          724,
+          1000
+        ],
+        [
+          813,
+          772,
+          1108,
+          1000
+        ],
+        [
+          1195,
+          772,
+          1490,
+          1000
+        ]
+      ],
+      "common_scale": 1.5178571428571428,
+      "pose_count": 16
+    },
+    {
+      "id": "character02",
+      "sheet": "actions",
+      "source_boxes": [
+        [
+          46,
+          79,
+          369,
+          359
+        ],
+        [
+          402,
+          80,
+          723,
+          359
+        ],
+        [
+          762,
+          79,
+          1080,
+          361
+        ],
+        [
+          1123,
+          80,
+          1437,
+          359
+        ],
+        [
+          21,
+          458,
+          356,
+          711
+        ],
+        [
+          385,
+          458,
+          714,
+          711
+        ],
+        [
+          737,
+          457,
+          1076,
+          711
+        ],
+        [
+          1099,
+          458,
+          1428,
+          711
+        ],
+        [
+          41,
+          777,
+          369,
+          1049
+        ],
+        [
+          406,
+          777,
+          728,
+          1046
+        ],
+        [
+          770,
+          772,
+          1085,
+          1047
+        ],
+        [
+          1126,
+          777,
+          1444,
+          1037
+        ]
+      ],
+      "common_scale": 1.2164579606440071,
+      "pose_count": 12
+    },
+    {
+      "id": "character03",
+      "sheet": "moods",
+      "source_boxes": [
+        [
+          46,
+          19,
+          372,
+          246
+        ],
+        [
+          416,
+          19,
+          745,
+          246
+        ],
+        [
+          790,
+          19,
+          1120,
+          246
+        ],
+        [
+          1165,
+          19,
+          1491,
+          246
+        ],
+        [
+          37,
+          268,
+          377,
+          501
+        ],
+        [
+          412,
+          268,
+          749,
+          500
+        ],
+        [
+          787,
+          268,
+          1121,
+          501
+        ],
+        [
+          1163,
+          268,
+          1498,
+          501
+        ],
+        [
+          44,
+          524,
+          373,
+          752
+        ],
+        [
+          427,
+          529,
+          748,
+          752
+        ],
+        [
+          803,
+          529,
+          1119,
+          752
+        ],
+        [
+          1162,
+          524,
+          1494,
+          752
+        ],
+        [
+          47,
+          774,
+          377,
+          1001
+        ],
+        [
+          420,
+          774,
+          744,
+          1001
+        ],
+        [
+          804,
+          774,
+          1125,
+          1001
+        ],
+        [
+          1168,
+          774,
+          1495,
+          1001
+        ]
+      ],
+      "common_scale": 1.497797356828194,
+      "pose_count": 16
+    },
+    {
+      "id": "character03",
+      "sheet": "actions",
+      "source_boxes": [
+        [
+          11,
+          76,
+          357,
+          335
+        ],
+        [
+          386,
+          76,
+          719,
+          334
+        ],
+        [
+          742,
+          76,
+          1080,
+          337
+        ],
+        [
+          1110,
+          76,
+          1443,
+          334
+        ],
+        [
+          14,
+          430,
+          357,
+          683
+        ],
+        [
+          388,
+          429,
+          720,
+          681
+        ],
+        [
+          745,
+          429,
+          1080,
+          683
+        ],
+        [
+          1110,
+          429,
+          1443,
+          681
+        ],
+        [
+          11,
+          764,
+          354,
+          1022
+        ],
+        [
+          386,
+          764,
+          718,
+          1012
+        ],
+        [
+          737,
+          764,
+          1078,
+          1027
+        ],
+        [
+          1110,
+          764,
+          1443,
+          1012
+        ]
+      ],
+      "common_scale": 1.3152804642166345,
+      "pose_count": 12
+    },
+    {
+      "id": "character04",
+      "sheet": "moods",
+      "source_boxes": [
+        [
+          81,
+          15,
+          347,
+          262
+        ],
+        [
+          435,
+          15,
+          700,
+          262
+        ],
+        [
+          775,
+          23,
+          1036,
+          262
+        ],
+        [
+          1125,
+          15,
+          1388,
+          262
+        ],
+        [
+          81,
+          277,
+          351,
+          530
+        ],
+        [
+          432,
+          277,
+          701,
+          530
+        ],
+        [
+          772,
+          281,
+          1041,
+          530
+        ],
+        [
+          1122,
+          281,
+          1388,
+          530
+        ],
+        [
+          81,
+          551,
+          351,
+          798
+        ],
+        [
+          433,
+          550,
+          699,
+          798
+        ],
+        [
+          769,
+          552,
+          1036,
+          798
+        ],
+        [
+          1122,
+          548,
+          1389,
+          798
+        ],
+        [
+          76,
+          816,
+          346,
+          1065
+        ],
+        [
+          433,
+          817,
+          695,
+          1065
+        ],
+        [
+          779,
+          820,
+          1024,
+          1065
+        ],
+        [
+          1122,
+          817,
+          1387,
+          1065
+        ]
+      ],
+      "common_scale": 1.3765182186234817,
+      "pose_count": 16
+    },
+    {
+      "id": "character04",
+      "sheet": "actions",
+      "source_boxes": [
+        [
+          31,
+          45,
+          338,
+          356
+        ],
+        [
+          412,
+          47,
+          691,
+          356
+        ],
+        [
+          751,
+          47,
+          1059,
+          352
+        ],
+        [
+          1133,
+          47,
+          1423,
+          356
+        ],
+        [
+          24,
+          398,
+          339,
+          702
+        ],
+        [
+          388,
+          392,
+          706,
+          700
+        ],
+        [
+          738,
+          390,
+          1073,
+          700
+        ],
+        [
+          1112,
+          397,
+          1428,
+          700
+        ],
+        [
+          31,
+          733,
+          355,
+          1030
+        ],
+        [
+          412,
+          731,
+          698,
+          1020
+        ],
+        [
+          755,
+          731,
+          1077,
+          1043
+        ],
+        [
+          1133,
+          731,
+          1413,
+          1020
+        ]
+      ],
+      "common_scale": 1.1003236245954693,
+      "pose_count": 12
+    },
+    {
+      "id": "character05",
+      "sheet": "moods",
+      "source_boxes": [
+        [
+          80,
+          24,
+          351,
+          244
+        ],
+        [
+          440,
+          24,
+          713,
+          244
+        ],
+        [
+          818,
+          25,
+          1090,
+          245
+        ],
+        [
+          1185,
+          24,
+          1457,
+          244
+        ],
+        [
+          72,
+          270,
+          354,
+          500
+        ],
+        [
+          441,
+          273,
+          718,
+          500
+        ],
+        [
+          813,
+          275,
+          1094,
+          500
+        ],
+        [
+          1184,
+          273,
+          1461,
+          500
+        ],
+        [
+          76,
+          528,
+          349,
+          758
+        ],
+        [
+          448,
+          531,
+          712,
+          758
+        ],
+        [
+          817,
+          530,
+          1086,
+          758
+        ],
+        [
+          1185,
+          530,
+          1457,
+          758
+        ],
+        [
+          76,
+          784,
+          349,
+          1010
+        ],
+        [
+          447,
+          782,
+          712,
+          1008
+        ],
+        [
+          822,
+          782,
+          1087,
+          1009
+        ],
+        [
+          1185,
+          781,
+          1456,
+          1010
+        ]
+      ],
+      "common_scale": 1.5454545454545454,
+      "pose_count": 16
+    },
+    {
+      "id": "character05",
+      "sheet": "actions",
+      "source_boxes": [
+        [
+          44,
+          62,
+          355,
+          347
+        ],
+        [
+          400,
+          62,
+          713,
+          345
+        ],
+        [
+          754,
+          62,
+          1055,
+          345
+        ],
+        [
+          1109,
+          62,
+          1417,
+          345
+        ],
+        [
+          33,
+          405,
+          343,
+          688
+        ],
+        [
+          403,
+          405,
+          711,
+          688
+        ],
+        [
+          744,
+          400,
+          1065,
+          688
+        ],
+        [
+          1105,
+          405,
+          1411,
+          688
+        ],
+        [
+          42,
+          734,
+          353,
+          1030
+        ],
+        [
+          411,
+          740,
+          719,
+          1024
+        ],
+        [
+          760,
+          737,
+          1073,
+          1025
+        ],
+        [
+          1126,
+          738,
+          1422,
+          1016
+        ]
+      ],
+      "common_scale": 1.2014134275618376,
+      "pose_count": 12
+    },
+    {
+      "id": "character01",
+      "sheet": "moods",
+      "source_boxes": [
+        [
+          31,
+          57,
+          310,
+          311
+        ],
+        [
+          346,
+          57,
+          625,
+          311
+        ],
+        [
+          636,
+          57,
+          913,
+          311
+        ],
+        [
+          950,
+          57,
+          1230,
+          311
+        ],
+        [
+          31,
+          334,
+          310,
+          589
+        ],
+        [
+          346,
+          333,
+          625,
+          589
+        ],
+        [
+          636,
+          334,
+          913,
+          589
+        ],
+        [
+          950,
+          334,
+          1230,
+          589
+        ],
+        [
+          31,
+          623,
+          310,
+          875
+        ],
+        [
+          346,
+          623,
+          625,
+          875
+        ],
+        [
+          636,
+          623,
+          914,
+          875
+        ],
+        [
+          950,
+          623,
+          1230,
+          875
+        ],
+        [
+          31,
+          907,
+          310,
+          1159
+        ],
+        [
+          346,
+          907,
+          625,
+          1159
+        ],
+        [
+          657,
+          907,
+          897,
+          1159
+        ],
+        [
+          951,
+          907,
+          1230,
+          1159
+        ]
+      ],
+      "common_scale": 1.3385826771653544,
+      "pose_count": 16
+    },
+    {
+      "id": "character01",
+      "sheet": "actions",
+      "source_boxes": [
+        [
+          50,
+          71,
+          369,
+          368
+        ],
+        [
+          407,
+          71,
+          705,
+          366
+        ],
+        [
+          749,
+          71,
+          1057,
+          366
+        ],
+        [
+          1108,
+          71,
+          1403,
+          363
+        ],
+        [
+          54,
+          404,
+          361,
+          693
+        ],
+        [
+          400,
+          404,
+          706,
+          693
+        ],
+        [
+          738,
+          404,
+          1050,
+          693
+        ],
+        [
+          1096,
+          404,
+          1402,
+          693
+        ],
+        [
+          53,
+          731,
+          375,
+          1030
+        ],
+        [
+          407,
+          731,
+          711,
+          1013
+        ],
+        [
+          761,
+          731,
+          1076,
+          1030
+        ],
+        [
+          1120,
+          731,
+          1422,
+          1010
+        ]
+      ],
+      "common_scale": 1.152542372881356,
+      "pose_count": 12
+    }
+  ],
+  "animations": [
+    {
+      "asset": "character01/character01_normal.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_happy.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_sad.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_sick.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_walk.gif",
+      "frames": 24,
+      "unique_frames": 24,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_cheer.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character01/character01_run.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_normal.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_happy.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_sad.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_sick.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_walk.gif",
+      "frames": 24,
+      "unique_frames": 24,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_cheer.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character02/character02_run.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_normal.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_happy.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_sad.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_sick.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_walk.gif",
+      "frames": 24,
+      "unique_frames": 24,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_cheer.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character03/character03_run.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_normal.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_happy.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_sad.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_sick.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_walk.gif",
+      "frames": 24,
+      "unique_frames": 24,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_cheer.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character04/character04_run.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_normal.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_happy.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_sad.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_sick.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_walk.gif",
+      "frames": 24,
+      "unique_frames": 24,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_cheer.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    },
+    {
+      "asset": "character05/character05_run.gif",
+      "frames": 4,
+      "unique_frames": 4,
+      "transparent": true
+    }
+  ],
+  "passed": true
+}
