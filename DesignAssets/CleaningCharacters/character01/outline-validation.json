@@ -1,0 +1,287 @@
+{
+  "reference": "../references/character01.png",
+  "expected_color": "#2B65B3",
+  "passed": true,
+  "frames": [
+    {
+      "frame": "normal/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        44,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "normal/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        44,
+        104,
+        191
+      ]
+    },
+    {
+      "frame": "normal/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        44,
+        104,
+        191
+      ]
+    },
+    {
+      "frame": "normal/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        43,
+        104,
+        190
+      ]
+    },
+    {
+      "frame": "happy/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        45,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "happy/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        48,
+        107,
+        192
+      ]
+    },
+    {
+      "frame": "happy/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        47,
+        106,
+        192
+      ]
+    },
+    {
+      "frame": "happy/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        46,
+        106,
+        191
+      ]
+    },
+    {
+      "frame": "sad/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        45,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "sad/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        47,
+        106,
+        192
+      ]
+    },
+    {
+      "frame": "sad/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        45,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "sad/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        45,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "sick/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        43,
+        103,
+        190
+      ]
+    },
+    {
+      "frame": "sick/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        43,
+        103,
+        191
+      ]
+    },
+    {
+      "frame": "sick/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        43,
+        104,
+        190
+      ]
+    },
+    {
+      "frame": "sick/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        46,
+        105,
+        191
+      ]
+    },
+    {
+      "frame": "walk/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        35,
+        100,
+        192
+      ]
+    },
+    {
+      "frame": "walk/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        35,
+        99,
+        193
+      ]
+    },
+    {
+      "frame": "walk/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        33,
+        98,
+        192
+      ]
+    },
+    {
+      "frame": "walk/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        34,
+        99,
+        192
+      ]
+    },
+    {
+      "frame": "cheer/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        37,
+        101,
+        194
+      ]
+    },
+    {
+      "frame": "cheer/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        38,
+        101,
+        195
+      ]
+    },
+    {
+      "frame": "cheer/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        40,
+        103,
+        195
+      ]
+    },
+    {
+      "frame": "cheer/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        38,
+        102,
+        194
+      ]
+    },
+    {
+      "frame": "run/00.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        39,
+        102,
+        193
+      ]
+    },
+    {
+      "frame": "run/01.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        38,
+        101,
+        193
+      ]
+    },
+    {
+      "frame": "run/02.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        35,
+        100,
+        194
+      ]
+    },
+    {
+      "frame": "run/03.png",
+      "blue_outline_fraction": 1.0,
+      "black_outline_pixels": 0,
+      "median_blue_rgb": [
+        41,
+        103,
+        193
+      ]
+    }
+  ]
+}

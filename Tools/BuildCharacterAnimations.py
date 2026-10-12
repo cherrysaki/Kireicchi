@@ -152,13 +152,19 @@ def asset_file(root, name, suffix, payload, kind):
     (folder / "Contents.json").write_text(json.dumps(content, indent=2) + "\n")
 
 
-def build(root):
+def build(root, only=None):
     manifest = json.loads((root / "manifest.json").read_text())
     repo = root.parents[1]
     assets = repo / "Kireicchi/Assets.xcassets"
-    reports, galleries = [], []
+    previous_report = root / "validation.json"
+    reports = []
+    if only and previous_report.exists():
+        reports = [r for r in json.loads(previous_report.read_text())["sheets"] if r["id"] not in only]
+    galleries = [root / c["id"] for c in manifest["characters"]]
     for character in manifest["characters"]:
         identifier = character["id"]
+        if only and identifier not in only:
+            continue
         output = root / identifier
         output.mkdir(exist_ok=True)
         all_frames = []
@@ -201,7 +207,8 @@ def build(root):
             if i % 4 == 0:
                 ImageDraw.Draw(contact).text((6, (i // 4) * 130 + 4), list(TIMINGS)[i // 4], fill="#4C3E3C")
         contact.save(output / "contact-sheet.png")
-        galleries.append(output)
+        if character.get("outlineColor"):
+            validate_blue_outline(output, character["outlineColor"])
 
     # Validate all delivered static images and encoded GIFs, not just source geometry.
     validation = []
@@ -223,9 +230,69 @@ def build(root):
     (root / "validation.json").write_text(json.dumps({"sheets": reports, "animations": validation,
                                                        "passed": True}, indent=2) + "\n")
     print(f"Built and validated {len(validation)} state animations for {len(galleries)} characters")
+    build_overview(root, manifest["characters"])
+
+
+def validate_blue_outline(output, expected_color):
+    expected = np.array([int(expected_color[i:i + 2], 16) for i in (1, 3, 5)])
+    results = []
+    for state in TIMINGS:
+        for path in sorted((output / state).glob("*.png")):
+            pixels = np.array(Image.open(path).convert("RGBA"))
+            mask = pixels[:, :, 3] >= 128
+            padded = np.pad(mask, 1)
+            interior = (padded[:-2, 1:-1] & padded[2:, 1:-1] &
+                        padded[1:-1, :-2] & padded[1:-1, 2:])
+            edge = mask & ~interior
+            rgb = pixels[:, :, :3].astype(int)
+            blue = edge & (rgb[:, :, 2] > rgb[:, :, 0] + 35) & (rgb[:, :, 2] > rgb[:, :, 1] + 20)
+            black = edge & (rgb.max(axis=2) < 55)
+            fraction = float(blue.sum() / edge.sum())
+            median = np.median(rgb[blue], axis=0)
+            if fraction < .8 or black.sum() / edge.sum() > .02 or np.linalg.norm(median - expected) > 50:
+                raise ValueError(f"{path}: body outline does not match the blue reference")
+            results.append({"frame": path.relative_to(output).as_posix(),
+                            "blue_outline_fraction": round(fraction, 3),
+                            "black_outline_pixels": int(black.sum()),
+                            "median_blue_rgb": median.astype(int).tolist()})
+    (output / "outline-validation.json").write_text(json.dumps({
+        "reference": "../references/character01.png", "expected_color": expected_color,
+        "passed": True, "frames": results}, indent=2) + "\n")
+
+
+def build_overview(root, characters):
+    states = list(TIMINGS)
+    contact = Image.new("RGB", (len(characters) * 200, len(states) * 178), "#FFF9EF")
+    preview = [Image.new("RGB", (len(characters) * 200, 178), "#FFF9EF") for _ in range(28)]
+    for column, character in enumerate(characters):
+        identifier = character["id"]
+        decoded = [Image.open(root / identifier / state / f"{i:02d}.png").convert("RGBA")
+                   for state in states for i in range(4)]
+        bounds = [f.getbbox() for f in decoded]
+        common_box = (min(b[0] for b in bounds), min(b[1] for b in bounds),
+                      max(b[2] for b in bounds), max(b[3] for b in bounds))
+        factor = min(150 / (common_box[2] - common_box[0]), 140 / (common_box[3] - common_box[1]))
+        for row, state in enumerate(states):
+            static = Image.open(root / identifier / f"{identifier}_{state}.png").convert("RGBA")
+            static = static.resize((150, 150), Image.Resampling.NEAREST)
+            contact.paste(static, (column * 200 + 25, row * 178 + 22), static)
+            ImageDraw.Draw(contact).text((column * 200 + 16, row * 178 + 4),
+                                         f"{column + 1} {state}", fill="#4C3E3C")
+            for index in range(4):
+                image = decoded[row * 4 + index].crop(common_box)
+                image = image.resize((round(image.width * factor), round(image.height * factor)),
+                                     Image.Resampling.NEAREST)
+                frame = preview[row * 4 + index]
+                frame.paste(image, (column * 200 + (200 - image.width) // 2, 170 - image.height), image)
+                ImageDraw.Draw(frame).text((column * 200 + 12, 5), f"{column + 1} {state}", fill="#4C3E3C")
+    contact.save(root / "all-characters.png")
+    preview[0].save(root / "all-characters.gif", save_all=True, append_images=preview[1:],
+                    duration=260, loop=0)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
-    build(parser.parse_args().root.resolve())
+    parser.add_argument("--characters", nargs="+", help="Rebuild only these IDs; still validate all characters")
+    args = parser.parse_args()
+    build(args.root.resolve(), args.characters)

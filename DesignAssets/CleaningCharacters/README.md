@@ -11,6 +11,10 @@
 | character04 | あわっち | ミント色の体と泡のかんむり |
 | character05 | ぽっけっち | 黄色い体と青いポッケ |
 
+白い子のビジュアルは、2026-10-12に指定された `kireicchi_geekten2026.pptx.png` を正とする。
+青い輪郭（参照画像から約 `#2B65B3`）、丸い体、きらきらした黒い目、ピンクのほっぺと口を保持。
+全28コマの外枠が青であり、黒い外枠に戻っていないことを `character01/outline-validation.json` で検査する。
+
 `references/` に生成時の立ち絵、`manifest.json` にプロンプトと参照画像を保存。
 各種類に、4列×4行の表情シートと4列×3行の行動シートがある。
 
@@ -24,6 +28,8 @@
 ```sh
 python3 Tools/BuildCharacterAnimations.py DesignAssets/CleaningCharacters
 ```
+
+白い子だけを修正したときは `--characters character01` を指定できる。全5種類のGIF検査と一覧プレビューは更新する。
 
 この処理は生成済みの画素を抽出・整列・符号化する。キャラクターや表情を手描きで合成しない。
 アプリ用のGIFは800×450、選択画面用GIFと静止画像は512×512。全GIFは透過・無限ループ。
