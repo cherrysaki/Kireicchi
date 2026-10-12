@@ -16,6 +16,8 @@ struct AnimatedGIFView: UIViewRepresentable {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
+        imageView.layer.magnificationFilter = .nearest
+        imageView.layer.minificationFilter = .nearest
         imageView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         imageView.setContentHuggingPriority(.defaultLow, for: .vertical)
         imageView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)

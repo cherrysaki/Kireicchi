@@ -32,7 +32,7 @@ final class AnimatedGIFCache: @unchecked Sendable {
         }
 
         var images: [UIImage] = []
-        var totalDuration: TimeInterval = 0
+        var frameDelays: [Int] = []
 
         for index in 0..<CGImageSourceGetCount(source) {
             guard let cgImage = CGImageSourceCreateImageAtIndex(source, index, nil) else {
@@ -40,17 +40,23 @@ final class AnimatedGIFCache: @unchecked Sendable {
             }
             images.append(UIImage(cgImage: cgImage))
 
-            if let frameProperties = CGImageSourceCopyPropertiesAtIndex(source, index, nil),
-               let gifProperties = (frameProperties as NSDictionary)[kCGImagePropertyGIFDictionary] as? [String: Any],
-               let delayTime = gifProperties[kCGImagePropertyGIFDelayTime as String] as? Double {
-                totalDuration += delayTime
-            } else {
-                totalDuration += 0.1
-            }
+            let frameProperties = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [String: Any]
+            let gifProperties = frameProperties?[kCGImagePropertyGIFDictionary as String] as? [String: Any]
+            let delay = gifProperties?[kCGImagePropertyGIFUnclampedDelayTime as String] as? Double
+                ?? gifProperties?[kCGImagePropertyGIFDelayTime as String] as? Double
+                ?? 0.1
+            frameDelays.append(max(20, Int((delay * 1_000).rounded())))
         }
 
         guard !images.isEmpty else { return nil }
-        let gif = CachedAnimatedGIF(images: images, duration: max(totalDuration, 0.1))
+        // UIImageView gives array entries equal time. Reuse decoded images to
+        // preserve the GIF's short blink frames and longer resting frames.
+        let frameStep = max(20, frameDelays.dropFirst().reduce(frameDelays[0], greatestCommonDivisor))
+        let playbackImages = zip(images, frameDelays).flatMap { image, delay in
+            Array(repeating: image, count: max(1, Int((Double(delay) / Double(frameStep)).rounded())))
+        }
+        let duration = Double(frameStep * playbackImages.count) / 1_000
+        let gif = CachedAnimatedGIF(images: playbackImages, duration: duration)
         let memoryCost = images.reduce(into: 0) { cost, image in
             let pixelWidth = image.size.width * image.scale
             let pixelHeight = image.size.height * image.scale
@@ -58,5 +64,14 @@ final class AnimatedGIFCache: @unchecked Sendable {
         }
         cache.setObject(gif, forKey: assetName as NSString, cost: memoryCost)
         return gif
+    }
+
+    private func greatestCommonDivisor(_ lhs: Int, _ rhs: Int) -> Int {
+        var a = lhs
+        var b = rhs
+        while b != 0 {
+            (a, b) = (b, a % b)
+        }
+        return a
     }
 }

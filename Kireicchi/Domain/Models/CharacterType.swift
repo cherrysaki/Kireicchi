@@ -5,17 +5,20 @@ enum CharacterType: String, CaseIterable, Codable, Hashable, Sendable {
     case character02 = "character02"
     case character03 = "character03"
     case character04 = "character04"
+    case character05 = "character05"
 
     var displayName: String {
         switch self {
         case .character01:
             return "きれいっち"
         case .character02:
-            return "しずくっち"
+            return "もっぷっち"
         case .character03:
-            return "はなっち"
+            return "ほうきっち"
         case .character04:
-            return "ほしっち"
+            return "あわっち"
+        case .character05:
+            return "ぽっけっち"
         }
     }
 
@@ -24,11 +27,13 @@ enum CharacterType: String, CaseIterable, Codable, Hashable, Sendable {
         case .character01:
             return "ふわふわ元気なおそうじ仲間"
         case .character02:
-            return "水まわりが好きな泡の妖精"
+            return "ふわふわのお耳で床をぴかぴかに"
         case .character03:
-            return "お花と片づけが好きな妖精"
+            return "ほうきのしっぽでささっとおそうじ"
         case .character04:
-            return "お部屋を明るく照らす妖精"
+            return "泡のかんむりで水まわりをきれいに"
+        case .character05:
+            return "小さなポッケでお片づけのお手伝い"
         }
     }
 }

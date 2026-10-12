@@ -10,11 +10,7 @@ struct CharacterChoiceCard: View {
         Button(action: select) {
             VStack(spacing: 8) {
                 ZStack(alignment: .topTrailing) {
-                    CharacterView(
-                        characterType: characterType,
-                        mood: .happy,
-                        playbackMode: .fixed(.idle)
-                    )
+                    AnimatedGIFView(assetName: "\(characterType.rawValue)_portrait")
                     .frame(height: showsIntroduction ? 110 : 82)
                     .accessibilityHidden(true)
 
