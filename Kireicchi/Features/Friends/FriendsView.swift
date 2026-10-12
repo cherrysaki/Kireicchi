@@ -229,7 +229,7 @@ struct FriendsView<ViewModel: FriendsViewModelProtocol>: View {
     // MARK: - Parts
 
     private func characterIcon(_ type: CharacterType) -> some View {
-        CharacterView(characterType: type, characterState: nil, forceGif: .normal)
+        CharacterView(characterType: type, mood: .normal, playbackMode: .fixed(.idle))
             .frame(width: 44, height: 44)
     }
 

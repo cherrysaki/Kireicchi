@@ -24,7 +24,7 @@ final class ComposePostcardImageUseCase: ComposePostcardImageUseCaseProtocol {
             cg.interpolationQuality = .none
             room.draw(in: canvas)
 
-            let name = "\(characterType.rawValue)_\(characterState.gifSuffix)_static"
+            let name = "\(characterType.rawValue)_\(characterState.assetSuffix)_static"
             guard let character = UIImage(named: name) else { return }
             let height = side * Self.characterHeightScale
             let width = height * (character.size.width / max(character.size.height, 1))

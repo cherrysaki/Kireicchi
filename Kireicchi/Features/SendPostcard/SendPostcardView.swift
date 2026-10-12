@@ -137,7 +137,7 @@ struct SendPostcardView<ViewModel: SendPostcardViewModelProtocol>: View {
             viewModel.toggle(friend)
         } label: {
             HStack(spacing: 12) {
-                CharacterView(characterType: friend.characterType, characterState: nil, forceGif: .normal)
+                CharacterView(characterType: friend.characterType, mood: .normal, playbackMode: .fixed(.idle))
                     .frame(width: 44, height: 44)
                 Text(friend.username)
                     .font(DesignSystem.Font.subheadline)

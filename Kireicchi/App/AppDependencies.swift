@@ -219,7 +219,7 @@ final class AppDependencies: ObservableObject {
             score: analysis.score,
             rank: analysis.rank.rawValue,
             characterType: CharacterType(rawValue: characterRaw) ?? .character01,
-            characterState: analysis.characterState,
+            characterState: analysis.characterMood,
             myProfile: myFriendProfile,
             fetchFriendsUseCase: fetchFriendsUseCase,
             sendPostcardUseCase: sendPostcardUseCase,
